@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/game-parser-rules/design.md`
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -142,7 +142,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] `make check` passes with ≥ 90% coverage on `src/domains/game/model/**`
+- [x] `make check` passes with ≥ 90% coverage on `src/domains/game/model/**`
 
 **Tests**: unit
 **Gate**: full

@@ -143,33 +143,33 @@ Every later engine (evaluation, classification, AI contract) and every screen ne
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| GAME-01 | P1: Chess.com HTML | Design | Pending |
-| GAME-02 | P1: Chess.com HTML | Design | Pending |
-| GAME-03 | P1: Chess.com HTML | Design | Pending |
-| GAME-04 | P1: Plain list | Design | Pending |
-| GAME-05 | P1: Plain list | Design | Pending |
-| GAME-06 | P1: Plain list | Design | Pending |
-| GAME-07 | P1: Plain list | Design | Pending |
-| GAME-08 | P1: Plain list | Design | Pending |
-| GAME-09 | P1: Plain list | Design | Pending |
-| GAME-10 | P1: Plain list | Design | Pending |
-| GAME-11 | P1: Reject | Design | Pending |
-| GAME-12 | P1: Reject | Design | Pending |
-| GAME-13 | P1: Reject | Design | Pending |
-| GAME-14 | P1: Reject | Design | Pending |
-| GAME-15 | P1: Replay | Design | Pending |
-| GAME-16 | P1: Replay | Design | Pending |
-| GAME-17 | P1: Replay | Design | Pending |
-| GAME-18 | P1: Replay | Design | Pending |
-| GAME-19 | P1: Replay | Design | Pending |
-| GAME-20 | P1: Replay | Design | Pending |
-| GAME-21 | P1: Replay | Design | Pending |
-| GAME-22 | P1: Portuguese display | Design | Pending |
-| GAME-23 | P1: Boundary | Design | Pending |
-| GAME-24 | P1: Boundary | Design | Pending |
-| GAME-25 | Edge case | Design | Pending |
+| GAME-01 | P1: Chess.com HTML | Tasks | Implementing |
+| GAME-02 | P1: Chess.com HTML | Tasks | Implementing |
+| GAME-03 | P1: Chess.com HTML | Tasks | Implementing |
+| GAME-04 | P1: Plain list | Tasks | Implementing |
+| GAME-05 | P1: Plain list | Tasks | Implementing |
+| GAME-06 | P1: Plain list | Tasks | Implementing |
+| GAME-07 | P1: Plain list | Tasks | Implementing |
+| GAME-08 | P1: Plain list | Tasks | Implementing |
+| GAME-09 | P1: Plain list | Tasks | Implementing |
+| GAME-10 | P1: Plain list | Tasks | Implementing |
+| GAME-11 | P1: Reject | Tasks | Implementing |
+| GAME-12 | P1: Reject | Tasks | Implementing |
+| GAME-13 | P1: Reject | Tasks | Implementing |
+| GAME-14 | P1: Reject | Tasks | Implementing |
+| GAME-15 | P1: Replay | Tasks | Implementing |
+| GAME-16 | P1: Replay | Tasks | Implementing |
+| GAME-17 | P1: Replay | Tasks | Implementing |
+| GAME-18 | P1: Replay | Tasks | Implementing |
+| GAME-19 | P1: Replay | Tasks | Implementing |
+| GAME-20 | P1: Replay | Tasks | Implementing |
+| GAME-21 | P1: Replay | Tasks | Implementing |
+| GAME-22 | P1: Portuguese display | Tasks | Implementing |
+| GAME-23 | P1: Boundary | Tasks | Implementing |
+| GAME-24 | P1: Boundary | Tasks | Implementing |
+| GAME-25 | Edge case | Tasks | Implementing |
 
-**Coverage:** 25 total, 0 mapped to tasks, 25 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 25 total, 25 mapped to tasks (T1–T5), 0 unmapped
 
 ---
 
