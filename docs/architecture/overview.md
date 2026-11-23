@@ -58,7 +58,9 @@ divergirem, o PRD vale.
   saiu, outro (descrito pela IA).
 - **Como a perda é medida (domínio `analysis`):** para cada lance, o motor avalia a
   posição antes e depois. A "linha de capturas" é o lance seguido das capturas da
-  variante principal enquanto ela só captura (até 8 meios-lances). É momento-chave
+  variante principal enquanto ela só captura (até 8 meios-lances). Também se mede a
+  mesma linha com os lances que de fato vieram na partida, e vale a pior das duas:
+  com várias threads, a variante do motor pode não começar pela captura. É momento-chave
   quando o material do jogador cai 2 pontos ou mais em relação a antes do lance **e**
   em relação à linha do melhor lance. A peça perdida é a primeira do jogador
   capturada nessa linha. "Defensor saiu": o lance tirou o único defensor dela; "peça

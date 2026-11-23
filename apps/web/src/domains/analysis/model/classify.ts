@@ -23,6 +23,12 @@ type ClassifyInput = {
   /** Avaliação da posição depois do lance. */
   after: PositionEvaluation;
   playerColor: PlayerColor;
+  /**
+   * Lances que vieram de fato depois deste na partida (UCI). Com várias threads, a
+   * variante do motor pode não começar pela captura; se o adversário capturou na
+   * partida, essa perda também conta.
+   */
+  continuation?: readonly string[];
 };
 
 function opposite(color: PlayerColor): PlayerColor {
@@ -60,9 +66,21 @@ function mistakeTypeOf(ply: Ply, lostPiece: PieceOnSquare | null): MistakeType {
  * material depois da sequência de capturas calculada pelo motor para o lance jogado
  * e para o melhor lance.
  */
-export function classifyMove({ ply, before, after, playerColor }: ClassifyInput): MoveVerdict {
+export function classifyMove({
+  ply,
+  before,
+  after,
+  playerColor,
+  continuation = [],
+}: ClassifyInput): MoveVerdict {
   const mover = ply.color;
-  const played = playCaptureLine(ply.fenBefore, uciOf(ply), after.pv);
+  // A pior das duas linhas para quem jogou: a do motor ou a que aconteceu na partida.
+  const engineLine = playCaptureLine(ply.fenBefore, uciOf(ply), after.pv);
+  const gameLine = playCaptureLine(ply.fenBefore, uciOf(ply), continuation);
+  const played =
+    materialBalance(gameLine.fen, mover) < materialBalance(engineLine.fen, mover)
+      ? gameLine
+      : engineLine;
   const best = playCaptureLine(ply.fenBefore, before.bestMove, before.pv.slice(1));
   const materialBefore = materialBalance(ply.fenBefore, mover);
   const playedMaterial = materialBalance(played.fen, mover);
@@ -117,6 +135,7 @@ export function classifyGame(
     if (!before || !after) {
       return { kind: "none", ply: ply.index, color: ply.color };
     }
-    return classifyMove({ ply, before, after, playerColor });
+    const continuation = game.plies.slice(ply.index).map(uciOf);
+    return classifyMove({ ply, before, after, playerColor, continuation });
   });
 }

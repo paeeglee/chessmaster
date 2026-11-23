@@ -109,6 +109,9 @@ export const analysisMachine = setup({
                         before,
                         after: event.evaluation,
                         playerColor: context.request.playerColor,
+                        continuation: context.request.game.plies
+                          .slice(ply.index)
+                          .map((next) => `${next.from}${next.to}${next.promotion ?? ""}`),
                       }),
                     ]),
                   ]
