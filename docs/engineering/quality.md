@@ -6,8 +6,13 @@
 - **Python:** fixado em `.python-version` na raiz (o uv lê esse arquivo). Python não
   tem LTS; usamos a versão estável mais recente que já tenha suporte das nossas
   dependências. Hoje é a 3.14.
-- **pnpm:** versão exata no campo `packageManager` do `package.json` (ativada com
-  `corepack enable`).
+- **pnpm:** versão exata no campo `packageManager` do `package.json`. O Node 26 não
+  traz mais o corepack: o `make setup` instala essa versão com
+  `npm install -g pnpm@<versão>` quando o `pnpm` não existe, e o próprio pnpm troca
+  para a versão de `packageManager` quando outra está instalada.
+- **TypeScript:** fixado na linha 5 (hoje 5.9.3), não na 7. O `openapi-typescript`
+  (usado em `make generate-api-types`) exige `typescript ^5`. Suba para a 7 quando
+  ele aceitar.
 - `package.json` (`engines`) e `pyproject.toml` (`requires-python`) devem bater com
   essas versões.
 - Ao subir uma versão, atualize os arquivos acima e este documento no mesmo PR.
@@ -37,7 +42,9 @@
 - **Vitest** para testes unitários e de componentes, com **React Testing Library**,
   `@testing-library/user-event` e ambiente `jsdom`.
 - **MSW** para simular a API do backend nos testes. Nenhum teste chama a rede de
-  verdade.
+  verdade: o servidor MSW compartilhado (`src/shared/lib/testing/server.ts`) roda
+  com `onUnhandledFrame: "error"`, então uma requisição sem handler falha o teste.
+  Cada teste registra os handlers de que precisa com `server.use(...)`.
 - **Playwright** para os testes de ponta a ponta do fluxo principal (colar →
   analisando → resultado → treino), rodando com os cabeçalhos de isolamento de
   origem ativos. Os critérios de aceite dos PRDs são a base desses testes.
@@ -69,6 +76,11 @@
 - Cada bug corrigido ganha um teste que falharia sem a correção.
 - **Cobertura mínima:** 90% nas camadas de domínio (`model/` no frontend, `domain/`
   e `application/` no backend); 80% no total de cada app.
+  - Frontend: o Vitest aplica os dois limites (`coverage.thresholds` no
+    `vite.config.ts`, com um limite próprio para `src/domains/**/model/**`).
+  - Backend: o pytest aplica os 80% no total (`--cov-fail-under`). O limite de 90%
+    para `domain/` e `application/` entra junto com essas camadas, na feature da
+    camada de IA.
 
 ### Dados de teste
 

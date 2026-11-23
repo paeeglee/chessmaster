@@ -133,34 +133,34 @@ The repository has docs, designs and a Makefile with only `setup`, `design` and 
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| SCAF-01 | P1: Frontend isolated | Design | Pending |
-| SCAF-02 | P1: Frontend isolated | Design | Pending |
-| SCAF-03 | P1: Frontend isolated | Design | Pending |
-| SCAF-04 | P1: Frontend isolated | Design | Pending |
-| SCAF-05 | P1: Frontend isolated | Design | Pending |
-| SCAF-06 | P1: Frontend isolated | Design | Pending |
-| SCAF-07 | P1: Frontend isolated | Design | Pending |
-| SCAF-08 | P1: Backend + proxy | Design | Pending |
-| SCAF-09 | P1: Backend + proxy | Design | Pending |
-| SCAF-10 | P1: Backend + proxy | Design | Pending |
-| SCAF-11 | P1: Backend + proxy | Design | Pending |
-| SCAF-12 | P1: Backend + proxy | Design | Pending |
-| SCAF-13 | P1: Backend + proxy | Design | Pending |
-| SCAF-14 | P1: Toolchain | Design | Pending |
-| SCAF-15 | P1: Toolchain | Design | Pending |
-| SCAF-16 | P1: Toolchain | Design | Pending |
-| SCAF-17 | P1: Toolchain | Design | Pending |
-| SCAF-18 | P1: Toolchain | Design | Pending |
-| SCAF-19 | P1: Toolchain | Design | Pending |
-| SCAF-20 | P1: Toolchain | Design | Pending |
-| SCAF-21 | P1: Toolchain | Design | Pending |
-| SCAF-22 | P1: Toolchain | Design | Pending |
-| SCAF-23 | P1: Toolchain | Design | Pending |
-| SCAF-24 | P1: Toolchain | Design | Pending |
-| SCAF-25 | P1: Toolchain | Design | Pending |
-| SCAF-26 | Edge case | Design | Pending |
+| SCAF-01 | P1: Frontend isolated | Tasks | Implementing |
+| SCAF-02 | P1: Frontend isolated | Tasks | Implementing |
+| SCAF-03 | P1: Frontend isolated | Tasks | Implementing |
+| SCAF-04 | P1: Frontend isolated | Tasks | Implementing |
+| SCAF-05 | P1: Frontend isolated | Tasks | Implementing |
+| SCAF-06 | P1: Frontend isolated | Tasks | Implementing |
+| SCAF-07 | P1: Frontend isolated | Tasks | Implementing |
+| SCAF-08 | P1: Backend + proxy | Tasks | Implementing |
+| SCAF-09 | P1: Backend + proxy | Tasks | Implementing |
+| SCAF-10 | P1: Backend + proxy | Tasks | Implementing |
+| SCAF-11 | P1: Backend + proxy | Tasks | Implementing |
+| SCAF-12 | P1: Backend + proxy | Tasks | Implementing |
+| SCAF-13 | P1: Backend + proxy | Tasks | Implementing |
+| SCAF-14 | P1: Toolchain | Tasks | Implementing |
+| SCAF-15 | P1: Toolchain | Tasks | Implementing |
+| SCAF-16 | P1: Toolchain | Tasks | Implementing |
+| SCAF-17 | P1: Toolchain | Tasks | Implementing |
+| SCAF-18 | P1: Toolchain | Tasks | Implementing |
+| SCAF-19 | P1: Toolchain | Tasks | Implementing |
+| SCAF-20 | P1: Toolchain | Tasks | Implementing |
+| SCAF-21 | P1: Toolchain | Tasks | Implementing |
+| SCAF-22 | P1: Toolchain | Tasks | Implementing |
+| SCAF-23 | P1: Toolchain | Tasks | Implementing |
+| SCAF-24 | P1: Toolchain | Tasks | Implementing |
+| SCAF-25 | P1: Toolchain | Tasks | Implementing |
+| SCAF-26 | Edge case | Tasks | Implementing |
 
-**Coverage:** 26 total, 0 mapped to tasks, 26 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 26 total, 26 mapped to tasks (T1–T7), 0 unmapped
 
 ---
 

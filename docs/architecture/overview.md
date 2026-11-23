@@ -112,13 +112,17 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   (requisição com o JSON dos motores e resposta com os textos). O FastAPI gera o
   OpenAPI a partir deles.
 - **Tipos do frontend gerados, nunca escritos à mão:** os tipos TypeScript do
-  cliente da API são gerados a partir do OpenAPI (por exemplo, com
-  `openapi-typescript`) e ficam no domínio `explanation` do frontend, num arquivo
-  `*.gen.ts`. Arquivos gerados não são editados à mão; quando o contrato muda,
+  cliente da API são gerados a partir do OpenAPI com `openapi-typescript` e ficam
+  em `apps/web/src/domains/explanation/api/schema.gen.ts`. O
+  `make generate-api-types` exporta o schema sem subir o servidor
+  (`python -m game_analyzer.export_openapi`) e gera o arquivo. Arquivos gerados não são editados à mão; quando o contrato muda,
   gere de novo e faça o commit junto com a mudança do backend.
 - **Rotas:** todas sob o prefixo `/api`. Sem versionamento na URL no MVP.
 - **Portas de desenvolvimento:** frontend (Vite) em `5173`, backend (FastAPI) em
-  `8000`.
+  `8000`. O `vite preview` (usado nos testes Playwright) roda em `4173`, com os
+  mesmos cabeçalhos de isolamento e o mesmo proxy de `/api`.
+- **OpenAPI e documentação:** o schema fica em `/api/openapi.json` e o Swagger UI
+  em `/api/docs`.
 - **Mesma origem no desenvolvimento:** o Vite faz proxy de `/api` para o backend.
   O frontend sempre chama caminhos relativos (`/api/...`). Isso evita CORS e não
   conflita com o isolamento de origem (COEP).

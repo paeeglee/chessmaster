@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/scaffold/design.md`
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -204,7 +204,7 @@ T5 → T6 → T7
 
 **Done when**:
 
-- [ ] Docs match the implemented toolchain; `make check` still passes
+- [x] Docs match the implemented toolchain; `make check` still passes
 
 **Tests**: none
 **Gate**: full
