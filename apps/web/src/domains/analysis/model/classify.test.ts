@@ -73,6 +73,8 @@ describe("classifyGame com a partida de referência (pretas)", () => {
       bestMoveSan: "Bd4+",
       mistakeType: "hanging-piece",
       lostPiece: { type: "b", square: "a1" },
+      materialBefore: 9,
+      materialAfter: 6,
     });
   });
 

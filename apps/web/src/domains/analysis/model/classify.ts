@@ -106,6 +106,8 @@ export function classifyMove({
       bestMoveSan: bestSan ? toPortugueseSan(bestSan) : null,
       mistakeType: mistakeTypeOf(ply, lostPiece),
       lostPiece,
+      materialBefore: materialBalance(ply.fenBefore, playerColor),
+      materialAfter: materialBalance(played.fen, playerColor),
     };
   }
 

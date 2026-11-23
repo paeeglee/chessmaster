@@ -31,6 +31,9 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // Alguns testes reproduzem a partida de referência inteira (145 posições); com a
+    // máquina ocupada (ex.: Stockfish rodando), 5 s é pouco.
+    testTimeout: 15_000,
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
     coverage: {

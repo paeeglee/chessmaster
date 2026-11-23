@@ -66,6 +66,8 @@ describe("summarizeAnalysis", () => {
         bestMoveSan: null,
         mistakeType: "defender-moved",
         lostPiece: { type: "n", square: "c3" },
+        materialBefore: 0,
+        materialAfter: 0,
       },
     ]);
     expect(finding?.text).toBe("tirou a proteção do cavalo em c3");
