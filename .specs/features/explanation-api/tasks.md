@@ -78,7 +78,7 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Retry flow tested with scripted providers
+- [x] Retry flow tested with scripted providers
 
 **Tests**: unit
 **Gate**: quick
