@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 20,
+  "next_id": 28,
   "lessons": [
     {
       "id": "L-001",
@@ -348,6 +348,150 @@
       ],
       "created": "2026-11-23T17:06:43Z",
       "last_seen": "2026-11-23T17:06:43Z"
+    },
+    {
+      "id": "L-020",
+      "key": "ac_gap::test text verification against every notation family the product accepts including english piece letters pawn captures castling and ellipsis move labels",
+      "text": "Test text verification against every notation family the product accepts, including English piece letters, pawn captures, castling and ellipsis move labels",
+      "signal": "ac_gap",
+      "scope": "api-verification",
+      "status": "candidate",
+      "features": [
+        "explanation-api"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EXP-05/EXP-06 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:14-16 (api-verification) (api-verification)"
+      ],
+      "created": "2026-11-23T17:09:52Z",
+      "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-021",
+      "key": "ac_gap::test text verification with moves cited without a move number but with a leading ellipsis as black moves are usually written",
+      "text": "Test text verification with moves cited without a move number but with a leading ellipsis, as Black moves are usually written",
+      "signal": "ac_gap",
+      "scope": "api-verification",
+      "status": "candidate",
+      "features": [
+        "explanation-api"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EXP-05 round 2 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:21 (api-verification) (api-verification)"
+      ],
+      "created": "2026-11-23T17:09:52Z",
+      "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-022",
+      "key": "ac_gap::verify every list in an ai response against its contract counterpart not only the first one the spec names",
+      "text": "Verify every list in an AI response against its contract counterpart, not only the first one the spec names",
+      "signal": "ac_gap",
+      "scope": "api-verification",
+      "status": "candidate",
+      "features": [
+        "explanation-api"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EXP-01 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:89-91 (api-verification) (api-verification)"
+      ],
+      "created": "2026-11-23T17:09:52Z",
+      "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-023",
+      "key": "spec_precision_gap::state in the spec whether decimal numbers are allowed in ai text and test that invented evaluations are rejected",
+      "text": "State in the spec whether decimal numbers are allowed in AI text and test that invented evaluations are rejected",
+      "signal": "spec_precision_gap",
+      "scope": "api-verification",
+      "status": "candidate",
+      "features": [
+        "explanation-api"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EXP-07 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:17 (api-verification) (api-verification)"
+      ],
+      "created": "2026-11-23T17:09:52Z",
+      "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-024",
+      "key": "spec_precision_gap::give every failure or tone requirement an observable outcome such as an http status or exact text",
+      "text": "Give every failure or tone requirement an observable outcome such as an HTTP status or exact text",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "explanation-api"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "EXP-12 apps/api/src/game_analyzer/domains/explanation/api/router.py:28-29; EXP-15 fake_provider.py:75 (spec) (spec)"
+      ],
+      "created": "2026-11-23T17:09:52Z",
+      "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-025",
+      "key": "surviving_mutant::assert that configuration values reach the adapter a factory builds not only the adapter type",
+      "text": "Assert that configuration values reach the adapter a factory builds, not only the adapter type",
+      "signal": "surviving_mutant",
+      "scope": "api-tests",
+      "status": "candidate",
+      "features": [
+        "explanation-api"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M14 apps/api/src/game_analyzer/domains/explanation/infrastructure/provider_factory.py:16 (api-tests) (api-tests)"
+      ],
+      "created": "2026-11-23T17:09:52Z",
+      "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-026",
+      "key": "surviving_mutant::assert the exact error body and retry payload on every route and use case that shares a flow not only on the first one",
+      "text": "Assert the exact error body and retry payload on every route and use case that shares a flow, not only on the first one",
+      "signal": "surviving_mutant",
+      "scope": "api-tests",
+      "status": "candidate",
+      "features": [
+        "explanation-api"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M15 apps/api/src/game_analyzer/domains/explanation/api/router.py:58; M2b answer_question.py:27 (api-tests) (api-tests)"
+      ],
+      "created": "2026-11-23T17:09:52Z",
+      "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-027",
+      "key": "surviving_mutant::give every normalization rule a test where the normalized form must be accepted",
+      "text": "Give every normalization rule a test where the normalized form must be accepted",
+      "signal": "surviving_mutant",
+      "scope": "api-verification",
+      "status": "candidate",
+      "features": [
+        "explanation-api"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N9 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:32 (api-verification) (api-verification)"
+      ],
+      "created": "2026-11-23T17:09:52Z",
+      "last_seen": "2026-11-23T17:09:52Z"
     }
   ]
 }

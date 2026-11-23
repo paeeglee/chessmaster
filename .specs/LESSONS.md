@@ -126,17 +126,53 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M21b round 3 apps/web/src/domains/analysis/model/classify.ts:43 (AN-08) (domain-model)
 - last seen: 2026-11-23T17:06:43Z
 
-### L-019 - Test text verification with moves cited without a move number but with a leading ellipsis, as Black moves are usually written
+### L-020 - Test text verification against every notation family the product accepts, including English piece letters, pawn captures, castling and ellipsis move labels
 - signal: `ac_gap` · recurrence: 1 feature(s) · scope: `api-verification` · harmful: 0
 - features: explanation-api
-- evidence: EXP-05 round 2 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:21 (api-verification)
-- last seen: 2026-11-23T17:07:01Z
+- evidence: EXP-05/EXP-06 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:14-16 (api-verification) (api-verification)
+- last seen: 2026-11-23T17:09:52Z
 
-### L-020 - Give every normalization rule a test where the normalized form must be accepted
+### L-021 - Test text verification with moves cited without a move number but with a leading ellipsis, as Black moves are usually written
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `api-verification` · harmful: 0
+- features: explanation-api
+- evidence: EXP-05 round 2 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:21 (api-verification) (api-verification)
+- last seen: 2026-11-23T17:09:52Z
+
+### L-022 - Verify every list in an AI response against its contract counterpart, not only the first one the spec names
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `api-verification` · harmful: 0
+- features: explanation-api
+- evidence: EXP-01 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:89-91 (api-verification) (api-verification)
+- last seen: 2026-11-23T17:09:52Z
+
+### L-023 - State in the spec whether decimal numbers are allowed in AI text and test that invented evaluations are rejected
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `api-verification` · harmful: 0
+- features: explanation-api
+- evidence: EXP-07 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:17 (api-verification) (api-verification)
+- last seen: 2026-11-23T17:09:52Z
+
+### L-024 - Give every failure or tone requirement an observable outcome such as an HTTP status or exact text
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: explanation-api
+- evidence: EXP-12 apps/api/src/game_analyzer/domains/explanation/api/router.py:28-29; EXP-15 fake_provider.py:75 (spec) (spec)
+- last seen: 2026-11-23T17:09:52Z
+
+### L-025 - Assert that configuration values reach the adapter a factory builds, not only the adapter type
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `api-tests` · harmful: 0
+- features: explanation-api
+- evidence: M14 apps/api/src/game_analyzer/domains/explanation/infrastructure/provider_factory.py:16 (api-tests) (api-tests)
+- last seen: 2026-11-23T17:09:52Z
+
+### L-026 - Assert the exact error body and retry payload on every route and use case that shares a flow, not only on the first one
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `api-tests` · harmful: 0
+- features: explanation-api
+- evidence: M15 apps/api/src/game_analyzer/domains/explanation/api/router.py:58; M2b answer_question.py:27 (api-tests) (api-tests)
+- last seen: 2026-11-23T17:09:52Z
+
+### L-027 - Give every normalization rule a test where the normalized form must be accepted
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `api-verification` · harmful: 0
 - features: explanation-api
-- evidence: N9 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:32 (api-verification)
-- last seen: 2026-11-23T17:07:01Z
+- evidence: N9 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:32 (api-verification) (api-verification)
+- last seen: 2026-11-23T17:09:52Z
 
 ## Quarantined (failed when applied - ignore)
 
