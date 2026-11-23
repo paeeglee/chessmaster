@@ -2,7 +2,7 @@ import { assign, fromCallback, fromPromise, setup } from "xstate";
 import type { EngineClient, PositionEvaluation } from "../../evaluation";
 import { type GameExplanation, requestExplanation } from "../../explanation";
 import type { AnalysisRequest } from "../../game-input";
-import { classifyMove } from "../model/classify";
+import { classifyPly } from "../model/classify";
 import { buildContract } from "../model/contract";
 import { type Finding, findingsFrom } from "../model/findings";
 import { type AnalysisSummary, summarizeAnalysis } from "../model/summary";
@@ -95,39 +95,37 @@ export const analysisMachine = setup({
         "POSITION.EVALUATED": {
           actions: assign(({ context, event }) => {
             const evaluations = [...context.evaluations, event.evaluation];
-            const index = evaluations.length - 1;
-            // Com as duas posições em volta do meio-lance avaliadas, já dá para classificá-lo.
-            const ply = index > 0 ? context.request.game.plies[index - 1] : undefined;
-            const before = evaluations[index - 1];
-            const findings =
-              ply && before
-                ? [
-                    ...context.findings,
-                    ...findingsFrom([
-                      classifyMove({
-                        ply,
-                        before,
-                        after: event.evaluation,
-                        playerColor: context.request.playerColor,
-                        continuation: context.request.game.plies
-                          .slice(ply.index)
-                          .map((next) => `${next.from}${next.to}${next.promotion ?? ""}`),
-                      }),
-                    ]),
-                  ]
-                : context.findings;
+            // O meio-lance k é classificado quando a posição depois da resposta do
+            // adversário (k + 1) já foi avaliada; o último sai no fim da avaliação.
+            const verdict = classifyPly(
+              context.request.game,
+              evaluations,
+              evaluations.length - 2,
+              context.request.playerColor,
+            );
+            const findings = verdict
+              ? [...context.findings, ...findingsFrom([verdict])]
+              : context.findings;
             return { evaluations, findings, elapsedMs: Date.now() - context.startedAt };
           }),
         },
         "EVALUATION.DONE": {
           target: "explaining",
-          actions: assign({
-            summary: ({ context }) =>
-              summarizeAnalysis(
+          actions: assign(({ context }) => {
+            const last = classifyPly(
+              context.request.game,
+              context.evaluations,
+              context.request.game.plies.length,
+              context.request.playerColor,
+            );
+            return {
+              findings: last ? [...context.findings, ...findingsFrom([last])] : context.findings,
+              summary: summarizeAnalysis(
                 context.request.game,
                 context.evaluations,
                 context.request.playerColor,
               ),
+            };
           }),
         },
         "EVALUATION.FAILED": { target: "evaluationFailed" },

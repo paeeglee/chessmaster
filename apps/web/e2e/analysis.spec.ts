@@ -17,6 +17,9 @@ async function startReferenceAnalysis(page: Page) {
 }
 
 test.describe("análise da partida (step_02)", () => {
+  // Um Stockfish por vez: duas análises em paralelo disputam a CPU e deixam a busca
+  // de 200 ms mais rasa.
+  test.describe.configure({ mode: "serial" });
   test.setTimeout(180_000);
 
   test("analisa a partida de referência e abre o resultado com os momentos-chave", async ({

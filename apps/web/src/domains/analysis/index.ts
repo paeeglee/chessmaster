@@ -7,7 +7,12 @@ export {
   analysisMachine,
   positionsOf,
 } from "./machines/analysisMachine";
-export { classifyGame, classifyMove, KEY_MOMENT_THRESHOLD } from "./model/classify";
+export {
+  classifyGame,
+  classifyMove,
+  classifyPly,
+  KEY_MOMENT_THRESHOLD,
+} from "./model/classify";
 export { ADVANTAGE_THRESHOLD, buildContract } from "./model/contract";
 export {
   type Finding,

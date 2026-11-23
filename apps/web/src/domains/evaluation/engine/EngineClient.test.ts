@@ -224,4 +224,40 @@ describe("EngineClient.evaluate", () => {
     answer = true;
     await expect(client.evaluate(START_FEN)).resolves.toMatchObject({ bestMove: "e2e4" });
   });
+
+  it("não confunde o bestmove atrasado da busca cancelada com o da próxima", async () => {
+    // Como o Stockfish de verdade: depois do stop chega o bestmove da busca
+    // interrompida, e só então o readyok.
+    let searches = 0;
+    let stopped = false;
+    const worker = new FakeWorker((command, reply) => {
+      if (command === "uci") reply("uciok");
+      if (command === "isready") {
+        // Antes do stop, responde na hora; depois, só quando a busca interrompida termina.
+        if (stopped) setTimeout(() => reply("readyok"), 10);
+        else reply("readyok");
+      }
+      if (command === "stop") {
+        stopped = true;
+        setTimeout(() => {
+          reply("info depth 20 score cp 999 pv h2h3");
+          reply("bestmove h2h3");
+        }, 5);
+      }
+      // A primeira busca é a cancelada: ela só termina com o bestmove do stop.
+      if (command === "go movetime 200" && ++searches > 1) {
+        setTimeout(() => {
+          reply("info depth 20 score cp 5 pv e2e4");
+          reply("bestmove e2e4");
+        }, 20);
+      }
+    });
+    const client = new EngineClient(worker);
+    await client.start({ threads: 1 });
+    const cancelled = client.evaluate(START_FEN);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    client.cancel();
+    await expect(cancelled).rejects.toThrow("Análise cancelada");
+    await expect(client.evaluate(START_FEN)).resolves.toMatchObject({ bestMove: "e2e4" });
+  });
 });

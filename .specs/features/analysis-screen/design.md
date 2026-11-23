@@ -53,4 +53,5 @@ type AnalysisResult = {
 | Concern | Location | Impact | Mitigation |
 | ------- | -------- | ------ | ---------- |
 | `stop` arrives while no search runs | EngineClient.cancel | Harmless UCI no-op | Always send `stop`; queue reset |
+| Multi-thread search is not deterministic | analysis at 200 ms | Under heavy CPU load a borderline key moment can be missed | Capture line also uses the actual reply (+ engine PV after it); min depth 12; e2e analysis tests run serially; observed 5/5 and 3/3 full-suite runs green |
 | Engine child not ready when analysis starts | appMachine | Should not happen (Colar guards) | Guard on ANALYSIS.REQUESTED reads engine; tests cover |

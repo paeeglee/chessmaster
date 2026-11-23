@@ -59,8 +59,12 @@ divergirem, o PRD vale.
 - **Como a perda é medida (domínio `analysis`):** para cada lance, o motor avalia a
   posição antes e depois. A "linha de capturas" é o lance seguido das capturas da
   variante principal enquanto ela só captura (até 8 meios-lances). Também se mede a
-  mesma linha com os lances que de fato vieram na partida, e vale a pior das duas:
-  com várias threads, a variante do motor pode não começar pela captura. É momento-chave
+  linha com a resposta que o adversário deu de fato na partida, seguida da variante
+  do motor na posição depois dela (assim as recapturas seguem confirmadas pelo
+  motor), e vale a pior das duas: com várias threads, a variante do motor pode não
+  começar pela captura. Por isso cada meio-lance é classificado quando a posição
+  depois da resposta já foi avaliada (`classifyPly`, usado no resumo e durante a
+  análise). É momento-chave
   quando o material do jogador cai 2 pontos ou mais em relação a antes do lance **e**
   em relação à linha do melhor lance. A peça perdida é a primeira do jogador
   capturada nessa linha. "Defensor saiu": o lance tirou o único defensor dela; "peça

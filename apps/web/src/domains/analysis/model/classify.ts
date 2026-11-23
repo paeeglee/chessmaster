@@ -24,9 +24,10 @@ type ClassifyInput = {
   after: PositionEvaluation;
   playerColor: PlayerColor;
   /**
-   * Lances que vieram de fato depois deste na partida (UCI). Com várias threads, a
-   * variante do motor pode não começar pela captura; se o adversário capturou na
-   * partida, essa perda também conta.
+   * A resposta que o adversário deu de fato na partida (UCI) seguida da variante do
+   * motor na posição depois dela. Com várias threads, a variante do motor pode não
+   * começar pela captura; se o adversário capturou na partida, a perda conta, e as
+   * recapturas seguem confirmadas pelo motor.
    */
   continuation?: readonly string[];
 };
@@ -123,19 +124,41 @@ export function classifyMove({
   return { kind: "none", ply: ply.index, color: mover };
 }
 
-/** Classifica todos os lances; `evaluations[i]` é a posição antes do meio-lance i + 1. */
+/**
+ * Classifica o meio-lance `index` com as avaliações em volta dele. `evaluations[i]` é
+ * a posição antes do meio-lance i + 1. Usado no resumo e durante a análise, para os
+ * dois darem o mesmo resultado.
+ */
+export function classifyPly(
+  game: Game,
+  evaluations: readonly PositionEvaluation[],
+  index: number,
+  playerColor: PlayerColor,
+): MoveVerdict | null {
+  const ply = game.plies[index - 1];
+  const before = evaluations[index - 1];
+  const after = evaluations[index];
+  if (!ply || !before || !after) {
+    return null;
+  }
+  const reply = game.plies[index];
+  const afterReply = evaluations[index + 1];
+  const continuation = reply && afterReply ? [uciOf(reply), ...afterReply.pv] : [];
+  return classifyMove({ ply, before, after, playerColor, continuation });
+}
+
+/** Classifica todos os lances da partida. */
 export function classifyGame(
   game: Game,
   evaluations: readonly PositionEvaluation[],
   playerColor: PlayerColor,
 ): MoveVerdict[] {
-  return game.plies.map((ply) => {
-    const before = evaluations[ply.index - 1];
-    const after = evaluations[ply.index];
-    if (!before || !after) {
-      return { kind: "none", ply: ply.index, color: ply.color };
-    }
-    const continuation = game.plies.slice(ply.index).map(uciOf);
-    return classifyMove({ ply, before, after, playerColor, continuation });
-  });
+  return game.plies.map(
+    (ply) =>
+      classifyPly(game, evaluations, ply.index, playerColor) ?? {
+        kind: "none",
+        ply: ply.index,
+        color: ply.color,
+      },
+  );
 }

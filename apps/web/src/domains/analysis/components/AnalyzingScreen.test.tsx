@@ -125,7 +125,7 @@ describe("AnalyzingScreen", () => {
     const { actor, evaluateUpTo } = startAnalysis();
     render(<AnalyzingScreen analysisRef={actor} onCancel={() => {}} />);
     expect(screen.getByText("Nada por enquanto.")).toBeInTheDocument();
-    await evaluateUpTo(45);
+    await evaluateUpTo(46);
     expect(screen.getByText("12.Ce2?")).toBeInTheDocument();
     expect(screen.getByText("22...Ta7?")).toBeInTheDocument();
     expect(screen.getByText("deixou o bispo em a1 ser capturado")).toBeInTheDocument();

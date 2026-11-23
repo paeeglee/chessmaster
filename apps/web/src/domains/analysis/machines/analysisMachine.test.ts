@@ -85,9 +85,10 @@ describe("analysisMachine", () => {
   });
 
   it("adiciona os achados assim que as duas posições do lance são avaliadas (AS-03)", async () => {
-    const engine = fakeEngine({ hangAt: 45 });
+    // O 22...Ta7 (meio-lance 44) sai quando a posição depois da resposta (45) é avaliada.
+    const engine = fakeEngine({ hangAt: 46 });
     const { actor } = start(engine);
-    await waitFor(actor, (snapshot) => snapshot.context.evaluations.length === 45);
+    await waitFor(actor, (snapshot) => snapshot.context.evaluations.length === 46);
     const findings = actor.getSnapshot().context.findings;
     expect(findings.map((finding) => `${finding.tag} ${finding.moveLabel}`)).toEqual(
       expect.arrayContaining(["Adversário 12.Ce2?", "Erro 22...Ta7?"]),
@@ -153,5 +154,31 @@ describe("analysisMachine", () => {
     await waitFor(actor, (snapshot) => snapshot.status === "done");
     expect(engine.calls).toHaveLength(5);
     expect(actor.getSnapshot().output?.keyMoments).toEqual([]);
+  });
+
+  it("conta a captura da partida quando a variante do motor não a mostra", async () => {
+    // Na posição depois de 22...Ta7, a variante do motor começa sem capturar; na
+    // partida veio 23.Txa1. O erro continua sendo achado.
+    const request = referenceRequest();
+    const altered = evaluations.map((evaluation, index) =>
+      index === 44 ? { ...evaluation, pv: ["f2e3"] } : evaluation,
+    );
+    const engine = fakeEngine();
+    (engine as { evaluate: (fen: string) => Promise<PositionEvaluation> }).evaluate = async (
+      fen: string,
+    ) => {
+      const index = engine.calls.length;
+      engine.calls.push(fen);
+      return altered[index] as PositionEvaluation;
+    };
+    const machine = analysisMachine.provide({
+      actors: { explainGame: fromPromise(async () => explanation) },
+    });
+    const actor = createActor(machine, { input: { request, engine } }).start();
+    await waitFor(actor, (snapshot) => snapshot.status === "done");
+    expect(actor.getSnapshot().context.findings.map((finding) => finding.moveLabel)).toContain(
+      "22...Ta7?",
+    );
+    expect(actor.getSnapshot().output?.keyMoments[0]?.moveLabel).toBe("22...Ta7");
   });
 });
