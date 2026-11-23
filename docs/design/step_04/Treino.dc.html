@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Treinar momento-chave</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#f3f2ee}
+a{color:#0d5f63}a:hover{color:#0a4d50}
+button{font:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1c2026; min-height: 100%">
+<header style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding: 14px 32px; background: #ffffff; border-bottom: 1px solid #dcd9d0">
+<div style="display: flex; align-items: center; gap: 10px; margin-right: auto">
+<div aria-hidden="true" style="width: 36px; height: 36px; border-radius: 9px; background: #0d5f63; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px">♞︎</div>
+<div style="display: flex; flex-direction: column"><span style="font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 19px; font-weight: 600; color: #1c2026">Analisador de partidas</span><span style="font-size: 12px; color: #4a525c">Entenda seus erros e treine a partir deles</span></div>
+</div>
+<nav aria-label="Seções" style="display: flex; gap: 4px; padding: 4px; background: #f3f2ee; border-radius: 10px; flex-wrap: wrap"><a href="#" style="text-decoration: none; padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 15px; background: #ffffff; color: #1c2026; box-shadow: 0 1px 3px rgba(0,0,0,0.12)">Analisar partida</a><a href="#" style="text-decoration: none; padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 15px; color: #4a525c">Minhas partidas</a></nav>
+</header>
+<main style="max-width: 1240px; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<a href="Resultado.dc.html" style="text-decoration: none; font-weight: 600; font-size: 15px">← Voltar ao resultado</a>
+<div style="display: flex; gap: 10px; align-items: center"><span style="font-size: 14px; color: #4a525c">Momento 1 de 5</span><div style="display: flex; gap: 6px"><span aria-hidden="true" style="width: 34px; height: 8px; border-radius: 99px; background: #0d5f63"></span><span aria-hidden="true" style="width: 34px; height: 8px; border-radius: 99px; background: #dcd9d0"></span><span aria-hidden="true" style="width: 34px; height: 8px; border-radius: 99px; background: #dcd9d0"></span><span aria-hidden="true" style="width: 34px; height: 8px; border-radius: 99px; background: #dcd9d0"></span><span aria-hidden="true" style="width: 34px; height: 8px; border-radius: 99px; background: #dcd9d0"></span></div></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+<section style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<div role="img" aria-label="{{boardLabel}}" style="width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: repeat(8, minmax(0, 1fr)); border-radius: 6px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.18); container-type: inline-size">
+<sc-for list="{{board}}" as="sq" hint-placeholder-count="64">
+<div style="{{sq.style}}"><span style="{{sq.pieceStyle}}; font-size: 10.5cqi; font-family: 'Segoe UI Symbol', 'Noto Sans Symbols 2', 'DejaVu Sans', serif">{{sq.glyph}}</span><span style="{{sq.coordColor}}; position: absolute; left: 4%; top: 3%; font-size: 11px; font-weight: 700">{{sq.rank}}</span><span style="{{sq.coordColor}}; position: absolute; right: 5%; bottom: 3%; font-size: 11px; font-weight: 700">{{sq.file}}</span></div>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 15px"><span style="display: inline-flex; gap: 8px; align-items: center; font-weight: 600"><span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 50%; background: #1c2026; display: inline-block"></span>Pretas jogam (você)</span><span style="color: #4a525c">Clique ou arraste para jogar</span></div>
+</section>
+<section style="flex: 999 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="background: #ffffff; border: 1px solid #dcd9d0; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #0d5f63; font-weight: 700; margin: 0">Encontre o lance · tipo: peça atacada</p>
+<h1 style="font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 30px; font-weight: 600; margin: 0; line-height: 1.2">Uma das suas peças está em perigo. O que fazer?</h1>
+<p style="margin: 0; font-size: 16px; color: #4a525c; line-height: 1.55">Posição real da sua partida, antes do lance 22. Na partida você jogou 22...Ta7.</p>
+</div>
+<div style="background: #fbf0dc; border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px" role="status">
+<div style="display: flex; gap: 8px; align-items: center"><span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #9a5b00; background: #ffffff; border-radius: 5px; padding: 2px 8px">Tentativa 1</span><strong>22...Te6 ainda perde o bispo</strong></div>
+<p style="margin: 0; font-size: 15px; line-height: 1.55">Depois de 23.Txa1, o bispo some do tabuleiro. Olhe a primeira fileira: quem ataca a casa a1?</p>
+</div>
+<div style="background: #e6eefb; color: #173d78; border-radius: 12px; padding: 16px 20px; font-size: 15px; line-height: 1.55"><strong>Dica:</strong> o bispo pode fugir — e um dos destinos ainda dá xeque no rei branco.</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button type="button" style="background: #ffffff; color: #1c2026; border: 1px solid #dcd9d0; border-radius: 8px; padding: 10px 16px; min-height: 44px; font-weight: 600; font-size: 15px">Desfazer</button><button type="button" style="background: #ffffff; color: #1c2026; border: 1px solid #dcd9d0; border-radius: 8px; padding: 10px 16px; min-height: 44px; font-weight: 600; font-size: 15px">Outra dica</button><button type="button" style="background: #ffffff; color: #1c2026; border: 1px solid #dcd9d0; border-radius: 8px; padding: 10px 16px; min-height: 44px; font-weight: 600; font-size: 15px">Mostrar solução</button></div>
+<div style="background: #ffffff; border: 1px solid #dcd9d0; border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 700">Depois deste momento</span>
+<p style="margin: 0; font-size: 15px; color: #4a525c; line-height: 1.5">Os momentos 3, 4 e 5 são do outro tipo: <em>defensor que saiu</em>. Se errar dois do mesmo tipo, sugerimos um treino extra só daquele padrão.</p>
+</div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+
+function boardSquares(code, flipped, marks, coords) {
+  const G = { k: '\u265A', q: '\u265B', r: '\u265C', b: '\u265D', n: '\u265E', p: '\u265F' };
+  const F = 'abcdefgh', out = [];
+  for (let v = 0; v < 64; v++) {
+    const row = v >> 3, col = v & 7;
+    const r = flipped ? row : 7 - row, f = flipped ? 7 - col : col;
+    const ch = code[(7 - r) * 8 + f];
+    const name = F[f] + (r + 1);
+    const light = (r + f) % 2 === 1;
+    const mk = marks[name];
+    let bg = light ? '#ebe5d5' : '#87a07c';
+    if (mk === 'red') bg = light ? '#e8b4a8' : '#c27a68';
+    if (mk === 'green') bg = light ? '#bfdcc2' : '#6fa57a';
+    if (mk === 'last') bg = light ? '#f0dc8c' : '#c4b45a';
+    const white = ch !== '.' && ch === ch.toUpperCase();
+    const pieceStyle = white
+      ? 'color: #fbfbf8; text-shadow: 0 0 1px #111, 0 0 1px #111, 0 0 1px #111, 0 1px 2px rgba(0,0,0,0.35)'
+      : 'color: #1f2328';
+    out.push({
+      style: 'background: ' + bg + '; position: relative; display: flex; align-items: center; justify-content: center; line-height: 1',
+      glyph: ch === '.' ? '' : G[ch.toLowerCase()] + '\uFE0E',
+      pieceStyle,
+      rank: coords && col === 0 ? String(r + 1) : '',
+      file: coords && row === 7 ? F[f] : '',
+      coordColor: light ? 'color: #5f7a56' : 'color: #f2f3ea',
+    });
+  }
+  return out;
+}
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      board: boardSquares('r...r........kppp.p..n...........Pp.pPbPP.....N....B.KP.b......R', true, { a1: 'red' }, true),
+      boardLabel: 'Posição antes de 22...Ta7, vista pelas pretas. O bispo preto em a1 está destacado.',
+    };
+  }
+}
+</script>
+</body>
+</html>

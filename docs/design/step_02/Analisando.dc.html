@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Analisando a partida</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#f3f2ee}
+a{color:#0d5f63}a:hover{color:#0a4d50}
+button{font:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1c2026; min-height: 100%">
+<header style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding: 14px 32px; background: #ffffff; border-bottom: 1px solid #dcd9d0">
+<div style="display: flex; align-items: center; gap: 10px; margin-right: auto">
+<div aria-hidden="true" style="width: 36px; height: 36px; border-radius: 9px; background: #0d5f63; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 22px">♞︎</div>
+<div style="display: flex; flex-direction: column"><span style="font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 19px; font-weight: 600; color: #1c2026">Analisador de partidas</span><span style="font-size: 12px; color: #4a525c">Entenda seus erros e treine a partir deles</span></div>
+</div>
+<nav aria-label="Seções" style="display: flex; gap: 4px; padding: 4px; background: #f3f2ee; border-radius: 10px; flex-wrap: wrap"><a href="#" style="text-decoration: none; padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 15px; background: #ffffff; color: #1c2026; box-shadow: 0 1px 3px rgba(0,0,0,0.12)">Analisar partida</a><a href="#" style="text-decoration: none; padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 15px; color: #4a525c">Minhas partidas</a></nav>
+</header>
+<main style="max-width: 1240px; margin: 0 auto; padding: 32px 32px 48px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><div style="display: flex; align-items: center; gap: 8px"><span style="width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #0d5f63; color: #ffffff; border: 1px solid #0d5f63">✓</span><span style="font-size: 14px; font-weight: 500; color: #1c2026">Colar</span></div><span aria-hidden="true" style="width: 40px; height: 1px; background: #c9c5ba"></span><div style="display: flex; align-items: center; gap: 8px"><span style="width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #0d5f63; color: #ffffff; border: 1px solid #0d5f63">2</span><span style="font-size: 14px; font-weight: 700; color: #1c2026">Analisar</span></div><span aria-hidden="true" style="width: 40px; height: 1px; background: #c9c5ba"></span><div style="display: flex; align-items: center; gap: 8px"><span style="width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #ffffff; color: #4a525c; border: 1px solid #c9c5ba">3</span><span style="font-size: 14px; font-weight: 500; color: #4a525c">Revisar e treinar</span></div></div>
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<section style="flex: 1 1 420px; min-width: 0; background: #ffffff; border: 1px solid #dcd9d0; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 14px; align-items: center">
+<p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #0d5f63; font-weight: 700; margin: 0; align-self: flex-start">Repassando a partida</p>
+<div role="img" aria-label="{{liveBoardLabel}}" style="width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: repeat(8, minmax(0, 1fr)); border-radius: 6px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.18); container-type: inline-size">
+<sc-for list="{{liveBoard}}" as="sq" hint-placeholder-count="64">
+<div style="{{sq.style}}"><span style="{{sq.pieceStyle}}; font-size: 10.5cqi; font-family: 'Segoe UI Symbol', 'Noto Sans Symbols 2', 'DejaVu Sans', serif">{{sq.glyph}}</span><span style="{{sq.coordColor}}; position: absolute; left: 4%; top: 3%; font-size: 11px; font-weight: 700">{{sq.rank}}</span><span style="{{sq.coordColor}}; position: absolute; right: 5%; bottom: 3%; font-size: 11px; font-weight: 700">{{sq.file}}</span></div>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; width: 100%; font-size: 15px"><span style="font-weight: 700">Lance 44 de 72</span><span style="color: #4a525c">44...Texe3+</span></div>
+</section>
+<section style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="background: #ffffff; border: 1px solid #dcd9d0; border-radius: 12px; padding: 26px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 30px; font-weight: 600; margin: 0">Analisando sua partida…</h1>
+<p style="margin: 0; color: #4a525c; font-size: 16px">Cada etapa faz uma coisa só. A IA entra no fim e só explica o que os motores calcularam.</p>
+</div>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px">
+<li style="display: flex; gap: 14px; align-items: flex-start">
+<span style="flex: none; width: 34px; height: 34px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background: #1c6b45; color: #ffffff">✓</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; padding-top: 5px">
+<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span style="font-weight: 700; font-size: 16px; color: #1c2026">Leitura dos lances</span><span style="font-size: 13px; color: #4a525c">0,2 s</span></div>
+<span style="font-size: 14px; color: #4a525c">Extrai os 144 lances do HTML colado</span>
+</div></li>
+<li style="display: flex; gap: 14px; align-items: flex-start">
+<span style="flex: none; width: 34px; height: 34px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background: #1c6b45; color: #ffffff">✓</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; padding-top: 5px">
+<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span style="font-weight: 700; font-size: 16px; color: #1c2026">Motor de regras</span><span style="font-size: 13px; color: #4a525c">0,4 s</span></div>
+<span style="font-size: 14px; color: #4a525c">Reconstrói e valida cada posição (xeques, roques, mate final)</span>
+</div></li>
+<li style="display: flex; gap: 14px; align-items: flex-start">
+<span style="flex: none; width: 34px; height: 34px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background: #ffffff; color: #0d5f63; border: 3px solid #0d5f63">3</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; padding-top: 5px">
+<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span style="font-weight: 700; font-size: 16px; color: #1c2026">Motor de avaliação</span><span style="font-size: 13px; color: #4a525c">lance 44 de 72 · ~12 s restantes</span></div>
+<span style="font-size: 14px; color: #4a525c">Calcula a vantagem e o melhor lance em cada posição</span><div style="height: 8px; background: #e1efee; border-radius: 99px; overflow: hidden; margin-top: 6px" role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100" aria-label="Motor de avaliação"><div style="width: 62%; height: 100%; background: #0d5f63"></div></div>
+</div></li>
+<li style="display: flex; gap: 14px; align-items: flex-start">
+<span style="flex: none; width: 34px; height: 34px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background: #f3f2ee; color: #4a525c; border: 1px solid #c9c5ba">4</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; padding-top: 5px">
+<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span style="font-weight: 700; font-size: 16px; color: #4a525c">Tabela de finais</span><span style="font-size: 13px; color: #4a525c"></span></div>
+<span style="font-size: 14px; color: #4a525c">Resultado exato quando sobram poucas peças, como rei e torre contra rei</span>
+</div></li>
+<li style="display: flex; gap: 14px; align-items: flex-start">
+<span style="flex: none; width: 34px; height: 34px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; background: #f3f2ee; color: #4a525c; border: 1px solid #c9c5ba">5</span>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px; padding-top: 5px">
+<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span style="font-weight: 700; font-size: 16px; color: #4a525c">Explicação da IA</span><span style="font-size: 13px; color: #4a525c"></span></div>
+<span style="font-size: 14px; color: #4a525c">Transforma os números em momentos-chave e dicas para o seu nível</span>
+</div></li>
+</ol>
+</div>
+<div style="background: #ffffff; border: 1px solid #dcd9d0; border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #0d5f63; font-weight: 700; margin: 0">Já encontrado</p><span style="font-size: 13px; color: #4a525c">aparece enquanto o motor avança</span></div>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+<li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; background: #fbf0dc; border-radius: 8px"><span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: #9a5b00; background: #ffffff; border-radius: 5px; padding: 2px 7px">Adversário</span><span style="font-size: 14px; color: #1c2026"><strong>12.Ce2?</strong> das brancas abriu a diagonal — você ganhou a torre com 12...Bxa1</span></li>
+<li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; background: #fbe7e5; border-radius: 8px"><span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: #a3231b; background: #ffffff; border-radius: 5px; padding: 2px 7px">Erro</span><span style="font-size: 14px; color: #1c2026"><strong>22...Ta7?</strong> deixou o bispo em a1 ser capturado</span></li>
+<li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; background: #fbe7e5; border-radius: 8px"><span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: #a3231b; background: #ffffff; border-radius: 5px; padding: 2px 7px">Erro</span><span style="font-size: 14px; color: #1c2026"><strong>27...Tb7?</strong> deixou o bispo em g4 ser capturado pelo rei</span></li>
+<li style="display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; background: #fbe7e5; border-radius: 8px"><span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: #a3231b; background: #ffffff; border-radius: 5px; padding: 2px 7px">Erro</span><span style="font-size: 14px; color: #1c2026"><strong>41...Ta1?</strong> tirou a proteção do cavalo em c3</span></li>
+</ul>
+</div>
+<div style="display: flex; justify-content: flex-end"><button type="button" style="background: #ffffff; color: #1c2026; border: 1px solid #dcd9d0; border-radius: 8px; padding: 10px 16px; min-height: 44px; font-weight: 600; font-size: 15px">Cancelar análise</button></div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+
+function boardSquares(code, flipped, marks, coords) {
+  const G = { k: '\u265A', q: '\u265B', r: '\u265C', b: '\u265D', n: '\u265E', p: '\u265F' };
+  const F = 'abcdefgh', out = [];
+  for (let v = 0; v < 64; v++) {
+    const row = v >> 3, col = v & 7;
+    const r = flipped ? row : 7 - row, f = flipped ? 7 - col : col;
+    const ch = code[(7 - r) * 8 + f];
+    const name = F[f] + (r + 1);
+    const light = (r + f) % 2 === 1;
+    const mk = marks[name];
+    let bg = light ? '#ebe5d5' : '#87a07c';
+    if (mk === 'red') bg = light ? '#e8b4a8' : '#c27a68';
+    if (mk === 'green') bg = light ? '#bfdcc2' : '#6fa57a';
+    if (mk === 'last') bg = light ? '#f0dc8c' : '#c4b45a';
+    const white = ch !== '.' && ch === ch.toUpperCase();
+    const pieceStyle = white
+      ? 'color: #fbfbf8; text-shadow: 0 0 1px #111, 0 0 1px #111, 0 0 1px #111, 0 1px 2px rgba(0,0,0,0.35)'
+      : 'color: #1f2328';
+    out.push({
+      style: 'background: ' + bg + '; position: relative; display: flex; align-items: center; justify-content: center; line-height: 1',
+      glyph: ch === '.' ? '' : G[ch.toLowerCase()] + '\uFE0E',
+      pieceStyle,
+      rank: coords && col === 0 ? String(r + 1) : '',
+      file: coords && row === 7 ? F[f] : '',
+      coordColor: light ? 'color: #5f7a56' : 'color: #f2f3ea',
+    });
+  }
+  return out;
+}
+
+class Component extends DCLogic {
+  renderVals() {
+    return { liveBoard: boardSquares('.............kpp...................N.P.Pr...rK........P.........', true, { e6: 'last', e3: 'last' }, true), liveBoardLabel: 'Tabuleiro mostrando a partida sendo repassada' };
+  }
+}
+</script>
+</body>
+</html>

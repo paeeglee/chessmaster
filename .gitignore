@@ -1,0 +1,34 @@
+# Sistema operacional
+.DS_Store
+
+# Variáveis de ambiente (só o .env.example vai para o repositório)
+.env
+.env.*
+!.env.example
+
+# Worktrees das tarefas
+.worktrees/
+
+# Node / frontend
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+playwright-report/
+test-results/
+# Arquivos do Stockfish copiados do node_modules no setup
+apps/web/public/engine/
+
+# Python / backend
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editores
+.idea/
+.vscode/
