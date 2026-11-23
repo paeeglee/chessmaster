@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 32,
+  "next_id": 35,
   "lessons": [
     {
       "id": "L-001",
@@ -564,6 +564,60 @@
       ],
       "created": "2026-11-23T17:23:33Z",
       "last_seen": "2026-11-23T17:23:33Z"
+    },
+    {
+      "id": "L-032",
+      "key": "ac_gap::probe a changed domain rule with a counterexample that should stay neutral before accepting a fix that only makes the reference fixture pass",
+      "text": "Probe a changed domain rule with a counterexample that should stay neutral before accepting a fix that only makes the reference fixture pass",
+      "signal": "ac_gap",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 2 N1 classify.ts:78-83 probe (domain-model)"
+      ],
+      "created": "2026-11-23T21:51:10Z",
+      "last_seen": "2026-11-23T21:51:10Z"
+    },
+    {
+      "id": "L-033",
+      "key": "surviving_mutant::make fakes reproduce the protocol race a fix targets otherwise the fix is untested",
+      "text": "Make fakes reproduce the protocol race a fix targets, otherwise the fix is untested",
+      "signal": "surviving_mutant",
+      "scope": "engine",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 2 R06 EngineClient.ts:106 (engine)"
+      ],
+      "created": "2026-11-23T21:51:10Z",
+      "last_seen": "2026-11-23T21:51:10Z"
+    },
+    {
+      "id": "L-034",
+      "key": "surviving_mutant::test every call site that wires a new parameter not only the pure function that consumes it",
+      "text": "Test every call site that wires a new parameter, not only the pure function that consumes it",
+      "signal": "surviving_mutant",
+      "scope": "machines",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 2 R09 R10 R11 analysisMachine.ts:112-114 (machines)"
+      ],
+      "created": "2026-11-23T21:51:10Z",
+      "last_seen": "2026-11-23T21:51:10Z"
     }
   ]
 }

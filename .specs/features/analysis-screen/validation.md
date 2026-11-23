@@ -1,15 +1,92 @@
 # F4b · Analysis pipeline and screen Validation
 
-**Date**: 2026-11-23
+**Date**: 2026-11-23 (round 2)
 **Spec**: `.specs/features/analysis-screen/spec.md`
-**Diff range**: `9de6292..2c2d0f4` (branch `feat/analysis-screen`)
+**Diff range**: `9de6292..ec2f46c` (round 2 re-verified fixes `3e19578` and `ec2f46c`)
 **Verifier**: independent sub-agent (author ≠ verifier)
 
 **Verdict**: FAIL
 
-The gates are green, but 2 discrimination-sensor mutants survived (AS-11 last-move highlight, `advantage_started_at` ≥ +2 boundary). Validate procedure: a surviving mutant is a fix task. AS-11 also has a behavior defect: the caption and the board disagree by one ply.
+All 8 round-1 gaps are closed: both round-1 survivors are now killed, and the caption, AI warning, AS-16 and doc items are fixed. The gates are green. Round 2 found new problems:
+
+- **The new continuation rule has a defect.** `ec2f46c` makes classification take the worse of the engine line and the game line. A probe shows a quiet move flagged as a "Peça atacada" key moment even though the piece was defended, so the engine confirmation required by D3 is bypassed.
+- **4 new sensor survivors.** Three are in the continuation wiring and one is in the `readyok` wait.
 
 ---
+
+## Round 2 · Gate Check
+
+- **`make check`** (HEAD `ec2f46c`): exit 0. Biome clean, tsc + mypy clean, Vitest 29 files / **298 passed** (98.52% stmts, 91.81% branches), pytest 75 passed.
+- **`make test-e2e`**: exit 0, **13 passed** (34.3 s).
+- **Flakiness of `analysis.spec.ts` "momentos-chave"**:
+  - At `3e19578` (before the continuation rule) it failed in 2 of 5 runs, with 4 key moments instead of 5 (27...Tb7 missing). Multi-thread Stockfish at 200 ms is not deterministic.
+  - At `ec2f46c`: 5 of 5 green (one `make test-e2e` + `--repeat-each 4 --workers 1`).
+- Ports 4173/8000 were free before and after.
+
+## Round 2 · Round-1 gaps re-checked
+
+| Round-1 gap | Fix evidence | Result |
+| ----------- | ------------ | ------ |
+| 1 AS-11 highlight (M29) | `apps/web/src/shared/ui/Board.tsx:72` `data-mark`; `apps/web/src/domains/analysis/components/AnalyzingScreen.test.tsx:110-112` - f5/d4 `data-mark="last"`, `querySelectorAll("[data-mark]")` length 2 | ✅ R01 killed |
+| 2 ≥ +2 boundary (M17) | `apps/web/src/domains/analysis/model/contract.test.ts:104-116` - timeline `[0,1,2,3,…]` → `{ ply: 2, label: "1...d5" }` | ✅ R02 killed |
+| 3 caption/board mismatch | `progress.ts:24` now uses the last evaluated position; `AnalyzingScreen.tsx:97` uses `lastPly.moveNumber`; `AnalyzingScreen.test.tsx:115-122` - 89 evaluations → "Lance 44 de 72", "44...Texe3+", `/^lance 44 de 72/`; `summary.test.ts:91` - `(89,145,17800)` → 61%, move 44, 12 s. The spec assumption was updated to match | ✅ R03, R04 killed |
+| 4 AI-failure warning | `apps/web/src/app/App.test.tsx:141` - `findByText("A explicação não pôde ser gerada.")` | ✅ |
+| 5 AS-16 pipeline level | `apps/web/src/domains/analysis/machines/analysisMachine.test.ts:145-156` - 4-ply game reaches `done`, 5 calls, `keyMoments` `[]` | ✅ |
+| 6/7 spec narrowings | `spec.md` assumptions: no stage times for 1–2; contract without FENs/scores, with rationale | ✅ (decisions recorded, `Confirmed? n`) |
+| 8 stale `bestmove` after cancel | `EngineClient.ts:106` queues `isready`→`readyok`; `EngineClient.test.ts:222` - `["stop","isready"]` | ⚠️ Partial: R06 survived (see N2) |
+| doc drift | `design.md` components table fixed | ✅ |
+
+## Round 2 · Discrimination Sensor (fresh scratch `f4b-sensor2` at `ec2f46c`)
+
+| # | Target | Mutation | Killed? |
+| - | ------ | -------- | ------- |
+| R01 | `AnalyzingScreen.tsx:28` | last-move marks removed | ✅ |
+| R02 | `contract.ts:28` | `>=` → `>` | ✅ |
+| R03 | `AnalyzingScreen.tsx:97` | caption back to `ceil(evaluated/2)` | ✅ |
+| R04 | `progress.ts:24` | `currentPosition` back to `evaluated` | ✅ |
+| R05 | `EngineClient.ts:106` | no `isready` after `stop` | ✅ |
+| R06 | `EngineClient.ts:106` | `isready` sent but the next search does not wait for `readyok` | ❌ **Survived** |
+| R07 | `classify.ts:81` | game line ignored | ✅ |
+| R08 | `classify.ts:81` | better line (for the mover) chosen | ✅ |
+| R09 | `classify.ts:138` | `classifyGame` continuation skips the opponent's reply | ❌ **Survived** |
+| R10 | `analysisMachine.ts:112-114` | machine passes no continuation | ❌ **Survived** |
+| R11 | `analysisMachine.ts:113` | machine continuation skips the reply | ❌ **Survived** |
+
+**Result**: 7/11 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; the real tree's `git status --porcelain` matches the baseline (empty).
+
+### Probe: continuation rule false positive (scratch only, not committed)
+
+The position is `4r1k1/8/8/8/4N3/3P4/8/6K1 w`. The knight on e4 is **defended** by the pawn on d3.
+
+- **Played:** White plays the quiet Kg1-h2. The engine PV after the move has no capture (`g8f8`). In the game Black plays Rxe4 and White does not recapture (`continuation: ["e8e4","h2g3"]`).
+- **Result:** `classifyMove` returns `{"kind":"mistake","moveLabel":"1.Rh2","loss":3,"mistakeType":"hanging-piece","lostPiece":{"type":"n","square":"e4"}}`.
+
+Kh2 did not hang anything: the engine line shows no loss, and the knight was protected. The real error is White's next move, which fails to recapture. That move is classified on its own as well, so one blunder becomes **two key moments**, and the first is mislabeled "Peça atacada".
+
+Why it happens: the game capture line stops at the mover's first non-capture, so the loss lands on the earlier move. This contradicts:
+
+- **D3** (general.md 10, "confirmada pelo motor");
+- the glossary definition of "Peça atacada" ("não foi … protegida").
+
+The reference game still yields exactly 5 key moments, so the fixtures do not expose this.
+
+## Round 2 · Ranked gaps
+
+1. **N1 - Continuation rule false positive / double counting (Major, behavior).** In `apps/web/src/domains/analysis/model/classify.ts:78-83` the game line can override the engine without engine confirmation. Fix:
+   - Only take the opponent's actual **reply** from the game: `[continuation[0], ...]`.
+   - Then continue with the engine PV of the position after that reply (`evaluations[ply.index + 1].pv`, which starts with the mover's best recapture). The recapture then stays engine-confirmed.
+   - In the machine this means a ply is classified once the position after the reply is evaluated (one ply later; the last ply falls back to the engine line).
+   - Add the probe above as a regression test that expects `kind: "none"` for Kh2.
+   - Record the rule in the spec and in `docs/architecture/overview.md`, and confirm it with the user, since it changes D3.
+2. **N2 - `readyok` wait not discriminated (R06 survived, Minor).** The fake worker in `apps/web/src/domains/evaluation/engine/EngineClient.test.ts:206-225` never sends the late `bestmove` after `stop`. Fix: make the fake reply `bestmove a2a3` to `stop` asynchronously (before `readyok`), then assert that the next `evaluate` resolves with its own best move (`e2e4`), not the stale one.
+3. **N3 - Continuation wiring untested (R09, R10, R11 survived, Minor).**
+   - `classify.ts:138` and `analysisMachine.ts:112-114` are only covered through fixture PVs that already contain the captures.
+   - The machine also re-implements `uciOf` inline, so findings during the analysis and the final summary can drift.
+   - Fix: export or reuse one helper for "continuation of ply i". Add a `classifyGame` test and an analysis-machine test where the engine PV lacks the capture but the game has it, and assert that the finding and the key moment appear.
+
+---
+
+# Round 1 report (kept for history)
 
 ## Task Completion
 

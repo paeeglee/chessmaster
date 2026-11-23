@@ -198,6 +198,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: AS-14 vs general.md 7.2; step_02 stage times (specs)
 - last seen: 2026-11-23T17:23:33Z
 
+### L-032 - Probe a changed domain rule with a counterexample that should stay neutral before accepting a fix that only makes the reference fixture pass
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-screen
+- evidence: validation.md round 2 N1 classify.ts:78-83 probe (domain-model)
+- last seen: 2026-11-23T21:51:10Z
+
+### L-033 - Make fakes reproduce the protocol race a fix targets, otherwise the fix is untested
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `engine` · harmful: 0
+- features: analysis-screen
+- evidence: validation.md round 2 R06 EngineClient.ts:106 (engine)
+- last seen: 2026-11-23T21:51:10Z
+
+### L-034 - Test every call site that wires a new parameter, not only the pure function that consumes it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `machines` · harmful: 0
+- features: analysis-screen
+- evidence: validation.md round 2 R09 R10 R11 analysisMachine.ts:112-114 (machines)
+- last seen: 2026-11-23T21:51:10Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
