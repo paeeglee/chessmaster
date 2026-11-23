@@ -29,7 +29,7 @@ Domínios iniciais (ajuste conforme o código crescer e atualize este arquivo):
 
 ```
 apps/web/src/
-├── app/                  # Inicialização, rotas, providers globais, tema do Tailwind
+├── app/                  # Inicialização, máquina raiz do fluxo (XState), providers globais, tema do Tailwind
 ├── domains/
 │   ├── game/             # Partida colada: leitor e regras (motores 1–2), posições, notação
 │   ├── evaluation/       # Worker do Stockfish e tabela de finais (motores 3–4), carregamento do motor
@@ -49,12 +49,21 @@ Dentro de um domínio, separe por papel só quando ajudar:
 domains/analysis/
 ├── index.ts              # Ponto de entrada público do domínio
 ├── model/                # Tipos e regras puras (classificação, momentos-chave)
+├── machines/             # Máquinas XState deste domínio e os atores que elas usam
 ├── workers/              # Web Workers deste domínio
 ├── hooks/                # Hooks React deste domínio
 ├── components/           # Componentes React deste domínio
 ├── fixtures/             # Dados de teste deste domínio (ex.: HTML real do Chess.com)
 └── *.test.ts(x)          # Testes ao lado do código
 ```
+
+- **Máquinas XState** ficam em `machines/` do domínio dono do fluxo (por exemplo,
+  `evaluation/machines/` para o carregamento do motor, `training/machines/` para a
+  sessão de treino). A máquina raiz, que decide a tela atual e passa os dados de
+  uma tela para a outra, fica em `app/`. Um domínio expõe a máquina pelo
+  `index.ts`, como qualquer outro código público.
+- Máquinas orquestram; não decidem regras de negócio. Guards e actions chamam
+  funções puras de `model/`, e `model/` nunca importa `xstate`.
 
 Os testes de ponta a ponta (Playwright) ficam em `apps/web/e2e/`, porque cobrem o
 fluxo entre domínios.

@@ -41,6 +41,12 @@ divergirem, o PRD vale.
   Todo recurso de outra origem (fontes, imagens, scripts) precisa de CORS ou
   `Cross-Origin-Resource-Policy`; prefira servir da própria origem. Sem isolamento
   (`crossOriginIsolated === false`), usar a versão de uma thread.
+- **Motor de regras com `chess.js`:** o motor 2 (posições em FEN, legalidade,
+  xeque, mate e afogamento) usa a biblioteca `chess.js`, com versão exata fixada no
+  `package.json`. Ela fica atrás do ponto de entrada do domínio `game`: os outros
+  domínios nunca importam `chess.js` direto. O Leitor (motor 1) é nosso: ele lê o
+  HTML do Chess.com e a lista simples de lances (notação inglesa ou portuguesa) e
+  entrega os lances em SAN inglês ao `chess.js`.
 - **A interface nunca trava:** os motores sempre rodam em Web Workers.
 - **IA trocável (D4):** padrão OpenAI GPT-5.1 com saída estruturada (JSON Schema).
   Provedor e modelo vêm de configuração, sem mudar telas nem motores. Uma camada
@@ -53,6 +59,46 @@ divergirem, o PRD vale.
 - **Nada é salvo (D2):** a análise existe só enquanto a página está aberta. Só o
   nível escolhido fica no armazenamento local.
 - **Cor do jogador (D5):** sempre escolhida pelo jogador, sem valor padrão.
+
+## Estado do frontend: XState 5
+
+O estado da aplicação no frontend é controlado com **XState 5** (`xstate` e
+`@xstate/react`). O fluxo do produto já é uma máquina de estados (Colar →
+Analisando → Resultado ⇄ Treino, com cancelamento, falhas e novas tentativas), e as
+máquinas deixam esses estados e transições explícitos e testáveis.
+
+- **Máquina raiz (`app/`):** decide a tela atual e carrega os dados entre as telas
+  (a partida lida, a cor, o nível, as prioridades, o resultado da análise). A tela
+  mostrada é derivada do estado dessa máquina. Não há roteador de URL no MVP.
+- **Máquinas de domínio (`domains/<domínio>/machines/`):** cada fluxo com estados
+  próprios tem sua máquina, por exemplo:
+  - carregamento do motor (baixando com porcentagem, pronto, falhou, tentar de
+    novo), que começa ao abrir a página (D1);
+  - tela Colar (vazio, reconhecida, formato não reconhecido, lance ilegal) e as
+    condições do botão "Analisar partida";
+  - pipeline da análise (as cinco etapas, cada uma aguardando, em andamento,
+    concluída ou com falha; cancelamento; resultado parcial);
+  - sessão de treino (tentativas, níveis de dica, solução, próximo momento).
+- **Como escrever:** cada máquina é criada com `setup({ types, actions, guards,
+  actors }).createMachine(...)`, com `context`, eventos e `input` tipados em
+  `types`. Ações, guards e atores são referenciados pelo nome declarado no
+  `setup`.
+- **Efeitos colaterais ficam em atores:** Web Workers (Stockfish, tabela de finais)
+  viram atores `fromCallback`, que repassam as mensagens do worker como eventos e
+  encerram o worker quando o ator para (assim "Cancelar análise" só precisa parar
+  o ator). Chamadas à API (`/api/...`) viram atores `fromPromise`. O
+  armazenamento local do nível fica numa ação ou ator próprio.
+- **Regras de negócio fora das máquinas:** guards e ações chamam funções puras de
+  `model/`. A máquina orquestra; ela não calcula material, momento-chave nem tipo
+  de erro.
+- **React:** a máquina raiz é exposta com `createActorContext` do `@xstate/react`.
+  Os componentes leem só a fatia de que precisam com seletores e mudam o estado
+  enviando eventos. Não use `useState`, `useReducer`, Context próprio nem outra
+  biblioteca de estado para estado de fluxo; `useState` serve só para detalhes
+  visuais locais de um componente (hover, menu aberto).
+- **Testes:** as máquinas são testadas sem React, com `createActor` e
+  `machine.provide()` para trocar workers, rede e armazenamento por versões falsas
+  (ver `docs/engineering/quality.md`).
 
 ## Privacidade
 

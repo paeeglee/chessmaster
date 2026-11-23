@@ -43,6 +43,11 @@
   origem ativos. Os critérios de aceite dos PRDs são a base desses testes.
 - Testes de componentes buscam elementos pelo papel e pelo texto acessível
   (`getByRole`, `getByLabelText`), como o usuário vê, e não por classes CSS.
+- **Máquinas XState** são testadas no Vitest sem React: crie o ator com
+  `createActor(machine)`, envie eventos e verifique `actor.getSnapshot()` (estado e
+  `context`). Workers, rede e armazenamento local são trocados por atores e ações
+  falsos com `machine.provide({ actors, actions })`. Toda transição citada num
+  critério de aceite tem teste.
 
 ### Backend
 
@@ -68,4 +73,8 @@
 ### Dados de teste
 
 - Use partidas reais como fixtures, guardadas no domínio que as usa (`fixtures/`).
-- A partida de 72 lances do `general.md` é a partida de referência principal.
+- A partida de 72 lances do `general.md` é a partida de referência principal. O
+  HTML real do Chess.com dela está em
+  `apps/web/src/domains/game/fixtures/reference-game.chesscom.html` (144
+  meios-lances, 0-1, termina em 72...Ta6#). Não edite esse arquivo: ele é a cópia
+  fiel do que o jogador cola, incluindo o texto extra da aba de aberturas.
