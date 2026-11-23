@@ -100,7 +100,7 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Adapters tested without network
+- [x] Adapters tested without network
 
 **Tests**: unit
 **Gate**: quick
