@@ -91,23 +91,23 @@ The Result and Training screens need plain-language Portuguese texts written fro
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| EXP-01 | Explain | Design | Pending |
-| EXP-02 | Explain | Design | Pending |
-| EXP-03 | Explain | Design | Pending |
-| EXP-04 | Explain | Design | Pending |
-| EXP-05 | Verify | Design | Pending |
-| EXP-06 | Verify | Design | Pending |
-| EXP-07 | Verify | Design | Pending |
-| EXP-08 | Verify | Design | Pending |
-| EXP-09 | Verify | Design | Pending |
-| EXP-10 | Ask | Design | Pending |
-| EXP-11 | Ask | Design | Pending |
-| EXP-12 | Provider | Design | Pending |
-| EXP-13 | Provider | Design | Pending |
-| EXP-14 | Provider | Design | Pending |
-| EXP-15 | Edge | Design | Pending |
+| EXP-01 | Explain | Tasks | Implementing |
+| EXP-02 | Explain | Tasks | Implementing |
+| EXP-03 | Explain | Tasks | Implementing |
+| EXP-04 | Explain | Tasks | Implementing |
+| EXP-05 | Verify | Tasks | Implementing |
+| EXP-06 | Verify | Tasks | Implementing |
+| EXP-07 | Verify | Tasks | Implementing |
+| EXP-08 | Verify | Tasks | Implementing |
+| EXP-09 | Verify | Tasks | Implementing |
+| EXP-10 | Ask | Tasks | Implementing |
+| EXP-11 | Ask | Tasks | Implementing |
+| EXP-12 | Provider | Tasks | Implementing |
+| EXP-13 | Provider | Tasks | Implementing |
+| EXP-14 | Provider | Tasks | Implementing |
+| EXP-15 | Edge | Tasks | Implementing |
 
-**Coverage:** 15 total, 0 mapped to tasks, 15 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 15 total, 15 mapped to tasks (T1–T4), 0 unmapped
 
 ---
 

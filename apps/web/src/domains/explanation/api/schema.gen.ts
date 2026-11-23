@@ -21,10 +21,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/explanations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Explain Game */
+        post: operations["explain_game_api_explanations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Answer Question */
+        post: operations["answer_question_api_questions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * GameContract
+         * @description Tudo o que a IA pode afirmar sobre a partida.
+         */
+        GameContract: {
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "beginner" | "intermediate" | "advanced";
+            /** Priorities */
+            priorities: ("lost-pieces" | "endgames" | "opening" | "plan")[];
+            /**
+             * Player Color
+             * @enum {string}
+             */
+            player_color: "w" | "b";
+            /** Result */
+            result: ("1-0" | "0-1" | "1/2-1/2") | null;
+            /** Termination */
+            termination: ("checkmate" | "stalemate") | null;
+            /**
+             * Outcome For Player
+             * @enum {string}
+             */
+            outcome_for_player: "win" | "loss" | "draw" | "unknown";
+            /** Total Moves */
+            total_moves: number;
+            /** Moves */
+            moves: components["schemas"]["MoveFact"][];
+            /** Material Timeline */
+            material_timeline: number[];
+            advantage_started_at: components["schemas"]["MoveRef"] | null;
+            /** Key Moments */
+            key_moments: components["schemas"]["KeyMomentFact"][];
+            /** Opponent Mistakes */
+            opponent_mistakes: components["schemas"]["OpponentMistakeFact"][];
+            /** Strengths */
+            strengths: components["schemas"]["StrengthFact"][];
+            /** Patterns */
+            patterns: components["schemas"]["PatternFact"][];
+        };
+        /**
+         * GameExplanation
+         * @description Resposta da IA para a tela Resultado, sempre neste formato.
+         */
+        GameExplanation: {
+            /**
+             * Verdict
+             * @description Manchete de no máximo 30 palavras
+             */
+            verdict: string;
+            /**
+             * Patterns Sentence
+             * @description Cita no máximo 2 padrões
+             */
+            patterns_sentence: string;
+            /** Key Moments */
+            key_moments: components["schemas"]["KeyMomentText"][];
+            /** Strengths */
+            strengths: components["schemas"]["StrengthText"][];
+            /**
+             * Next Game Habit
+             * @description Uma frase acionável ligada aos padrões
+             */
+            next_game_habit: string;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
         /** HealthResponse */
         HealthResponse: {
             /**
@@ -32,6 +138,141 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** KeyMomentFact */
+        KeyMomentFact: {
+            /** Ply */
+            ply: number;
+            /** Move Label */
+            move_label: string;
+            /**
+             * Mistake Type
+             * @enum {string}
+             */
+            mistake_type: "hanging-piece" | "defender-moved" | "other";
+            lost_piece: components["schemas"]["PieceOnSquare"] | null;
+            /**
+             * Best Move
+             * @description Melhor lance do motor em notação portuguesa
+             */
+            best_move: string | null;
+            /**
+             * Loss
+             * @description Pontos de material perdidos em relação ao melhor lance
+             */
+            loss: number;
+        };
+        /** KeyMomentText */
+        KeyMomentText: {
+            /** Ply */
+            ply: number;
+            /**
+             * Summary
+             * @description Uma frase curta para a lista
+             */
+            summary: string;
+            /**
+             * Explanation
+             * @description Até 3 frases, com casas e lances concretos
+             */
+            explanation: string;
+        };
+        /** MoveFact */
+        MoveFact: {
+            /** Ply */
+            ply: number;
+            /**
+             * Label
+             * @description Lance com número, em notação portuguesa: "22...Ta7"
+             */
+            label: string;
+            /**
+             * San
+             * @description Lance em notação portuguesa sem número: "Ta7"
+             */
+            san: string;
+        };
+        /** MoveRef */
+        MoveRef: {
+            /** Ply */
+            ply: number;
+            /** Label */
+            label: string;
+        };
+        /** OpponentMistakeFact */
+        OpponentMistakeFact: {
+            /** Ply */
+            ply: number;
+            /** Move Label */
+            move_label: string;
+            lost_piece: components["schemas"]["PieceOnSquare"] | null;
+            /** Loss */
+            loss: number;
+        };
+        /** PatternFact */
+        PatternFact: {
+            /**
+             * Mistake Type
+             * @enum {string}
+             */
+            mistake_type: "hanging-piece" | "defender-moved" | "other";
+            /** Count */
+            count: number;
+            /** Move Labels */
+            move_labels: string[];
+        };
+        /** PieceOnSquare */
+        PieceOnSquare: {
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "p" | "n" | "b" | "r" | "q" | "k";
+            /** Square */
+            square: string;
+        };
+        /** QuestionAnswer */
+        QuestionAnswer: {
+            /** Answer */
+            answer: string;
+            /** In Scope */
+            in_scope: boolean;
+        };
+        /** QuestionRequest */
+        QuestionRequest: {
+            game: components["schemas"]["GameContract"];
+            /** Question */
+            question: string;
+        };
+        /** StrengthFact */
+        StrengthFact: {
+            /** Ply */
+            ply: number;
+            /** Move Label */
+            move_label: string;
+            won_piece: components["schemas"]["PieceOnSquare"] | null;
+            /** Gain */
+            gain: number;
+        };
+        /** StrengthText */
+        StrengthText: {
+            /** Ply */
+            ply: number;
+            /** Text */
+            text: string;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
     };
     responses: never;
@@ -59,6 +300,100 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
                 };
+            };
+        };
+    };
+    explain_game_api_explanations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GameContract"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameExplanation"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A IA citou algo fora do contrato mesmo depois de nova tentativa. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A IA está indisponível (provedor, chave ou rede). */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    answer_question_api_questions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionAnswer"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A IA citou algo fora do contrato mesmo depois de nova tentativa. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A IA está indisponível (provedor, chave ou rede). */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
