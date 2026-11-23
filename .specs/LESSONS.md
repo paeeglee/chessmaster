@@ -114,6 +114,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: apps/web/vite.config.ts:43-48 analysis/model branches 88.57% (tooling)
 - last seen: 2026-11-23T17:00:09Z
 
+### L-018 - Verify each hand-made chess test position with the rules engine before relying on what it claims
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-model
+- evidence: M21 round 2 apps/web/src/domains/analysis/model/classify.test.ts:294-310 (AN-08) (domain-model)
+- last seen: 2026-11-23T17:04:33Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

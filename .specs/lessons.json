@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 18,
+  "next_id": 19,
   "lessons": [
     {
       "id": "L-001",
@@ -312,6 +312,24 @@
       ],
       "created": "2026-11-23T17:00:09Z",
       "last_seen": "2026-11-23T17:00:09Z"
+    },
+    {
+      "id": "L-018",
+      "key": "surviving_mutant::verify each hand made chess test position with the rules engine before relying on what it claims",
+      "text": "Verify each hand-made chess test position with the rules engine before relying on what it claims",
+      "signal": "surviving_mutant",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-model"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M21 round 2 apps/web/src/domains/analysis/model/classify.test.ts:294-310 (AN-08) (domain-model)"
+      ],
+      "created": "2026-11-23T17:04:33Z",
+      "last_seen": "2026-11-23T17:04:33Z"
     }
   ]
 }
