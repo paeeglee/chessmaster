@@ -120,7 +120,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Reference game replays to 144 plies with the asserted plies 24, 44 and 144
+- [x] Reference game replays to 144 plies with the asserted plies 24, 44 and 144
 
 **Tests**: unit
 **Gate**: quick
