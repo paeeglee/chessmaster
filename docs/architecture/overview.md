@@ -70,6 +70,13 @@ máquinas deixam esses estados e transições explícitos e testáveis.
 - **Máquina raiz (`app/`):** decide a tela atual e carrega os dados entre as telas
   (a partida lida, a cor, o nível, as prioridades, o resultado da análise). A tela
   mostrada é derivada do estado dessa máquina. Não há roteador de URL no MVP.
+- **Tela Colar (F3):** o `appMachine` invoca o `gameInputMachine` (domínio
+  `game-input`) no estado `gameInput`, passando o rascunho salvo (texto, cor, nível,
+  prioridades). A cada mudança o filho envia `GAME_INPUT.DRAFT_SAVED` ao pai, e ao
+  analisar envia `ANALYSIS.REQUESTED` com a partida reproduzida e as escolhas. Por
+  isso, cancelar a análise volta à tela com tudo preenchido. O que a tela mostra
+  (formato, lances legais, resultado) é derivado do texto por funções puras
+  (`inspectGame`), sem guardar cópia na máquina.
 - **Máquinas de domínio (`domains/<domínio>/machines/`):** cada fluxo com estados
   próprios tem sua máquina, por exemplo:
   - carregamento do motor (baixando com porcentagem, pronto, falhou, tentar de

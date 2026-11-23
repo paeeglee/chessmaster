@@ -5,13 +5,20 @@ import {
   EngineStatus,
   type engineLoaderMachine,
 } from "../domains/evaluation";
-import { AppMachineContext } from "./AppMachineContext";
+import type { EngineState } from "../domains/game-input";
 
-type EngineLoaderRef = ActorRefFrom<typeof engineLoaderMachine>;
+export type EngineLoaderRef = ActorRefFrom<typeof engineLoaderMachine>;
 
-function ConnectedEngineStatus({ engineRef }: { engineRef: EngineLoaderRef }) {
+/** Estado do motor (carregando com %, pronto, falhou) para as telas. */
+export function useEngineState(engineRef: EngineLoaderRef): EngineState {
   const status = useSelector(engineRef, (snapshot) => snapshot.value as EngineLoaderStatus);
   const percent = useSelector(engineRef, (snapshot) => snapshot.context.percent);
+  return { status, percent };
+}
+
+/** Linha de estado do motor invocado pela máquina raiz. */
+export function EngineIndicator({ engineRef }: { engineRef: EngineLoaderRef }) {
+  const { status, percent } = useEngineState(engineRef);
   return (
     <EngineStatus
       status={status}
@@ -19,10 +26,4 @@ function ConnectedEngineStatus({ engineRef }: { engineRef: EngineLoaderRef }) {
       onRetry={() => engineRef.send({ type: "RETRY" })}
     />
   );
-}
-
-/** Mostra o estado do motor invocado pela máquina raiz. */
-export function EngineIndicator() {
-  const engineRef = AppMachineContext.useSelector((snapshot) => snapshot.children.engine);
-  return engineRef ? <ConnectedEngineStatus engineRef={engineRef} /> : null;
 }
