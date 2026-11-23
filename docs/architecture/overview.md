@@ -78,7 +78,8 @@ divergirem, o PRD vale.
   capturada nessa linha. "Defensor saiu": o lance tirou o único defensor dela; "peça
   atacada": ela já estava atacada e ficou no lugar; senão, "outro". A mesma regra nos
   lances do adversário gera a tag "Adversário"; ganhos de 2 pontos ou mais do
-  jogador viram "O que você fez bem". Na partida de referência isso dá 22...Ta7,
+  jogador viram "O que você fez bem", medidos a partir de antes do lance anterior do
+  adversário (recapturar numa troca não é ganho). Na partida de referência isso dá 22...Ta7,
   27...Tb7, 41...Ta1, 43...Te6 e 56...Ta8 (fixture de avaliações em
   `domains/analysis/fixtures/`, gerado por `scripts/evaluate-fixture.mjs`).
 - **Nada é salvo (D2):** a análise existe só enquanto a página está aberta. Só o
@@ -112,6 +113,14 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   (`explaining`). Se a IA falhar, o resultado segue com `aiFailed: true`. Cancelar
   para o ator, que manda `stop` ao motor e rejeita a fila (`EngineClient.cancel`).
   Ao terminar, o `appMachine` vai para `review` com o `AnalysisResult`.
+- **Resultado (F7):** no estado `review`, o `appMachine` invoca o `reviewMachine`
+  (domínio `review`) com o `AnalysisResult`. Ele tem regiões paralelas: `board`
+  (posição mostrada, orientação, momento aberto e a linha do motor andando a cada
+  600 ms), `questions` ("Pergunte à IA", ator `askQuestion` → `POST /api/questions`),
+  `explanation` (nova tentativa do texto da IA com `AI.RETRY` quando ele falhou) e
+  `newGame` (confirmação de "Analisar outra partida"). "Treinar" manda
+  `TRAINING.REQUESTED` com o meio-lance do momento; "Analisar outra partida" manda
+  `REVIEW.NEW_GAME`, que volta à tela Colar com o campo vazio e o nível mantido.
 - **Máquinas de domínio (`domains/<domínio>/machines/`):** cada fluxo com estados
   próprios tem sua máquina, por exemplo:
   - carregamento do motor (baixando com porcentagem, pronto, falhou, tentar de

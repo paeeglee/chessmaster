@@ -18,6 +18,9 @@ export type MistakeVerdict = {
   bestMoveSan: string | null;
   mistakeType: MistakeType;
   lostPiece: PieceOnSquare | null;
+  /** Saldo de material do jogador antes do lance e no fim da linha de capturas. */
+  materialBefore: number;
+  materialAfter: number;
 };
 
 export type StrengthVerdict = {

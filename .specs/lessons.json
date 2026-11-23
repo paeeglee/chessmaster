@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 37,
+  "next_id": 40,
   "lessons": [
     {
       "id": "L-001",
@@ -654,6 +654,60 @@
       ],
       "created": "2026-11-23T22:09:40Z",
       "last_seen": "2026-11-23T22:09:40Z"
+    },
+    {
+      "id": "L-037",
+      "key": "surviving_mutant::assert the payload of every event a button sends such as the target ply not only the event type",
+      "text": "Assert the payload of every event a button sends, such as the target ply, not only the event type",
+      "signal": "surviving_mutant",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "review-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M11+M12 / apps/web/src/domains/review/components/ReviewScreen.test.tsx:129-134 (RV-12) (web-tests)"
+      ],
+      "created": "2026-11-23T22:42:19Z",
+      "last_seen": "2026-11-23T22:42:19Z"
+    },
+    {
+      "id": "L-038",
+      "key": "surviving_mutant::when a requirement lists several entry points for the same action test each entry point and assert the full synced outcome",
+      "text": "When a requirement lists several entry points for the same action, test each entry point and assert the full synced outcome",
+      "signal": "surviving_mutant",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "review-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M15 / apps/web/src/domains/review/components/MoveList.tsx:50 (RV-10) (web-tests)"
+      ],
+      "created": "2026-11-23T22:42:19Z",
+      "last_seen": "2026-11-23T22:42:19Z"
+    },
+    {
+      "id": "L-039",
+      "key": "spec_precision_gap::assert concrete fixture values instead of recomputing the expected value with the implementation formula",
+      "text": "Assert concrete fixture values instead of recomputing the expected value with the implementation formula",
+      "signal": "spec_precision_gap",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "review-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "RV-02 / apps/web/src/domains/review/model/review.test.ts:45 (web-tests)"
+      ],
+      "created": "2026-11-23T22:42:19Z",
+      "last_seen": "2026-11-23T22:42:19Z"
     }
   ]
 }

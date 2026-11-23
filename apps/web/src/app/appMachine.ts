@@ -9,6 +9,7 @@ import {
   gameInputMachine,
   initialLevel,
 } from "../domains/game-input";
+import { type ReviewParentEvent, reviewMachine } from "../domains/review";
 
 export type AppContext = {
   /** O que o jogador preencheu na tela Colar; volta intacto ao cancelar a análise. */
@@ -17,12 +18,15 @@ export type AppContext = {
   /** O motor pronto, guardado ao começar a análise. */
   engine: EngineClient | null;
   result: AnalysisResult | null;
+  /** Meio-lance do momento-chave em treino. */
+  trainingPly: number | null;
 };
 
 export type AppEvent =
   | GameInputParentEvent
   | { type: "ANALYSIS.CANCELLED" }
-  | { type: "REVIEW.NEW_GAME" };
+  | ReviewParentEvent
+  | { type: "TRAINING.BACK" };
 
 type EngineChild = { getSnapshot(): { value: unknown; context: { engine: EngineClient | null } } };
 
@@ -38,12 +42,18 @@ export const appMachine = setup({
   types: {
     context: {} as AppContext,
     events: {} as AppEvent,
-    children: {} as { engine: "engineLoader"; gameInput: "gameInput"; analysis: "analysis" },
+    children: {} as {
+      engine: "engineLoader";
+      gameInput: "gameInput";
+      analysis: "analysis";
+      review: "review";
+    },
   },
   actors: {
     engineLoader: engineLoaderMachine,
     gameInput: gameInputMachine,
     analysis: analysisMachine,
+    review: reviewMachine,
   },
 }).createMachine({
   id: "app",
@@ -52,6 +62,7 @@ export const appMachine = setup({
     request: null,
     engine: null,
     result: null,
+    trainingPly: null,
   }),
   invoke: { id: "engine", src: "engineLoader" },
   initial: "gameInput",
@@ -96,7 +107,16 @@ export const appMachine = setup({
       },
     },
     review: {
+      invoke: {
+        id: "review",
+        src: "review",
+        input: ({ context }) => context.result as AnalysisResult,
+      },
       on: {
+        "TRAINING.REQUESTED": {
+          target: "training",
+          actions: assign({ trainingPly: ({ event }) => event.ply }),
+        },
         // R-13: nova análise com o campo vazio; nível e prioridades continuam.
         "REVIEW.NEW_GAME": {
           target: "gameInput",
@@ -106,6 +126,11 @@ export const appMachine = setup({
             result: null,
           }),
         },
+      },
+    },
+    training: {
+      on: {
+        "TRAINING.BACK": { target: "review", actions: assign({ trainingPly: null }) },
       },
     },
   },

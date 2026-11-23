@@ -13,6 +13,7 @@ export {
   defendersOf,
   isAttackedBy,
   playCaptureLine,
+  positionsAlongLine,
   uciToSan,
 } from "./model/lines";
 export { toPortugueseSan } from "./model/notation";

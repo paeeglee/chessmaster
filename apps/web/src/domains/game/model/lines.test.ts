@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defendersOf, isAttackedBy, playCaptureLine, uciToSan } from "./lines";
+import { defendersOf, isAttackedBy, playCaptureLine, positionsAlongLine, uciToSan } from "./lines";
 
 // Bispo branco em c4 atacado pelo peão d5; cavalo preto em f6 defendido por g7 e d8.
 const POSITION = "rnbqkb1r/ppp2ppp/5n2/3p4/2B5/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4";
@@ -65,5 +65,17 @@ describe("uciToSan", () => {
   it("converte UCI em SAN", () => {
     expect(uciToSan(POSITION, "c4d5")).toBe("Bxd5");
     expect(uciToSan(POSITION, "c4c8")).toBeNull();
+  });
+});
+
+describe("positionsAlongLine", () => {
+  it("devolve a posição depois de cada lance, até o limite", () => {
+    const positions = positionsAlongLine(POSITION, ["c4d5", "f6d5", "d1f3"], 2);
+    expect(positions).toHaveLength(2);
+    expect(positions[1]?.split(" ")[1]).toBe("w");
+  });
+
+  it("para no primeiro lance ilegal", () => {
+    expect(positionsAlongLine(POSITION, ["c4d5", "a1a8"], 6)).toHaveLength(1);
   });
 });

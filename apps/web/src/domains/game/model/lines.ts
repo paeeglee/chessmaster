@@ -77,3 +77,22 @@ export function uciToSan(fen: string, uci: string): string | null {
     return null;
   }
 }
+
+/** Posições depois de cada lance da linha (até `maxPlies`); para no primeiro ilegal. */
+export function positionsAlongLine(
+  fen: string,
+  line: readonly string[],
+  maxPlies: number,
+): string[] {
+  const chess = new Chess(fen);
+  const positions: string[] = [];
+  for (const uci of line.slice(0, maxPlies)) {
+    try {
+      playUci(chess, uci);
+    } catch {
+      break;
+    }
+    positions.push(chess.fen());
+  }
+  return positions;
+}

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createActor, fromCallback, fromPromise } from "xstate";
+import { createActor, createMachine, fromCallback, fromPromise } from "xstate";
 import { analysisMachine } from "../domains/analysis";
 import { engineLoaderMachine } from "../domains/evaluation";
 import { gameInputMachine } from "../domains/game-input";
@@ -180,6 +180,7 @@ describe("appMachine com a tela Colar", () => {
           analysisInput = input;
           return result as never;
         }) as never,
+        review: createMachine({}) as never,
       },
     });
     const app = createActor(logic).start();
@@ -205,6 +206,8 @@ describe("appMachine com a tela Colar", () => {
           },
         }),
         analysis: fromPromise(async () => ({}) as never) as never,
+        // A tela Resultado é testada no domínio review; aqui ela só fica parada.
+        review: createMachine({}) as never,
       },
     });
     const app = createActor(logic).start();
@@ -222,5 +225,32 @@ describe("appMachine com a tela Colar", () => {
       playerColor: null,
       level: "advanced",
     });
+  });
+
+  it("leva ao treino de um momento e volta ao resultado (RV-12)", async () => {
+    const logic = appMachine.provide({
+      actors: {
+        engineLoader: engineLoaderMachine.provide({
+          actors: {
+            loadEngine: fromCallback(({ sendBack }) => {
+              sendBack({ type: "ENGINE.READY", engine: {} as never });
+            }),
+          },
+        }),
+        analysis: fromPromise(async () => ({}) as never) as never,
+        review: createMachine({}) as never,
+      },
+    });
+    const app = createActor(logic).start();
+    gameInput(app).send({ type: "TEXT.CHANGED", text: GAME });
+    gameInput(app).send({ type: "COLOR.SELECTED", color: "b" });
+    gameInput(app).send({ type: "ANALYZE", engine: READY });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    app.send({ type: "TRAINING.REQUESTED", ply: 86 });
+    expect(app.getSnapshot().value).toBe("training");
+    expect(app.getSnapshot().context.trainingPly).toBe(86);
+    app.send({ type: "TRAINING.BACK" });
+    expect(app.getSnapshot().value).toBe("review");
+    expect(app.getSnapshot().context.trainingPly).toBeNull();
   });
 });

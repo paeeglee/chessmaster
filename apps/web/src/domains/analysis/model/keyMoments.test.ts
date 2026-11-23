@@ -17,6 +17,8 @@ function mistake(
     bestMoveSan: null,
     mistakeType,
     lostPiece: null,
+    materialBefore: 0,
+    materialAfter: 0,
   };
 }
 
@@ -43,6 +45,8 @@ describe("selectKeyMoments (AN-14)", () => {
         bestMoveSan: null,
         mistakeType: "other",
         lostPiece: null,
+        materialBefore: 0,
+        materialAfter: 0,
       },
     ];
     expect(selectKeyMoments(verdicts).map((moment) => moment.ply)).toEqual([2, 4, 6, 8, 12]);
@@ -107,6 +111,8 @@ describe("findingText (AN-15)", () => {
         bestMoveSan: "Bb2",
         mistakeType: "other",
         lostPiece: { type: "r", square: "a1" },
+        materialBefore: 0,
+        materialAfter: 0,
       }),
     ).toBe("o adversário deixou a torre em a1 ser capturada");
   });

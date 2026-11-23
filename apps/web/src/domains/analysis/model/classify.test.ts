@@ -73,6 +73,8 @@ describe("classifyGame com a partida de referência (pretas)", () => {
       bestMoveSan: "Bd4+",
       mistakeType: "hanging-piece",
       lostPiece: { type: "b", square: "a1" },
+      materialBefore: 9,
+      materialAfter: 6,
     });
   });
 
@@ -388,6 +390,23 @@ describe("classifyMove com posições feitas à mão", () => {
       loss: 3,
       lostPiece: { type: "n", square: "e4" },
     });
+  });
+
+  it("não conta recaptura numa troca como ponto forte (R-10)", () => {
+    // Antes: T+C brancos contra B preto (+5). As pretas tomam o cavalo com Bxd4 (+2) e
+    // Txd4 retoma o bispo (+5): troca empatada, sem ganho líquido.
+    const previousFen = "6k1/8/1b6/8/3N4/8/8/3R2K1 b - - 0 1";
+    const fen = "6k1/8/8/8/3b4/8/8/3R2K1 w - - 0 1";
+    const after = "6k1/8/8/8/3R4/8/8/6K1 b - - 0 1";
+    const input = {
+      ply: pieceMove(fen, "d1", "d4", after, "r"),
+      before: evaluation(fen, "d1d4", ["d1d4", "g8f7"]),
+      after: evaluation(after, "g8f7", ["g8f7"]),
+      playerColor: "w" as const,
+    };
+    expect(classifyMove({ ...input, previousFen }).kind).toBe("none");
+    // Sem a posição anterior, a recaptura pareceria um ganho de 3.
+    expect(classifyMove(input)).toMatchObject({ kind: "strength", gain: 3 });
   });
 
   it("não marca o lance quando a perda da partida tinha recaptura (motor confirma)", () => {

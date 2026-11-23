@@ -30,6 +30,11 @@ type ClassifyInput = {
    * recapturas seguem confirmadas pelo motor.
    */
   continuation?: readonly string[];
+  /**
+   * Posição antes do lance anterior (do adversário). O ganho de um ponto forte é medido
+   * a partir dela, para que recapturar numa troca não conte como ganho (R-10).
+   */
+  previousFen?: string;
 };
 
 function opposite(color: PlayerColor): PlayerColor {
@@ -73,6 +78,7 @@ export function classifyMove({
   after,
   playerColor,
   continuation = [],
+  previousFen,
 }: ClassifyInput): MoveVerdict {
   const mover = ply.color;
   // A pior das duas linhas para quem jogou: a do motor ou a que aconteceu na partida.
@@ -106,10 +112,12 @@ export function classifyMove({
       bestMoveSan: bestSan ? toPortugueseSan(bestSan) : null,
       mistakeType: mistakeTypeOf(ply, lostPiece),
       lostPiece,
+      materialBefore: materialBalance(ply.fenBefore, playerColor),
+      materialAfter: materialBalance(played.fen, playerColor),
     };
   }
 
-  const gain = playedMaterial - materialBefore;
+  const gain = playedMaterial - materialBalance(previousFen ?? ply.fenBefore, mover);
   if (mover === playerColor && gain >= KEY_MOMENT_THRESHOLD) {
     const captured = played.captures.find((capture) => capture.color !== mover);
     return {
@@ -144,7 +152,15 @@ export function classifyPly(
   const reply = game.plies[index];
   const afterReply = evaluations[index + 1];
   const continuation = reply && afterReply ? [uciOf(reply), ...afterReply.pv] : [];
-  return classifyMove({ ply, before, after, playerColor, continuation });
+  const previousFen = game.plies[index - 2]?.fenBefore;
+  return classifyMove({
+    ply,
+    before,
+    after,
+    playerColor,
+    continuation,
+    ...(previousFen ? { previousFen } : {}),
+  });
 }
 
 /** Classifica todos os lances da partida. */
