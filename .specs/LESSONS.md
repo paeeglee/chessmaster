@@ -216,6 +216,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md round 2 R09 R10 R11 analysisMachine.ts:112-114 (machines)
 - last seen: 2026-11-23T21:51:10Z
 
+### L-035 - Test the final flush step of an incremental pipeline separately from the per-item step
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `machines` · harmful: 0
+- features: analysis-screen
+- evidence: validation.md round 3 T05 analysisMachine.ts:115-123 (machines)
+- last seen: 2026-11-23T22:09:40Z
+
+### L-036 - Isolate e2e tests that run a time-boxed CPU-bound engine from parallel workers, or assert only results that are stable under load
+- signal: `gate_fail` · recurrence: 1 feature(s) · scope: `e2e` · harmful: 0
+- features: analysis-screen
+- evidence: validation.md round 3 E1 e2e/analysis.spec.ts:25 playwright.config.ts:10 (e2e)
+- last seen: 2026-11-23T22:09:40Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

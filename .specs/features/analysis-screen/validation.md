@@ -1,16 +1,69 @@
 # F4b · Analysis pipeline and screen Validation
 
-**Date**: 2026-11-23 (round 2)
+**Date**: 2026-11-23 (round 3)
 **Spec**: `.specs/features/analysis-screen/spec.md`
-**Diff range**: `9de6292..ec2f46c` (round 2 re-verified fixes `3e19578` and `ec2f46c`)
+**Diff range**: `9de6292..bb4d357` (round 3 re-verified `bb4d357`)
 **Verifier**: independent sub-agent (author ≠ verifier)
 
 **Verdict**: FAIL
 
-All 8 round-1 gaps are closed: both round-1 survivors are now killed, and the caption, AI warning, AS-16 and doc items are fixed. The gates are green. Round 2 found new problems:
+All round-2 gaps (N1–N3) are fixed and confirmed. Two problems remain:
 
-- **The new continuation rule has a defect.** `ec2f46c` makes classification take the worse of the engine line and the game line. A probe shows a quiet move flagged as a "Peça atacada" key moment even though the piece was defended, so the engine confirmation required by D3 is bypassed.
-- **4 new sensor survivors.** Three are in the continuation wiring and one is in the `readyok` wait.
+- **One surviving mutant (T05):** the finding for the last ply on EVALUATION.DONE is untested.
+- **The `make test-e2e` gate is not reliable:** 1 of 4 full runs failed (4 key moments instead of 5).
+
+This was the **3rd fix→re-verify iteration** (the cap in validate.md). The remaining items go to the user instead of another loop.
+
+---
+
+## Round 3 · Gate Check (HEAD `bb4d357`)
+
+- **`make check`**: exit 0. Biome clean, tsc + mypy clean, Vitest 29 files / **302 passed** (98.53% stmts, 91.86% branches), pytest 75 passed.
+- **`make test-e2e`**:
+  - First run **exit 2**. 11 passed, 1 failed (`e2e/analysis.spec.ts:25`: `toHaveCount(5)` got `4`), and the cancel test did not run (serial mode).
+  - The next 3 full runs exit 0 with 13 passed. **Full suite: 3/4 green.**
+- **`analysis.spec.ts` alone** (`--repeat-each 3 --workers 1`, both tests): **6/6 green**.
+- Likely cause: `fullyParallel: true` (`apps/web/playwright.config.ts:10`) runs the other spec files next to the analysis on this 10-CPU machine. The multi-thread 200 ms search becomes shallower, so a key moment is missed. `test.describe.configure({ mode: "serial" })` only serializes inside the file. The artifact of the failed run was overwritten, so which moment was missed was not recorded.
+- Ports 4173/8000 were free before and after.
+
+## Round 3 · Round-2 gaps re-checked
+
+| Round-2 gap | Fix evidence | Result |
+| ----------- | ------------ | ------ |
+| N1 continuation false positive | `apps/web/src/domains/analysis/model/classify.ts` `classifyPly`: continuation = `[uciOf(reply), ...evaluations[index + 1].pv]`; the probe is a regression test in `apps/web/src/domains/analysis/model/classify.test.ts:393-407` (`expect(verdict.kind).toBe("none")`); `classifyGame` test at `classify.test.ts:411-418` (altered PV → still `mistake` 22...Ta7; without the post-reply evaluation → `none`). Spec AS-03 + assumption updated and marked **needs product confirmation** | ✅ (T01, T02, T03, T07 killed) |
+| N2 `readyok` wait | `apps/web/src/domains/evaluation/engine/EngineClient.test.ts:228-262` - the fake answers `stop` with a late `bestmove h2h3` before `readyok`; the next evaluate resolves `bestMove: "e2e4"` | ✅ (T08 killed) |
+| N3 continuation wiring | Machine uses `classifyPly` (`apps/web/src/domains/analysis/machines/analysisMachine.ts:100-105`); test `apps/web/src/domains/analysis/machines/analysisMachine.test.ts:159-183` (altered PV at index 44 → finding "22...Ta7?" and first key moment 22...Ta7) | ✅ (T04, T06 killed) |
+
+AS-03 evidence was updated to the new timing: `analysisMachine.test.ts:87-96` (engine hangs at 46, findings ⊇ "Erro 22...Ta7?", all `ply <= 44`) and `AnalyzingScreen.test.tsx:125-131` (`evaluateUpTo(46)`).
+
+## Round 3 · Discrimination Sensor (fresh scratch `f4b-sensor3` at `bb4d357`)
+
+| # | Target | Mutation | Killed? |
+| - | ------ | -------- | ------- |
+| T01 | `classify.ts` `classifyPly` | drop the actual reply (PV-after only) | ✅ |
+| T02 | `classifyPly` | reply without the PV after it | ✅ |
+| T03 | `classifyPly` | reply + raw game continuation (round-2 rule) | ✅ |
+| T04 | `analysisMachine.ts:103` | classify ply k at position k (not k+1) | ✅ |
+| T05 | `analysisMachine.ts:122` | last ply not classified on EVALUATION.DONE | ❌ **Survived** |
+| T06 | `analysisMachine.ts:100-105` | machine uses `classifyMove` without continuation | ✅ |
+| T07 | `classify.ts:81` | better line for the mover chosen | ✅ |
+| T08 | `EngineClient.ts:106` | `isready` not awaited (round-2 R06) | ✅ |
+| T09 | `AnalyzingScreen.tsx:28` | last-move marks removed (M29) | ✅ |
+| T10 | `contract.ts:28` | `>=` → `>` (M17) | ✅ |
+
+**Result**: 9/10 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; the real tree's `git status --porcelain` matches the baseline (empty).
+
+## Round 3 · Remaining gaps (escalated to the user, iteration cap reached)
+
+1. **E1 - `make test-e2e` is flaky under the parallel suite (Major for the gate).** 1 of 4 full runs failed with 4 key moments. Options, pick one:
+   - (a) Put `analysis.spec.ts` in its own Playwright project that runs after the others (`dependencies`) with `workers: 1`, or give the reference-game test the machine alone.
+   - (b) Keep the parallel run but assert what is stable: "22...Ta7?" first, at least 4 key moments, and the key moments equal to the classification of the evaluations the browser actually computed.
+   - (c) Accept a longer `movetime` in e2e only.
+
+   It is also a product signal: under CPU load the same game can give 4 or 5 key moments (D1 accepts non-determinism; consider stating it in step_02 §5 "Computador lento").
+2. **E2 - Last-ply finding untested (T05 survived, Minor).** `apps/web/src/domains/analysis/machines/analysisMachine.ts:115-123`. Key moments are unaffected (the summary uses `classifyGame`), but a mistake on the last ply would never reach "Já encontrado". Fix: a machine test with a short game whose last ply is a mistake (or a fake evaluation that makes it one), asserting the finding after `EVALUATION.DONE`.
+3. **E3 - Residual risk, not verified (no fix required now).** The UCI protocol says `isready` must be answered "also when the engine is calculating". Real Stockfish may therefore send `readyok` before the late `bestmove` of the stopped search. The new fake models the friendly order only. A sturdier sync would wait for the stopped search's `bestmove` (when a search was running) before `readyok`/the next `go`.
+4. **E4 - Product confirmation pending.** The played-line rule (spec assumption "Played line robustness", `Confirmed? n`) changes how D3 is measured.
 
 ---
 

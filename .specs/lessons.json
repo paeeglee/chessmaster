@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 35,
+  "next_id": 37,
   "lessons": [
     {
       "id": "L-001",
@@ -618,6 +618,42 @@
       ],
       "created": "2026-11-23T21:51:10Z",
       "last_seen": "2026-11-23T21:51:10Z"
+    },
+    {
+      "id": "L-035",
+      "key": "surviving_mutant::test the final flush step of an incremental pipeline separately from the per item step",
+      "text": "Test the final flush step of an incremental pipeline separately from the per-item step",
+      "signal": "surviving_mutant",
+      "scope": "machines",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 3 T05 analysisMachine.ts:115-123 (machines)"
+      ],
+      "created": "2026-11-23T22:09:40Z",
+      "last_seen": "2026-11-23T22:09:40Z"
+    },
+    {
+      "id": "L-036",
+      "key": "gate_fail::isolate e2e tests that run a time boxed cpu bound engine from parallel workers or assert only results that are stable under load",
+      "text": "Isolate e2e tests that run a time-boxed CPU-bound engine from parallel workers, or assert only results that are stable under load",
+      "signal": "gate_fail",
+      "scope": "e2e",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 3 E1 e2e/analysis.spec.ts:25 playwright.config.ts:10 (e2e)"
+      ],
+      "created": "2026-11-23T22:09:40Z",
+      "last_seen": "2026-11-23T22:09:40Z"
     }
   ]
 }
