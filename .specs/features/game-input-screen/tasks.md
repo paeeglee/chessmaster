@@ -79,7 +79,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Every rule tested with exact strings
+- [x] Every rule tested with exact strings
 
 **Tests**: unit
 **Gate**: quick
