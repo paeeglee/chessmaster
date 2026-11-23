@@ -10,7 +10,9 @@ import {
   hintText,
   outcomeOf,
   principleFor,
+  refutationFen,
   solutionLabel,
+  squareClick,
   statementFor,
   summaryText,
   wrongFeedback,
@@ -162,5 +164,70 @@ describe("exerciseMarks", () => {
       a1: "last",
     });
     expect(exerciseMarks({ ...base, showSolution: true })).toEqual({ a1: "green", d4: "green" });
+  });
+});
+
+describe("squareClick (T-02)", () => {
+  it("seleciona, troca a seleção, joga e limpa", () => {
+    expect(squareClick(fen, null, "a1")).toMatchObject({ kind: "select", square: "a1" });
+    expect(squareClick(fen, "a1", "e8")).toMatchObject({ kind: "select", square: "e8" });
+    expect(squareClick(fen, "a1", "d4")).toMatchObject({ kind: "move", move: { san: "Bd4+" } });
+    expect(squareClick(fen, "a1", "a1")).toEqual({ kind: "clear" });
+    expect(squareClick(fen, null, "e5")).toEqual({ kind: "clear" });
+    // Peça do adversário não é selecionada; destino ilegal com seleção limpa.
+    expect(squareClick(fen, null, "h1")).toEqual({ kind: "clear" });
+    expect(squareClick(fen, "a1", "a3")).toEqual({ kind: "clear" });
+  });
+});
+
+describe("casos de borda do motor", () => {
+  it("sem variante: aceita e não mostra resposta nem refutação", () => {
+    const move = attempt("a1", "b2");
+    const checked = checkAttempt(exercise, move, evaluation(move.fen, []));
+    expect(checked).toMatchObject({
+      accepted: true,
+      replyLabel: null,
+      replyUci: null,
+      continuation: [],
+    });
+    expect(refutationFen(checked, move.fen)).toBeNull();
+  });
+
+  it("refutação ilegal não muda o tabuleiro", () => {
+    const move = attempt("e8", "e6");
+    const checked = checkAttempt(exercise, move, evaluation(move.fen, ["h1a1"]));
+    expect(refutationFen(checked, move.fen)).toMatch(
+      /^r7\/5kpp\/p1p1rn2\/8\/1Pp1pPbP\/P5N1\/3B1KP1\/R7 b/,
+    );
+    expect(refutationFen({ ...checked, replyUci: "a1a8" }, move.fen)).toBeNull();
+  });
+
+  it("sem melhor lance (ou ilegal) não há solução", () => {
+    expect(
+      solutionLabel({ ...exercise, before: { ...exercise.before, bestMove: null } }),
+    ).toBeNull();
+    expect(
+      solutionLabel({ ...exercise, before: { ...exercise.before, bestMove: "a1a8" } }),
+    ).toBeNull();
+  });
+
+  it("promoção vira o lance do exercício com a peça promovida", () => {
+    // Exercício artificial: peão branco em e7 a promover.
+    const promoFen = "8/4P3/8/8/8/8/k7/4K3 w - - 0 1";
+    const promo = {
+      ...exercise,
+      playerColor: "w" as const,
+      ply: { ...exercise.ply, color: "w" as const, fenBefore: promoFen },
+      before: evaluation(promoFen, ["e7e8q"]),
+    };
+    const move = playMove(promoFen, "e7", "e8");
+    if (!move) throw new Error("promoção ilegal");
+    const checked = checkAttempt(promo, move, evaluation(move.fen, ["a2b3"]));
+    expect(checked).toMatchObject({ accepted: true, label: "22.e8=D" });
+  });
+
+  it("dica de peça no feminino", () => {
+    const rook = exerciseFor(result, 86);
+    expect(hintText(rook, 2)).toBe("A torre pode sair dali ou ser protegida.");
   });
 });
