@@ -1,5 +1,7 @@
+import type { ComponentProps } from "react";
 import { AppHeader } from "./AppHeader";
 import { AppMachineContext } from "./AppMachineContext";
+import { EngineIndicator } from "./EngineIndicator";
 
 function CurrentScreen() {
   const screen = AppMachineContext.useSelector((snapshot) => snapshot.value);
@@ -21,12 +23,18 @@ function CurrentScreen() {
   }
 }
 
-export function App() {
+type AppProps = {
+  /** Permite aos testes trocar atores (worker, rede) com `appMachine.provide(...)`. */
+  logic?: ComponentProps<typeof AppMachineContext.Provider>["logic"];
+};
+
+export function App({ logic }: AppProps) {
   return (
-    <AppMachineContext.Provider>
+    <AppMachineContext.Provider {...(logic ? { logic } : {})}>
       <div className="min-h-full font-sans text-ink">
         <AppHeader />
         <main className="mx-auto flex max-w-[1240px] flex-col gap-6 px-8 pt-8 pb-12">
+          <EngineIndicator />
           <CurrentScreen />
         </main>
       </div>

@@ -123,7 +123,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Machine transitions tested with a fake loader actor; component texts tested
+- [x] Machine transitions tested with a fake loader actor; component texts tested
 
 **Tests**: unit
 **Gate**: quick

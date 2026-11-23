@@ -2,8 +2,25 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { fromCallback } from "xstate";
+import { engineLoaderMachine } from "../domains/evaluation";
 import { server } from "../shared/lib/testing/server";
 import { App } from "./App";
+import { appMachine } from "./appMachine";
+
+function appWithEngine(outcome: "ENGINE.FAILED" | { type: "ENGINE.PROGRESS"; percent: number }) {
+  return appMachine.provide({
+    actors: {
+      engineLoader: engineLoaderMachine.provide({
+        actors: {
+          loadEngine: fromCallback(({ sendBack }) => {
+            sendBack(outcome === "ENGINE.FAILED" ? { type: "ENGINE.FAILED" } : outcome);
+          }),
+        },
+      }),
+    },
+  });
+}
 
 describe("App", () => {
   it("mostra a marca do produto no cabeçalho", () => {
@@ -54,5 +71,16 @@ describe("App", () => {
       const source = readFileSync(join(dir, file), "utf8");
       expect(source, file).not.toMatch(literalToken);
     }
+  });
+
+  it("mostra o progresso do motor ao abrir a página (EVAL-05, EVAL-06)", () => {
+    render(<App logic={appWithEngine({ type: "ENGINE.PROGRESS", percent: 40 })} />);
+    expect(screen.getByText("Carregando o motor de análise… 40%")).toBeInTheDocument();
+  });
+
+  it("deixa tentar de novo quando o motor falha (EVAL-09, EVAL-10)", () => {
+    render(<App logic={appWithEngine("ENGINE.FAILED")} />);
+    expect(screen.getByText("Não foi possível carregar o motor")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tentar de novo" })).toBeInTheDocument();
   });
 });
