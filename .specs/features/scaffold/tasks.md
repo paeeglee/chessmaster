@@ -90,9 +90,9 @@ T5 → T6 → T7
 
 **Done when**:
 
-- [ ] Header banner with "Analisador de partidas" renders from the machine context
-- [ ] Machine test with `createActor` passes
-- [ ] No literal mockup colors in components
+- [x] Header banner with "Analisador de partidas" renders from the machine context
+- [x] Machine test with `createActor` passes
+- [x] No literal mockup colors in components
 
 **Tests**: unit
 **Gate**: quick-web
