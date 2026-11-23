@@ -66,6 +66,47 @@ def test_reports_a_number_not_in_the_contract(contract: GameContract) -> None:
     assert verify_text("Foram 72 lances e você perdeu 3 pontos.", facts) == []
 
 
+@pytest.mark.parametrize(
+    ("text", "violation"),
+    [
+        ("Nf3 era melhor.", "lance Nf3 não está no contrato"),
+        ("Qxh7# encerrava.", "lance Qxh7# não está no contrato"),
+        ("Kg1 salvava.", "lance Kg1 não está no contrato"),
+        ("Bastava exd5.", "lance exd5 não está no contrato"),
+        ("E gxh3 abria a coluna.", "lance gxh3 não está no contrato"),
+        ("Faltou O-O-O.", "lance O-O-O não está no contrato"),
+        ("Faltou 0-0.", "lance 0-0 não está no contrato"),
+        ("Depois de 12…Txa2 tudo mudou.", "lance 12…Txa2 não está no contrato"),
+        ("Depois de 30. e4 tudo mudou.", "lance 30. e4 não está no contrato"),
+        ("Com Bd4 em h8 não dá.", "casa h8 não está no contrato"),
+    ],
+)
+def test_reports_every_kind_of_invented_move(
+    contract: GameContract, text: str, violation: str
+) -> None:
+    assert verify_text(text, allowed_facts(contract)) == [violation]
+
+
+def test_accepts_contract_moves_written_with_spaces_and_signs(contract: GameContract) -> None:
+    facts = allowed_facts(contract)
+    assert verify_text("Em 22... Ta7+ e em 22…Ta7! o bispo caiu.", facts) == []
+
+
+@pytest.mark.parametrize("decimal", ["+2,3", "2.3", "-0,5"])
+def test_reports_decimal_numbers_as_invented_evaluations(
+    contract: GameContract, decimal: str
+) -> None:
+    assert verify_text(f"A avaliação foi {decimal}.", allowed_facts(contract)) == [
+        f"número decimal {decimal} não pode aparecer (avaliação inventada)"
+    ]
+
+
+def test_reports_strengths_that_do_not_match(contract: GameContract) -> None:
+    assert verify_explanation(explanation(strengths=[]), contract) == [
+        "os pontos fortes não batem com o contrato"
+    ]
+
+
 def test_reports_a_long_verdict(contract: GameContract) -> None:
     long_verdict = " ".join(["palavra"] * 31)
     assert verify_explanation(explanation(verdict=long_verdict), contract) == [

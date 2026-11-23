@@ -7,18 +7,30 @@ from game_analyzer.domains.explanation.domain.contract import GameContract, Game
 
 MAX_VERDICT_WORDS = 30
 
-_SAN = (
-    r"(?:O-O(?:-O)?|[RDTBC][a-h]?[1-8]?x?[a-h][1-8](?:=[DTBC])?"
-    r"|[a-h](?:x[a-h])?[1-8](?:=[DTBC])?)[+#]?"
+# Letras de peça em inglês e em português: um lance com letra inglesa nunca está no
+# contrato (que usa notação portuguesa), então vira violação.
+_PIECE = "KQRBNDTC"
+_CASTLING = r"[O0]-[O0](?:-[O0])?"
+_PIECE_MOVE = rf"[{_PIECE}][a-h]?[1-8]?x?[a-h][1-8](?:=?[{_PIECE}])?"
+_PAWN_CAPTURE = rf"[a-h]x[a-h][1-8](?:=?[{_PIECE}])?"
+_PAWN_PUSH = rf"[a-h][1-8](?:=?[{_PIECE}])?"
+_SAN = rf"(?:{_CASTLING}|{_PIECE_MOVE}|{_PAWN_CAPTURE}|{_PAWN_PUSH})[+#]?[!?]*"
+
+_LABELED_MOVE = re.compile(rf"(?<![\w.])\d+\s?(?:\.\.\.|…|\.)\s?{_SAN}(?![\w])")
+_UNLABELED_MOVE = re.compile(
+    rf"(?<![\w.…])(?:{_CASTLING}|{_PIECE_MOVE}|{_PAWN_CAPTURE})[+#]?(?!\w)"
 )
-_LABELED_MOVE = re.compile(rf"\b(\d+)\s?\.(?:\.\.|…)?\s?({_SAN})")
-_PIECE_MOVE = re.compile(r"(?<![\w.…])([RDTBC][a-h]?[1-8]?x?[a-h][1-8](?:=[DTBC])?[+#]?)(?!\w)")
-_SQUARE = re.compile(r"(?<![\w])([a-h][1-8])(?!\w)")
-_INTEGER = re.compile(r"(?<![\w.,])(\d+)(?![\w.,]\d)")
+_SQUARE = re.compile(r"[a-h][1-8]")
+_STANDALONE_SQUARE = re.compile(r"(?<![\w])[a-h][1-8](?!\w)")
+_DECIMAL = re.compile(r"[+-]?\d+[.,]\d+")
+_INTEGER = re.compile(r"(?<![\w])\d+(?!\w)")
 
 
 def _normalize_move(move: str) -> str:
-    return move.replace(" ", "").replace("…", "...").rstrip("+#")
+    """Tira espaços, sinais de xeque e anotações; reticências viram três pontos."""
+    normalized = re.sub(r"\s", "", move).replace("…", "...")
+    normalized = re.sub(r"0-0", "O-O", normalized)
+    return re.sub(r"[+#!?]+$", "", normalized)
 
 
 @dataclass(frozen=True)
@@ -53,7 +65,7 @@ def allowed_facts(contract: GameContract) -> AllowedFacts:
     numbers.update(abs(value) for value in contract.material_timeline)
     for move in contract.moves:
         numbers.update({move.ply, (move.ply + 1) // 2})
-    squares = {square for move in moves for square in _SQUARE.findall(move)}
+    squares = {square for move in moves | labels for square in _SQUARE.findall(move)}
     squares.update(piece.square for piece in pieces if piece is not None)
     return AllowedFacts(frozenset(labels), frozenset(moves), frozenset(squares), frozenset(numbers))
 
@@ -63,19 +75,21 @@ def verify_text(text: str, facts: AllowedFacts) -> list[str]:
     violations: list[str] = []
     remaining = text
     for match in _LABELED_MOVE.finditer(text):
-        label = _normalize_move(match.group(0))
-        if label not in facts.labels:
+        if _normalize_move(match.group(0)) not in facts.labels:
             violations.append(f"lance {match.group(0)} não está no contrato")
-        remaining = remaining.replace(match.group(0), " ")
-    for match in _PIECE_MOVE.finditer(remaining):
-        if _normalize_move(match.group(1)) not in facts.moves:
-            violations.append(f"lance {match.group(1)} não está no contrato")
-        remaining = remaining.replace(match.group(1), " ")
-    for square in _SQUARE.findall(remaining):
+        remaining = remaining.replace(match.group(0), " ", 1)
+    for match in _UNLABELED_MOVE.finditer(remaining):
+        if _normalize_move(match.group(0)) not in facts.moves:
+            violations.append(f"lance {match.group(0)} não está no contrato")
+        remaining = remaining.replace(match.group(0), " ", 1)
+    for square in _STANDALONE_SQUARE.findall(remaining):
         if square not in facts.squares:
             violations.append(f"casa {square} não está no contrato")
-    without_squares = _SQUARE.sub(" ", remaining)
-    for number in _INTEGER.findall(without_squares):
+    remaining = _STANDALONE_SQUARE.sub(" ", remaining)
+    for decimal in _DECIMAL.findall(remaining):
+        violations.append(f"número decimal {decimal} não pode aparecer (avaliação inventada)")
+    remaining = _DECIMAL.sub(" ", remaining)
+    for number in _INTEGER.findall(remaining):
         if int(number) not in facts.numbers:
             violations.append(f"número {number} não está no contrato")
     return violations
@@ -89,6 +103,9 @@ def verify_explanation(explanation: GameExplanation, contract: GameContract) -> 
     expected_plies = [moment.ply for moment in contract.key_moments]
     if [moment.ply for moment in explanation.key_moments] != expected_plies:
         violations.append("os momentos-chave não batem com o contrato")
+    expected_strengths = [strength.ply for strength in contract.strengths]
+    if [strength.ply for strength in explanation.strengths] != expected_strengths:
+        violations.append("os pontos fortes não batem com o contrato")
     texts = [explanation.verdict, explanation.patterns_sentence, explanation.next_game_habit]
     texts += [moment.summary for moment in explanation.key_moments]
     texts += [moment.explanation for moment in explanation.key_moments]

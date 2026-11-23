@@ -126,6 +126,30 @@ def test_factory_builds_the_configured_provider(provider: str, expected: type) -
     assert isinstance(build_provider(Settings(ai_provider=provider)), expected)
 
 
+def test_factory_passes_model_and_key_to_the_openai_adapter() -> None:
+    settings = Settings(ai_provider="openai", ai_model="gpt-x", openai_api_key="sk-abc")
+    provider = build_provider(settings)
+    assert isinstance(provider, OpenAIProvider)
+    chat = FakeChat(QuestionAnswer(answer="ok", in_scope=True))
+    created: list[tuple[str, str]] = []
+
+    def factory(model: str, key: str) -> FakeChat:
+        created.append((model, key))
+        return chat
+
+    provider._chat_factory = factory  # noqa: SLF001 - troca a fábrica só neste teste
+    provider.generate("s", "u", QuestionAnswer)
+    assert created == [("gpt-x", "sk-abc")]
+
+
+def test_fake_verdict_for_a_clean_game(contract: GameContract) -> None:
+    clean = contract.model_copy(update={"key_moments": [], "patterns": []})
+    explanation = ExplainGame(FakeProvider())(clean)
+    assert explanation.verdict == (
+        "Vitória sem perdas de material importantes: parabéns pela partida limpa."
+    )
+
+
 def test_factory_rejects_unknown_providers() -> None:
     with pytest.raises(UnknownProviderError, match="AI_PROVIDER desconhecido: outro"):
         build_provider(Settings(ai_provider="outro"))

@@ -48,10 +48,10 @@ The Result and Training screens need plain-language Portuguese texts written fro
 
 ### P1: Verify the texts ⭐ MVP
 
-1. WHEN a text cites a move (e.g. `22...Ta7`, `Bd4+`) that is not in the contract THEN verification SHALL report it. <!-- EXP-05 -->
+1. WHEN a text cites a move that is not in the contract — numbered (`22...Ta7`, `12…Txa2`, `30. e4`) or not, with English or Portuguese piece letters, pawn captures or castling (`Nf3`, `exd5`, `O-O-O`, `0-0`) — THEN verification SHALL report it; spaces, check signs and `!`/`?` are ignored when comparing. <!-- EXP-05 -->
 2. WHEN a text cites a square not present in the contract's moves or pieces THEN verification SHALL report it. <!-- EXP-06 -->
-3. WHEN a text cites an integer not in the contract's allowed numbers (move numbers, plies, counts, losses, gains, material values) THEN verification SHALL report it. <!-- EXP-07 -->
-4. IF the verdict has more than 30 words or the key-moment plies differ from the contract THEN verification SHALL report it. <!-- EXP-08 -->
+3. WHEN a text cites an integer not in the contract's allowed numbers (move numbers, plies, counts, losses, gains, material values) or any decimal number (an invented evaluation such as `+2,3`) THEN verification SHALL report it. <!-- EXP-07 -->
+4. IF the verdict has more than 30 words, or the key-moment plies or the strength plies differ from the contract THEN verification SHALL report it. <!-- EXP-08 -->
 5. WHEN the first answer fails verification THEN the use case SHALL call the provider once more with the violations; IF the second also fails THEN the route SHALL return 502 `{"detail": "explanation_unverified"}`. <!-- EXP-09 -->
 
 ### P1: Ask the AI ⭐ MVP
@@ -61,7 +61,7 @@ The Result and Training screens need plain-language Portuguese texts written fro
 
 ### P1: Swappable provider ⭐ MVP
 
-1. `AI_PROVIDER=openai` SHALL use the LangChain OpenAI adapter with `AI_MODEL` and `OPENAI_API_KEY`; `AI_PROVIDER=fake` SHALL use the fake adapter; any other value SHALL fail at startup of the route with a clear error. <!-- EXP-12 -->
+1. `AI_PROVIDER=openai` SHALL use the LangChain OpenAI adapter with `AI_MODEL` and `OPENAI_API_KEY`; `AI_PROVIDER=fake` SHALL use the fake adapter; any other value SHALL make the AI routes answer 503 `ai_unavailable` and log the configuration error (health keeps working). <!-- EXP-12 -->
 2. IF `AI_PROVIDER=openai` and the key is empty THEN the routes SHALL return 503 `ai_unavailable` (the health route keeps working). <!-- EXP-13 -->
 3. The `domain/` package SHALL NOT import FastAPI or LangChain, and `application/` SHALL depend only on `domain/` and its own ports. <!-- EXP-14 -->
 
@@ -69,7 +69,7 @@ The Result and Training screens need plain-language Portuguese texts written fro
 
 ## Edge Cases
 
-- WHEN the contract has no key moments THEN `key_moments` SHALL be empty and the verdict positive (fake provider) and verification SHALL accept it. <!-- EXP-15 -->
+- WHEN the contract has no key moments THEN `key_moments` SHALL be empty, verification SHALL accept it, and the fake provider's verdict SHALL be "{Vitória/Derrota/Empate} sem perdas de material importantes: parabéns pela partida limpa." <!-- EXP-15 -->
 
 ## Implicit-Requirement Sweep
 

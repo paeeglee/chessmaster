@@ -36,6 +36,7 @@ def test_explanations_returns_the_verified_explanation() -> None:
     assert response.status_code == 200
     body = response.json()
     assert [moment["ply"] for moment in body["key_moments"]] == [44, 54]
+    assert [strength["ply"] for strength in body["strengths"]] == [24]
     assert set(body) == {
         "verdict",
         "patterns_sentence",
@@ -94,6 +95,7 @@ def test_questions_reports_an_unavailable_provider() -> None:
         "/api/questions", json={"game": reference_contract_data(), "question": "Oi?"}
     )
     assert response.status_code == 503
+    assert response.json() == {"detail": "ai_unavailable"}
 
 
 def test_questions_reports_unverified_answers() -> None:
@@ -102,6 +104,7 @@ def test_questions_reports_unverified_answers() -> None:
         "/api/questions", json={"game": reference_contract_data(), "question": "Oi?"}
     )
     assert response.status_code == 502
+    assert response.json() == {"detail": "explanation_unverified"}
 
 
 def test_openai_without_key_is_unavailable_but_health_works(
@@ -113,6 +116,16 @@ def test_openai_without_key_is_unavailable_but_health_works(
     assert client.get("/api/health").status_code == 200
     response = client.post("/api/explanations", json=reference_contract_data())
     assert response.status_code == 503
+    assert response.json() == {"detail": "ai_unavailable"}
+
+
+def test_unknown_provider_is_reported_as_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AI_PROVIDER", "outro")
+    client = TestClient(create_app())
+    assert client.get("/api/health").status_code == 200
+    response = client.post("/api/explanations", json=reference_contract_data())
+    assert response.status_code == 503
+    assert response.json() == {"detail": "ai_unavailable"}
 
 
 def test_fake_provider_selected_by_configuration(monkeypatch: pytest.MonkeyPatch) -> None:

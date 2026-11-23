@@ -17,7 +17,10 @@ from game_analyzer.domains.explanation.domain.contract import (
     QuestionAnswer,
     QuestionRequest,
 )
-from game_analyzer.domains.explanation.infrastructure.provider_factory import build_provider
+from game_analyzer.domains.explanation.infrastructure.provider_factory import (
+    UnknownProviderError,
+    build_provider,
+)
 from game_analyzer.shared.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -26,7 +29,11 @@ router = APIRouter(tags=["explanation"])
 
 
 def get_provider() -> LLMProvider:
-    return build_provider(get_settings())
+    try:
+        return build_provider(get_settings())
+    except UnknownProviderError as error:
+        logger.error("configuração de IA inválida: %s", error)
+        raise HTTPException(status_code=503, detail="ai_unavailable") from error
 
 
 Provider = Annotated[LLMProvider, Depends(get_provider)]
@@ -45,7 +52,7 @@ def explain_game(contract: GameContract, provider: Provider) -> GameExplanation:
         logger.warning("provedor de IA indisponível: %s", error)
         raise HTTPException(status_code=503, detail="ai_unavailable") from error
     except ExplanationUnverifiedError as error:
-        logger.warning("explicação reprovada na verificação: %s", error.violations)
+        logger.warning("explicação reprovada na verificação (%d problemas)", len(error.violations))
         raise HTTPException(status_code=502, detail="explanation_unverified") from error
 
 
@@ -57,5 +64,5 @@ def answer_question(request: QuestionRequest, provider: Provider) -> QuestionAns
         logger.warning("provedor de IA indisponível: %s", error)
         raise HTTPException(status_code=503, detail="ai_unavailable") from error
     except ExplanationUnverifiedError as error:
-        logger.warning("resposta reprovada na verificação: %s", error.violations)
+        logger.warning("resposta reprovada na verificação (%d problemas)", len(error.violations))
         raise HTTPException(status_code=502, detail="explanation_unverified") from error

@@ -86,6 +86,7 @@ def test_answer_question_is_verified(contract: GameContract) -> None:
     answer = AnswerQuestion(provider)(request)
     assert answer.answer == "Em 22...Ta7 o bispo em a1 ficou atacado."
     assert "Por que perdi o bispo?" in provider.calls[0][1]
+    assert "casa h3 não está no contrato" in provider.calls[1][1]
 
 
 def test_off_topic_answer_starts_with_the_notice(contract: GameContract) -> None:
