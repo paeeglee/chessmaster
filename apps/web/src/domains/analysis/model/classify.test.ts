@@ -310,6 +310,25 @@ describe("classifyMove com posições feitas à mão", () => {
     });
   });
 
+  it("não aponta defensor saiu ao mover o primeiro de dois defensores (AN-08)", () => {
+    // Mesmo cavalo de e4, agora sai o peão de d3, que vem primeiro na lista do motor.
+    const fen = "6k1/8/8/3p4/4N3/3P4/6B1/6K1 w - - 0 1";
+    const after = "6k1/8/8/3p4/3PN3/8/6B1/6K1 b - - 0 1";
+    const verdict = classifyMove({
+      ply: pieceMove(fen, "d3", "d4", after, "p"),
+      before: evaluation(fen, "e4c3", ["e4c3", "g8f8"]),
+      after: evaluation(after, "d5e4", ["d5e4", "g2e4", "g8f8"]),
+      playerColor: "w",
+    });
+    expect(defendersOf(fen, "e4", "w")[0]).toBe("d3");
+    expect(verdict).toMatchObject({
+      kind: "mistake",
+      loss: 2,
+      mistakeType: "hanging-piece",
+      lostPiece: { type: "n", square: "e4" },
+    });
+  });
+
   it("não aponta peça atacada quando o lance protegeu a peça (glossário)", () => {
     // O bispo vai para g2 e passa a defender o cavalo de e4, que cai mesmo assim.
     const fen = "6k1/8/8/3p4/4N3/8/8/5BK1 w - - 0 1";
