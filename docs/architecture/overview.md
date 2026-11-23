@@ -41,6 +41,12 @@ divergirem, o PRD vale.
   Todo recurso de outra origem (fontes, imagens, scripts) precisa de CORS ou
   `Cross-Origin-Resource-Policy`; prefira servir da própria origem. Sem isolamento
   (`crossOriginIsolated === false`), usar a versão de uma thread.
+- **Motor de regras com `chess.js`:** o motor 2 (posições em FEN, legalidade,
+  xeque, mate e afogamento) usa a biblioteca `chess.js`, com versão exata fixada no
+  `package.json`. Ela fica atrás do ponto de entrada do domínio `game`: os outros
+  domínios nunca importam `chess.js` direto. O Leitor (motor 1) é nosso: ele lê o
+  HTML do Chess.com e a lista simples de lances (notação inglesa ou portuguesa) e
+  entrega os lances em SAN inglês ao `chess.js`.
 - **A interface nunca trava:** os motores sempre rodam em Web Workers.
 - **IA trocável (D4):** padrão OpenAI GPT-5.1 com saída estruturada (JSON Schema).
   Provedor e modelo vêm de configuração, sem mudar telas nem motores. Uma camada

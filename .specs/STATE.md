@@ -10,4 +10,12 @@
 - **Date**: 2026-11-22
 - **Status**: active
 
+### AD-002
+- **Decision**: The rules engine (engine 2) uses `chess.js`, wrapped behind the `game` domain's public entry point; the parser (engine 1) is written in-house and feeds English SAN to it.
+- **Reason**: Move legality, FEN, check, checkmate and stalemate are a solved, well-tested problem; writing our own adds risk without product value.
+- **Trade-off**: External dependency in a core engine; Portuguese notation must be translated by our parser before reaching `chess.js`.
+- **Scope**: `apps/web` `game` domain (F1) and every domain that needs positions or legal moves (through `game`).
+- **Date**: 2026-11-22
+- **Status**: active
+
 ## Handoff
