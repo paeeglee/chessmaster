@@ -26,7 +26,7 @@ Engine 3 (D1) must evaluate every position with the full Stockfish NNUE build in
 | Assumption / decision | Chosen default | Rationale | Confirmed? |
 | --------------------- | -------------- | --------- | ---------- |
 | Package and builds | npm `stockfish@19.0.1`; `bin/stockfish-19.{js,wasm}` (multi-thread) and `bin/stockfish-19-single.{js,wasm}` (single-thread) | overview.md: official npm WASM build, both full builds | y (docs) |
-| Copy step | `apps/web/scripts/copy-engine.mjs` copies both builds plus `Copying.txt` to `public/engine/` as `stockfish-19.0.1-mt.*`, `stockfish-19.0.1-st.*`, run by `postinstall` and `make setup-web` | overview.md: copied from node_modules, versioned names, not in git | y (docs) |
+| Copy step | `apps/web/scripts/copy-engine.mjs` copies both builds plus `Copying.txt` to `public/engine/` as `stockfish-19.0.1-mt.*`, `stockfish-19.0.1-st.*`, run by `make setup-web` and before `pnpm dev`/`pnpm build` (pnpm did not run the root `postinstall` on frozen installs) | overview.md: copied from node_modules, versioned names, not in git | y (docs) |
 | Build choice | `crossOriginIsolated === true` → multi-thread with `max(1, hardwareConcurrency − 1)` threads; otherwise single-thread with 1 thread | D1 | y (PRD) |
 | Download progress | The page transfers a `MessagePort` to the worker as `{ progressPort }`; the engine posts `{ percent, loaded, total }` on it while it downloads the `.wasm` | Protocol built into stockfish.js 19 (`progressPort` message) | y (package code) |
 | Ready | Engine is ready after `uci` → `uciok`, `setoption name Threads value N`, `isready` → `readyok` | Standard UCI handshake | y |
@@ -45,7 +45,7 @@ Engine 3 (D1) must evaluate every position with the full Stockfish NNUE build in
 
 **Acceptance Criteria**:
 
-1. WHEN `pnpm install` (or `make setup-web`) runs THEN `apps/web/public/engine/` SHALL contain `stockfish-19.0.1-mt.js`, `stockfish-19.0.1-mt.wasm`, `stockfish-19.0.1-st.js`, `stockfish-19.0.1-st.wasm` and `Copying.txt`, copied from the installed `stockfish` package. <!-- EVAL-01 -->
+1. WHEN `make setup-web`, `pnpm dev` or `pnpm build` runs THEN `apps/web/public/engine/` SHALL contain `stockfish-19.0.1-mt.js`, `stockfish-19.0.1-mt.wasm`, `stockfish-19.0.1-st.js`, `stockfish-19.0.1-st.wasm` and `Copying.txt`, copied from the installed `stockfish` package. <!-- EVAL-01 -->
 2. The `apps/web/public/engine/` folder SHALL stay out of git. <!-- EVAL-02 -->
 
 ### P1: Choose the right build ⭐ MVP
@@ -103,28 +103,28 @@ Engine 3 (D1) must evaluate every position with the full Stockfish NNUE build in
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| EVAL-01 | P1: Files | Design | Pending |
-| EVAL-02 | P1: Files | Design | Pending |
-| EVAL-03 | P1: Build | Design | Pending |
-| EVAL-04 | P1: Build | Design | Pending |
-| EVAL-05 | P1: Loading | Design | Pending |
-| EVAL-06 | P1: Loading | Design | Pending |
-| EVAL-07 | P1: Loading | Design | Pending |
-| EVAL-08 | P1: Loading | Design | Pending |
-| EVAL-09 | P1: Loading | Design | Pending |
-| EVAL-10 | P1: Loading | Design | Pending |
-| EVAL-11 | P1: Loading | Design | Pending |
-| EVAL-12 | P1: Evaluate | Design | Pending |
-| EVAL-13 | P1: Evaluate | Design | Pending |
-| EVAL-14 | P1: Evaluate | Design | Pending |
-| EVAL-15 | P1: Evaluate | Design | Pending |
-| EVAL-16 | P1: Evaluate | Design | Pending |
-| EVAL-17 | P1: Evaluate | Design | Pending |
-| EVAL-18 | P1: Boundary | Design | Pending |
-| EVAL-19 | Edge case | Design | Pending |
-| EVAL-20 | Edge case | Design | Pending |
+| EVAL-01 | P1: Files | Tasks | Implementing |
+| EVAL-02 | P1: Files | Tasks | Implementing |
+| EVAL-03 | P1: Build | Tasks | Implementing |
+| EVAL-04 | P1: Build | Tasks | Implementing |
+| EVAL-05 | P1: Loading | Tasks | Implementing |
+| EVAL-06 | P1: Loading | Tasks | Implementing |
+| EVAL-07 | P1: Loading | Tasks | Implementing |
+| EVAL-08 | P1: Loading | Tasks | Implementing |
+| EVAL-09 | P1: Loading | Tasks | Implementing |
+| EVAL-10 | P1: Loading | Tasks | Implementing |
+| EVAL-11 | P1: Loading | Tasks | Implementing |
+| EVAL-12 | P1: Evaluate | Tasks | Implementing |
+| EVAL-13 | P1: Evaluate | Tasks | Implementing |
+| EVAL-14 | P1: Evaluate | Tasks | Implementing |
+| EVAL-15 | P1: Evaluate | Tasks | Implementing |
+| EVAL-16 | P1: Evaluate | Tasks | Implementing |
+| EVAL-17 | P1: Evaluate | Tasks | Implementing |
+| EVAL-18 | P1: Boundary | Tasks | Implementing |
+| EVAL-19 | Edge case | Tasks | Implementing |
+| EVAL-20 | Edge case | Tasks | Implementing |
 
-**Coverage:** 20 total, 0 mapped to tasks, 20 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 20 total, 20 mapped to tasks (T1–T5), 0 unmapped
 
 ---
 

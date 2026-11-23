@@ -148,10 +148,22 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   com a versão exata fixada no `package.json`. Não baixar binários de fontes
   avulsas.
 - **Sem binários no git:** os arquivos do motor (`.js` e `.wasm`) são copiados do
-  `node_modules` para `apps/web/public/engine/` por um script de setup. Essa pasta
-  fica no `.gitignore`.
-- **Dois builds:** o completo multi-thread e o completo de uma thread, para o
-  fallback sem isolamento de origem.
+  `node_modules` para `apps/web/public/engine/` pelo `apps/web/scripts/copy-engine.mjs`,
+  que roda no `make setup-web` e antes do `dev` e do `build` (só copia o que mudou).
+  Essa pasta fica no `.gitignore`.
+- **Dois builds:** o completo multi-thread (`stockfish-<versão>-mt.js/.wasm`) e o
+  completo de uma thread (`stockfish-<versão>-st.js/.wasm`), para o fallback sem
+  isolamento de origem. A escolha fica em `chooseEngineBuild` (domínio `evaluation`).
+- **Progresso do download:** a página cria um `MessageChannel` e envia uma das portas
+  ao worker como `{ progressPort }`; o stockfish.js publica nela
+  `{ percent, loaded, total }` enquanto baixa o `.wasm`.
+- **Carregamento:** a máquina `engineLoaderMachine` é invocada na raiz do
+  `appMachine` (id `engine`), então o download começa ao abrir a página. Estados:
+  `loading` (com porcentagem), `ready` (com o `EngineClient`) e `failed` (com
+  "Tentar de novo").
+- **Busca:** `position fen …` + `go movetime 200`; se a profundidade final ficar
+  abaixo de 12, roda `go depth 12` na mesma posição. A pontuação é guardada sempre do
+  ponto de vista das brancas.
 - **Cache:** o nome dos arquivos inclui a versão do motor, para que o navegador
   possa guardar o arquivo por muito tempo (`Cache-Control: immutable`) e baixar de
   novo só quando a versão mudar.
