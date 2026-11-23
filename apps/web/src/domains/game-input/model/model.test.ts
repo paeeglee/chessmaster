@@ -94,6 +94,8 @@ describe("estimateSeconds (IN-24)", () => {
     expect(estimateSeconds(144)).toBe(30);
     expect(estimateSeconds(300)).toBe(60);
     expect(estimateSeconds(4)).toBe(5);
+    // 37 meios-lances = 38 posições = 7,6 s → 10 s (sem o +1 seriam 7,4 s → 5 s).
+    expect(estimateSeconds(37)).toBe(10);
   });
 });
 

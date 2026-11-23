@@ -1,18 +1,19 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
-import { fromCallback } from "xstate";
+import { fromCallback, fromPromise } from "xstate";
 import { App } from "../../../app/App";
 import { appMachine } from "../../../app/appMachine";
 import { type EngineClient, engineLoaderMachine } from "../../evaluation";
 import referenceGameHtml from "../../game/fixtures/reference-game.chesscom.html?raw";
+import { gameInputMachine } from "../machines/gameInputMachine";
 
 type EngineEvent =
   | { type: "ENGINE.PROGRESS"; percent: number }
   | { type: "ENGINE.READY"; engine: EngineClient }
   | { type: "ENGINE.FAILED" };
 
-function renderApp() {
+function renderApp(readClipboard: () => Promise<string> = async () => "") {
   const engine = { send: (_event: EngineEvent) => {} };
   const logic = appMachine.provide({
     actors: {
@@ -22,6 +23,9 @@ function renderApp() {
             engine.send = sendBack;
           }),
         },
+      }),
+      gameInput: gameInputMachine.provide({
+        actors: { readClipboard: fromPromise(readClipboard) },
       }),
     },
   });
@@ -133,6 +137,24 @@ describe("tela Colar: o que encontramos", () => {
 });
 
 describe("tela Colar: campo e escolhas", () => {
+  it("cola o texto da área de transferência (IN-11)", async () => {
+    renderApp(async () => "1.e4 e5 2.Nf3");
+    await userEvent.click(screen.getByRole("button", { name: "Colar da área de transferência" }));
+    expect(await screen.findByDisplayValue("1.e4 e5 2.Nf3")).toBeInTheDocument();
+  });
+
+  it("orienta a usar Ctrl/Cmd+V quando a leitura é negada (IN-12)", async () => {
+    renderApp(async () => {
+      throw new Error("NotAllowedError");
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Colar da área de transferência" }));
+    expect(
+      await screen.findByText(
+        "Não conseguimos ler a área de transferência. Clique no campo e use Ctrl+V (Cmd+V no Mac).",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("Limpar esvazia o campo e o painel (IN-10)", async () => {
     renderApp();
     paste("1.e4 e5");
@@ -231,12 +253,14 @@ describe("tela Colar: começar a análise", () => {
     paste(referenceGameHtml);
     await userEvent.click(screen.getByRole("button", { name: "Pretas" }));
     await userEvent.click(screen.getByRole("button", { name: "Plano" }));
+    await userEvent.selectOptions(screen.getByLabelText("Seu nível"), "Intermediário");
     await userEvent.click(screen.getByRole("button", { name: "Analisar partida →" }));
     expect(screen.getByRole("heading", { name: "Analisando sua partida" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Cancelar análise" }));
     expect(screen.getByLabelText("Partida")).toHaveValue(referenceGameHtml);
     expect(screen.getByRole("button", { name: "Pretas" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Plano" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText("Seu nível")).toHaveValue("intermediate");
   });
 
   it("mostra a estimativa e o aviso de privacidade (IN-24)", () => {

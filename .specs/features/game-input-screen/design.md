@@ -27,11 +27,11 @@ graph TD
 | `game/model/describe.ts` | `formatMoveLabel(ply)` ("72...Ta6#"), `listPieces(fen)`, `describePieces(fen)` (aria), `summarizeMaterial(fen)` (visible) |
 | `game-input/model/types.ts` | `Level`, `Priority`, `GameInputDraft`, `AnalysisRequest` |
 | `game-input/model/inspectGame.ts` | `inspectGame(text) → Inspection` (empty / too-large / unrecognized / illegal / valid with game, warnings) |
-| `game-input/model/analyzeBlocker.ts` | `analyzeAvailability(inspection, color, engine)` → `{ enabled, label, hint }` |
+| `game-input/model/analyzeAvailability.ts` | `analyzeAvailability(inspection, color, engine)` → `{ enabled, label, hint }` |
 | `game-input/model/estimate.ts` | `estimateSeconds(plies)` |
 | `game-input/model/levelStorage.ts` | `loadLevel(storage)`, `saveLevel(storage, level)` with try/catch |
 | `game-input/machines/gameInputMachine.ts` | Draft state; actors `readClipboard` (fromPromise), actions `persistLevel`, `saveDraft` (sendParent) |
-| `game-input/components/*` | `GameInputScreen`, `GameField`, `FindingsPanel`, `PlayerChoices`, `AnalyzeAction` |
+| `game-input/components/*` | `GameInputScreen`, `GameField`, `FindingsPanel`, `FindingItem`, `PlayerChoices` (holds the analyze button) |
 | `app/appMachine.ts` | States `gameInput` (invokes gameInput) and `analyzing` (placeholder, cancel back); context `draft`, `request` |
 
 ## Data Models

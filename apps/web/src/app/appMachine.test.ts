@@ -145,6 +145,7 @@ describe("appMachine com a tela Colar", () => {
     gameInput(app).send({ type: "TEXT.CHANGED", text: GAME });
     gameInput(app).send({ type: "COLOR.SELECTED", color: "b" });
     gameInput(app).send({ type: "PRIORITY.TOGGLED", priority: "plan" });
+    gameInput(app).send({ type: "LEVEL.SELECTED", level: "intermediate" });
     gameInput(app).send({ type: "ANALYZE", engine: READY });
     app.send({ type: "ANALYSIS.CANCELLED" });
     expect(app.getSnapshot().value).toBe("gameInput");
@@ -152,6 +153,7 @@ describe("appMachine com a tela Colar", () => {
     expect(gameInput(app).getSnapshot().context).toMatchObject({
       text: GAME,
       playerColor: "b",
+      level: "intermediate",
       priorities: ["lost-pieces", "endgames", "plan"],
     });
   });
