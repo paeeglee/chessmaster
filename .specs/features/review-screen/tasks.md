@@ -56,7 +56,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Pure functions tested on the reference result
+- [x] Pure functions tested on the reference result
 
 **Tests**: unit
 **Gate**: quick

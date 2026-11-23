@@ -78,7 +78,8 @@ divergirem, o PRD vale.
   capturada nessa linha. "Defensor saiu": o lance tirou o único defensor dela; "peça
   atacada": ela já estava atacada e ficou no lugar; senão, "outro". A mesma regra nos
   lances do adversário gera a tag "Adversário"; ganhos de 2 pontos ou mais do
-  jogador viram "O que você fez bem". Na partida de referência isso dá 22...Ta7,
+  jogador viram "O que você fez bem", medidos a partir de antes do lance anterior do
+  adversário (recapturar numa troca não é ganho). Na partida de referência isso dá 22...Ta7,
   27...Tb7, 41...Ta1, 43...Te6 e 56...Ta8 (fixture de avaliações em
   `domains/analysis/fixtures/`, gerado por `scripts/evaluate-fixture.mjs`).
 - **Nada é salvo (D2):** a análise existe só enquanto a página está aberta. Só o

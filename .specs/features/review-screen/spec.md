@@ -35,6 +35,7 @@ After the analysis, the player must understand in seconds what happened, explore
 | "Analisar outra partida" | Asks for confirmation with an in-page dialog (no `window.confirm`) before discarding | R-13 | n |
 | Short game (< 15 moves) | Chart hidden | step_03 states | y (PRD) |
 | More than 5 candidates | "ver todos os lances anotados" link scrolls to the move list | step_03 states | y (PRD) |
+| Strength gain (refines F4a AN-05) | A strength's gain is measured from the position before the opponent's previous move, so recapturing in a trade (e.g. 16...Txd8 after 16.Dxd8) is not a gain | R-10: only real gains; found with the real engine data | n |
 | AI unavailable | Verdict band shows the result tag and context line; verdict replaced by "A explicação não pôde ser gerada." + "Tentar de novo" (re-calls `/api/explanations`); key moments show template texts from the engines; habit and "Pergunte à IA" hidden | step_03 state "IA indisponível" | y (PRD) |
 
 **Open questions:** none - all resolved or logged above.
