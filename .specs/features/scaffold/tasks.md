@@ -67,8 +67,8 @@ T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm test` pass
-- [ ] `strict: true` and `engines.node` match `.nvmrc`
+- [x] `pnpm lint`, `pnpm typecheck`, `pnpm test` pass
+- [x] `strict: true` and `engines.node` match `.nvmrc`
 
 **Tests**: unit
 **Gate**: quick-web
