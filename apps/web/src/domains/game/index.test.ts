@@ -27,6 +27,7 @@ describe("fronteira do domínio game", () => {
       "listPieces",
       "parseGameText",
       "playCaptureLine",
+      "positionsAlongLine",
       "replayGame",
       "summarizeMaterial",
       "toPortugueseSan",
