@@ -50,6 +50,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md gap 1 / GAME-08 (apps/web/src/domains/game/model/moveText.ts:92-93) (parser)
 - last seen: 2026-11-23T13:43:42Z
 
+### L-007 - Give every alternative in a compound condition its own test case, not just the first alternative
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `parser` · harmful: 0
+- features: game-parser-rules
+- evidence: validation.md M22 (apps/web/src/domains/game/model/moveText.ts:120) (parser)
+- last seen: 2026-11-23T13:46:41Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

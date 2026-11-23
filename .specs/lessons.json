@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 7,
+  "next_id": 8,
   "lessons": [
     {
       "id": "L-001",
@@ -112,6 +112,24 @@
       ],
       "created": "2026-11-23T13:43:42Z",
       "last_seen": "2026-11-23T13:43:42Z"
+    },
+    {
+      "id": "L-007",
+      "key": "surviving_mutant::give every alternative in a compound condition its own test case not just the first alternative",
+      "text": "Give every alternative in a compound condition its own test case, not just the first alternative",
+      "signal": "surviving_mutant",
+      "scope": "parser",
+      "status": "candidate",
+      "features": [
+        "game-parser-rules"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md M22 (apps/web/src/domains/game/model/moveText.ts:120) (parser)"
+      ],
+      "created": "2026-11-23T13:46:41Z",
+      "last_seen": "2026-11-23T13:46:41Z"
     }
   ]
 }
