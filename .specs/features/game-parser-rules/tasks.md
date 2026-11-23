@@ -76,7 +76,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Each AC has a test with the exact expected tokens
+- [x] Each AC has a test with the exact expected tokens
 
 **Tests**: unit
 **Gate**: quick
