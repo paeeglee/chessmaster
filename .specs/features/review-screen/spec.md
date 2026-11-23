@@ -75,7 +75,7 @@ After the analysis, the player must understand in seconds what happened, explore
 
 ### P1: Footer and new game ⭐ MVP
 
-1. The footer "Motores usados" SHALL list rules, evaluation, endgame tablebase and AI with their status (✓ or "falhou"). <!-- RV-18 -->
+1. The footer "Motores usados" SHALL list rules, evaluation, endgame tablebase and AI with their status (✓ or "falhou"); until F5 ships, the tablebase SHALL show "– Tabela de finais (ainda não disponível)" and only the AI can fail on this screen. <!-- RV-18 -->
 2. WHEN "Analisar outra partida" is clicked THEN a confirmation dialog SHALL appear; confirming SHALL return to Colar with the field empty; cancelling SHALL keep the result. <!-- RV-19 -->
 
 ---

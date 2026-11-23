@@ -1,6 +1,6 @@
 import { MISTAKE_TYPE_LABEL } from "../../analysis";
 import type { ReviewContext, ReviewEvent } from "../machines/reviewMachine";
-import { annotationOf, materialChange, momentTexts } from "../model/review";
+import { annotationOf, hiddenMistakes, materialChange, momentTexts } from "../model/review";
 
 type KeyMomentsListProps = {
   context: ReviewContext;
@@ -109,6 +109,11 @@ export function KeyMomentsList({ context, send }: KeyMomentsListProps) {
               );
             })}
           </ol>
+          {hiddenMistakes(context.result) > 0 && (
+            <a href="#lances" className="self-start font-semibold text-[15px] text-brand">
+              ver todos os lances anotados
+            </a>
+          )}
           <button
             type="button"
             onClick={() => {

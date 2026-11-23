@@ -18,6 +18,8 @@ export type Question = {
   question: string;
   status: "pending" | "answered" | "failed";
   answer: string | null;
+  /** false quando a pergunta não era sobre a partida (R-11). */
+  inScope: boolean;
 };
 
 export type AskInput = { result: AnalysisResult; question: string };
@@ -197,6 +199,7 @@ export const reviewMachine = setup({
                     question: event.question.trim().slice(0, 500),
                     status: "pending",
                     answer: null,
+                    inScope: true,
                   },
                 ],
               }),
@@ -216,7 +219,12 @@ export const reviewMachine = setup({
                 questions: ({ context, event }) =>
                   context.questions.map((question, index) =>
                     index === context.questions.length - 1
-                      ? { ...question, status: "answered" as const, answer: event.output.answer }
+                      ? {
+                          ...question,
+                          status: "answered" as const,
+                          answer: event.output.answer,
+                          inScope: event.output.in_scope,
+                        }
                       : question,
                   ),
               }),

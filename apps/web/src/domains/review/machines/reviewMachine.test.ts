@@ -108,12 +108,13 @@ describe("reviewMachine: perguntas (RV-16, RV-17)", () => {
     const actor = start();
     actor.send({ type: "QUESTION.ASK", question: "  Por que perdi?  " });
     expect(actor.getSnapshot().context.questions).toEqual([
-      { id: 1, question: "Por que perdi?", status: "pending", answer: null },
+      { id: 1, question: "Por que perdi?", status: "pending", answer: null, inScope: true },
     ]);
     await waitFor(actor, (snapshot) => snapshot.matches({ questions: "idle" }));
     expect(actor.getSnapshot().context.questions[0]).toMatchObject({
       status: "answered",
       answer: "Sim.",
+      inScope: true,
     });
   });
 

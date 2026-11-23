@@ -212,3 +212,12 @@ export function positionCaption(result: AnalysisResult, position: number): strin
 export function sideToMoveLabel(game: Game, position: number): string {
   return positionFen(game, position).split(" ")[1] === "b" ? "Pretas jogam" : "Brancas jogam";
 }
+
+/**
+ * Erros do jogador além dos momentos-chave mostrados (R-07: mais de 5 candidatos).
+ * Quando houver, a lista ganha o link "ver todos os lances anotados".
+ */
+export function hiddenMistakes(result: AnalysisResult): number {
+  const mistakes = result.verdicts.filter((verdict) => verdict.kind === "mistake").length;
+  return Math.max(0, mistakes - result.keyMoments.length);
+}

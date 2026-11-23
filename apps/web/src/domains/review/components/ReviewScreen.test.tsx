@@ -25,6 +25,8 @@ type Options = {
   withExplanation?: boolean;
   answer?: () => Promise<QuestionAnswer>;
   explain?: () => Promise<GameExplanation>;
+  /** Ajusta o resultado do fixture antes de abrir a tela. */
+  adjust?: (result: ReturnType<typeof referenceResult>) => ReturnType<typeof referenceResult>;
 };
 
 function renderReview(options: Options = {}) {
@@ -40,22 +42,31 @@ function renderReview(options: Options = {}) {
     },
   });
   const received: string[] = [];
+  const events: { type: string; ply?: number }[] = [];
+  const base = referenceResult(
+    withExplanation ? { explanation } : { explanation: null, aiFailed: true },
+  );
   const parent = createMachine({
     invoke: {
       id: "review",
       src: logic,
-      input: referenceResult(
-        withExplanation ? { explanation } : { explanation: null, aiFailed: true },
-      ),
+      input: options.adjust ? options.adjust(base) : base,
     },
-    on: { "*": { actions: ({ event }) => received.push(event.type) } },
+    on: {
+      "*": {
+        actions: ({ event }) => {
+          received.push(event.type);
+          events.push(event as { type: string; ply?: number });
+        },
+      },
+    },
   });
   const actor = createActor(parent).start();
   const review = actor.getSnapshot().children.review as Parameters<
     typeof ReviewScreen
   >[0]["reviewRef"];
   render(<ReviewScreen reviewRef={review} />);
-  return { received };
+  return { received, events };
 }
 
 describe("resumo (RV-01, RV-02)", () => {
@@ -82,11 +93,21 @@ describe("IA indisponível (RV-03)", () => {
     expect(screen.queryByText("Hábito para a próxima partida")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Pergunte à IA sobre esta partida")).not.toBeInTheDocument();
     expect(screen.getByText("✕ IA: falhou")).toBeInTheDocument();
+    // Os dados dos motores continuam: tabuleiro, gráfico e lances.
+    expect(screen.getByRole("region", { name: "Tabuleiro da partida" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /Vantagem de material/ })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Lances" })).toBeInTheDocument();
     // Sem IA, os momentos usam os textos dos motores.
     expect(screen.getByText("Deixou o bispo em a1 ser capturado.")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Tentar de novo" }));
     expect(await screen.findByRole("heading", { name: explanation.verdict })).toBeInTheDocument();
     expect(screen.getByText("✓ IA: só explica, não calcula")).toBeInTheDocument();
+  });
+
+  it("o rodapé não marca a tabela de finais como usada antes da F5 (RV-18)", () => {
+    renderReview();
+    expect(screen.getByText("– Tabela de finais (ainda não disponível)")).toBeInTheDocument();
+    expect(screen.queryByText(/✓ Tabela de finais/)).toBeNull();
   });
 });
 
@@ -126,11 +147,57 @@ describe("momentos-chave (RV-11, RV-12, RV-13)", () => {
     expect(screen.getByText("Antes de 27...Tb7?")).toBeInTheDocument();
   });
 
-  it("pede o treino do momento e de todos a partir do primeiro", async () => {
-    const { received } = renderReview();
+  it("pede o treino do momento aberto e de todos a partir do primeiro (RV-12)", async () => {
+    const { events } = renderReview();
+    await userEvent.click(screen.getByRole("button", { name: "Ver 43...Te6" }));
     await userEvent.click(screen.getByRole("button", { name: "Treinar este momento" }));
     await userEvent.click(screen.getByRole("button", { name: "Treinar os 5 momentos" }));
-    expect(received).toEqual(["TRAINING.REQUESTED", "TRAINING.REQUESTED"]);
+    expect(events).toEqual([
+      { type: "TRAINING.REQUESTED", ply: 86 },
+      { type: "TRAINING.REQUESTED", ply: 44 },
+    ]);
+  });
+
+  it("clicar no círculo do gráfico abre o momento na lista (RV-08)", async () => {
+    renderReview();
+    await userEvent.click(screen.getByRole("button", { name: "Momento 4: 43...Te6" }));
+    expect(screen.getByRole("button", { name: "Ver 43...Te6" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+  });
+
+  it("clicar num momento-chave na lista de lances abre o momento (RV-10)", async () => {
+    renderReview();
+    const moves = screen.getByRole("region", { name: "Lances" });
+    await userEvent.click(within(moves).getByRole("button", { name: "Te6??" }));
+    expect(screen.getByRole("button", { name: "Ver 43...Te6" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(screen.getByText("Antes de 43...Te6?")).toBeInTheDocument();
+  });
+
+  it("com mais de 5 candidatos, oferece ver todos os lances anotados (R-07)", () => {
+    renderReview({
+      adjust: (result) => ({
+        ...result,
+        verdicts: result.verdicts.map((verdict) =>
+          verdict.ply === 2 && result.keyMoments[0]
+            ? { ...result.keyMoments[0], ply: 2, moveLabel: "1...d5" }
+            : verdict,
+        ),
+      }),
+    });
+    expect(screen.getByRole("link", { name: "ver todos os lances anotados" })).toHaveAttribute(
+      "href",
+      "#lances",
+    );
+  });
+
+  it("com 5 candidatos ou menos, não mostra o link", () => {
+    renderReview();
+    expect(screen.queryByRole("link", { name: "ver todos os lances anotados" })).toBeNull();
   });
 
   it("mostra a linha do motor no tabuleiro", async () => {
@@ -167,6 +234,29 @@ describe("Pergunte à IA (RV-16, RV-17)", () => {
     expect(screen.getByText("Pensando…")).toBeInTheDocument();
     await act(async () => finish({ answer: "Porque ganhou a torre.", in_scope: true }));
     expect(screen.getByText("Porque ganhou a torre.")).toBeInTheDocument();
+  });
+
+  it("pergunta fora da partida recebe o aviso e aponta as sugestões (R-11)", async () => {
+    renderReview({
+      answer: async () => ({
+        answer: "Eu só falo sobre esta partida.",
+        in_scope: false,
+      }),
+    });
+    await userEvent.type(
+      screen.getByLabelText("Pergunte à IA sobre esta partida"),
+      "Qual a capital da França?",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Perguntar" }));
+    expect(await screen.findByText("Eu só falo sobre esta partida.")).toBeInTheDocument();
+    expect(screen.getByText("Experimente uma das sugestões acima.")).toBeInTheDocument();
+  });
+
+  it("pergunta dentro da partida não mostra o aviso", async () => {
+    renderReview();
+    await userEvent.click(screen.getByRole("button", { name: "Por que 12...Bxa1 foi bom?" }));
+    expect(await screen.findByText("Porque ganhou a torre.")).toBeInTheDocument();
+    expect(screen.queryByText("Experimente uma das sugestões acima.")).toBeNull();
   });
 
   it("pergunta pelo campo", async () => {

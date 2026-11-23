@@ -42,7 +42,8 @@ describe("statCards (RV-02)", () => {
     expect(cards[0]).toEqual({ value: "5", label: "momentos em que você perdeu material" });
     expect(cards[1]).toEqual({ value: "12...Bxa1!", label: "seu melhor lance" });
     expect(cards[2]?.label).toBe("sua maior vantagem (pontos de material)");
-    expect(cards[2]?.value).toBe(`+${Math.max(...result.materialTimeline)}`);
+    // Maior vantagem da partida de referência: +10 (depois de 32...Txe4).
+    expect(cards[2]?.value).toBe("+10");
   });
 });
 

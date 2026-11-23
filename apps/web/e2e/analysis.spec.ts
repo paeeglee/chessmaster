@@ -26,7 +26,9 @@ test.describe("análise da partida (step_02)", () => {
       expect(texts.some((text) => text.includes(label))).toBe(true);
     }
     // Texto da IA (provedor falso, só com fatos do contrato).
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Vitória\./);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      /^Vitória\. A vantagem começou em 12\.\.\.Bxa1\./,
+    );
   });
 
   test("cancelar volta à tela Colar com a partida e a cor", async ({ page }) => {

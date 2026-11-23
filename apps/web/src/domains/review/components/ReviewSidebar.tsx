@@ -109,6 +109,11 @@ export function AskAi({ context, send, asking }: Props & { asking: boolean }) {
             <span className="text-[15px]">
               {question.status === "pending" && "Pensando…"}
               {question.status === "answered" && question.answer}
+              {question.status === "answered" && !question.inScope && (
+                <span className="mt-1 block text-ink-muted text-sm">
+                  Experimente uma das sugestões acima.
+                </span>
+              )}
               {question.status === "failed" && "Não foi possível responder agora. Tente de novo."}
             </span>
           </li>
@@ -129,7 +134,8 @@ export function EnginesFooter({ context }: Pick<Props, "context">) {
       <span className="font-bold text-ink">Motores usados</span>
       <span>✓ Regras</span>
       <span>✓ Avaliação</span>
-      <span>✓ Tabela de finais (quando sobram poucas peças)</span>
+      {/* A tabela de finais (motor 4) ainda não existe; não mostrar como usada. */}
+      <span>– Tabela de finais (ainda não disponível)</span>
       <span>{aiFailed ? "✕ IA: falhou" : "✓ IA: só explica, não calcula"}</span>
     </footer>
   );
