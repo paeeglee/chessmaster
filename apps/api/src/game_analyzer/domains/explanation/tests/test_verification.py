@@ -95,6 +95,10 @@ def test_accepts_contract_moves_written_with_spaces_and_signs(contract: GameCont
     assert verify_text("Com ...Ta7 e …Ta7 o bispo caiu.", facts) == []
 
 
+def test_violation_messages_have_no_extra_spaces(contract: GameContract) -> None:
+    assert verify_text("Jogue: Nf3.", allowed_facts(contract)) == ["lance Nf3 não está no contrato"]
+
+
 def test_accepts_castling_written_with_zeros(contract: GameContract) -> None:
     data = contract.model_dump()
     data["moves"].append({"ply": 12, "label": "6...O-O", "san": "O-O"})

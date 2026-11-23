@@ -82,7 +82,7 @@ def verify_text(text: str, facts: AllowedFacts) -> list[str]:
     for match in _UNLABELED_MOVE.finditer(remaining):
         move = re.sub(r"^(?:\.\.\.|…)\s?", "", match.group(0).strip())
         if _normalize_move(move) not in facts.moves:
-            violations.append(f"lance {match.group(0)} não está no contrato")
+            violations.append(f"lance {match.group(0).strip()} não está no contrato")
         remaining = remaining.replace(match.group(0), " ", 1)
     for square in _STANDALONE_SQUARE.findall(remaining):
         if square not in facts.squares:
