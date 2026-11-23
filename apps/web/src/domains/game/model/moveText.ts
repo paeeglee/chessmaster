@@ -4,6 +4,8 @@ export type MoveTextTokens = {
   /** Lances como foram escritos, sem números, anotações nem o resultado. */
   moves: string[];
   result: GameResult | null;
+  /** Há texto que não é lance no meio da lista (com lances depois dele). */
+  interrupted: boolean;
 };
 
 // Lance em SAN com letras de peça inglesas (K Q R B N) ou portuguesas (R D T B C).
@@ -27,10 +29,28 @@ function stripVariations(text: string): string {
   return current;
 }
 
+// Figurinos Unicode (♘f3) viram as letras inglesas das peças.
+const FIGURINES: Record<string, string> = {
+  "♔": "K",
+  "♚": "K",
+  "♕": "Q",
+  "♛": "Q",
+  "♖": "R",
+  "♜": "R",
+  "♗": "B",
+  "♝": "B",
+  "♘": "N",
+  "♞": "N",
+};
+const FIGURINE = /[♔♚♕♛♖♜♗♝♘♞]/g;
+// Relógio copiado junto com os lances (0:59, 1:02:03, 12.4 não), ignorado.
+const CLOCK = /^[([]?\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?[)\]]?$/;
+
 function normalize(text: string): string {
   const withoutComments = text.replace(/\{[^}]*\}/g, " ").replace(/;[^\n]*/g, " ");
   return stripVariations(withoutComments)
     .replace(/\$\d+/g, " ")
+    .replace(FIGURINE, (glyph) => FIGURINES[glyph] as string)
     .replace(/½-½/g, "1/2-1/2")
     .replace(/(?<![\d/-])0-0-0(?![\d-])/g, "O-O-O")
     .replace(/(?<![\d/-])0-0(?![\d-])/g, "O-O");
@@ -40,6 +60,7 @@ type Token =
   | { kind: "number"; value: number }
   | { kind: "move"; value: string }
   | { kind: "result"; value: GameResult | null }
+  | { kind: "clock" }
   | { kind: "other" };
 
 function classify(raw: string): Token[] {
@@ -48,6 +69,9 @@ function classify(raw: string): Token[] {
     const rest = raw.slice(numbered[0].length);
     const number: Token = { kind: "number", value: Number(numbered[1]) };
     return rest ? [number, ...classify(rest)] : [number];
+  }
+  if (CLOCK.test(raw)) {
+    return [{ kind: "clock" }];
   }
   if (raw in RESULTS) {
     return [{ kind: "result", value: RESULTS[raw] ?? null }];
@@ -70,28 +94,38 @@ export function readResultToken(raw: string): GameResult | null | undefined {
 
 /**
  * Lê os lances de um texto. Começa no primeiro "1." (o que vem antes é ignorado) e
- * para no resultado ou no primeiro texto que não é lance. Sem "1.", só aceita o
- * texto se todos os tokens forem lances.
+ * termina no resultado ou no último lance; o texto depois disso é ignorado. Texto que
+ * não é lance no meio da lista marca a leitura como interrompida, para não perder
+ * lances em silêncio. Sem "1.", só aceita o texto se todos os tokens forem lances.
  */
 export function tokenizeMoveText(text: string): MoveTextTokens {
   const tokens = normalize(text).split(/\s+/).filter(Boolean).flatMap(classify);
   const start = tokens.findIndex((token) => token.kind === "number" && token.value === 1);
 
   if (start === -1 && tokens.some((token) => token.kind === "other")) {
-    return { moves: [], result: null };
+    return { moves: [], result: null, interrupted: false };
   }
 
   const moves: string[] = [];
   let result: GameResult | null = null;
+  let strayText = false;
+  let interrupted = false;
   for (const token of tokens.slice(Math.max(start, 0))) {
-    if (token.kind === "move") {
-      moves.push(token.value);
-    } else if (token.kind === "result") {
+    if (token.kind === "result") {
       result = token.value;
       break;
-    } else if (token.kind === "other") {
-      break;
+    }
+    if (token.kind === "other") {
+      strayText = true;
+    } else if (token.kind === "move" || token.kind === "number") {
+      if (strayText) {
+        interrupted = true;
+        break;
+      }
+      if (token.kind === "move") {
+        moves.push(token.value);
+      }
     }
   }
-  return { moves, result };
+  return { moves, result, interrupted };
 }

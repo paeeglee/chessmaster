@@ -170,7 +170,7 @@ describe("replayGame com lance ilegal", () => {
   });
 
   it("com notação indeterminada, informa a leitura que foi mais longe", () => {
-    // Inglês falha no 3º meio-lance (Re2); português falha no 4º (Bb4 sem caminho).
+    // Inglês falha no 3º meio-lance (Re2); português falha no 4º (Bb3 sem caminho).
     const outcome = replayText("1.e4 e5 2.Re2 Bb3");
     expect(outcome).toMatchObject({
       kind: "illegal-move",

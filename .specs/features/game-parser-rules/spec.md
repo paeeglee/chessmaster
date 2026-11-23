@@ -68,7 +68,9 @@ Every later engine (evaluation, classification, AI contract) and every screen ne
 2. WHEN it receives `1.d4 d5 2.Cc3 e6 3.Cf3 Cc6 4.e3 Cf6 5.Bd3 Bd6 6.a3 O-O 7.b4 Te8` THEN it SHALL return the same English tokens as the English list (`Nc3`, `Nf3`, `Nc6`, `Nf6`, `Bd3`, `Bd6`, `O-O`, `Re8`). <!-- GAME-05 -->
 3. WHEN a list uses only `R` and `B` piece letters and is legal in Portuguese but not in English THEN replay SHALL read it as Portuguese (`R` = king). <!-- GAME-06 -->
 4. WHEN moves carry `+`, `#`, `!`, `?`, `!!`, `??`, `!?`, `?!`, NAGs, `{comments}` or `(variations)` THEN the parser SHALL return the same tokens as without them. <!-- GAME-07 -->
-5. WHEN the list is wrapped in HTML tags or surrounded by other text THEN the parser SHALL return the moves from the first `1.` up to the last move or result token. <!-- GAME-08 -->
+5. WHEN the list is wrapped in HTML tags or surrounded by other text THEN the parser SHALL return the moves from the first `1.` up to the last move or result token. IF a non-move token appears inside the list (a move or move number follows it) THEN `parseGameText` SHALL return `unrecognized` instead of dropping moves. <!-- GAME-08 -->
+8. WHEN moves use Unicode figurines (`♘f3`, `♞c6`) THEN the parser SHALL read them as the English piece letters. <!-- GAME-26 -->
+9. WHEN clock times (`0:59`, `[1:02:03]`) appear between moves THEN the parser SHALL ignore them. <!-- GAME-27 -->
 6. WHEN the list ends with `1-0`, `0-1`, `1/2-1/2`, `½-½` or `*` THEN the parser SHALL return that result (`*` and no token → `null`). <!-- GAME-09 -->
 7. WHEN castling is written with zeros (`0-0`, `0-0-0`) THEN the parser SHALL read it as `O-O`/`O-O-O`. <!-- GAME-10 -->
 
@@ -168,8 +170,10 @@ Every later engine (evaluation, classification, AI contract) and every screen ne
 | GAME-23 | P1: Boundary | Tasks | Implementing |
 | GAME-24 | P1: Boundary | Tasks | Implementing |
 | GAME-25 | Edge case | Tasks | Implementing |
+| GAME-26 | P1: Plain list | Tasks | Implementing |
+| GAME-27 | P1: Plain list | Tasks | Implementing |
 
-**Coverage:** 25 total, 25 mapped to tasks (T1–T5), 0 unmapped
+**Coverage:** 27 total, 27 mapped to tasks (T1–T5 + verification fixes), 0 unmapped
 
 ---
 

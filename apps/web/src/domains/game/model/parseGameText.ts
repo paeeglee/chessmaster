@@ -24,12 +24,13 @@ function readMoves(text: string): {
   format: GameFormat;
   moves: string[];
   result: GameResult | null;
+  interrupted: boolean;
 } {
   if (LOOKS_LIKE_HTML.test(text)) {
     const doc = new DOMParser().parseFromString(text, "text/html");
     const chesscom = readChesscomHtml(doc);
     if (chesscom && chesscom.moves.length > 0) {
-      return { format: "chesscom-html", ...chesscom };
+      return { format: "chesscom-html", ...chesscom, interrupted: false };
     }
     return { format: "move-list", ...tokenizeMoveText(documentText(doc)) };
   }
@@ -52,8 +53,8 @@ export function parseGameText(text: string): ParseOutcome {
     return { kind: "unrecognized" };
   }
 
-  const { format, moves, result } = readMoves(text);
-  if (moves.length === 0) {
+  const { format, moves, result, interrupted } = readMoves(text);
+  if (moves.length === 0 || interrupted) {
     return { kind: "unrecognized" };
   }
 

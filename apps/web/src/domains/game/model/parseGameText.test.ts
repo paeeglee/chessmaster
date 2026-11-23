@@ -34,6 +34,20 @@ describe("parseGameText com o HTML do Chess.com", () => {
     expect(game.result).toBeNull();
   });
 
+  it("lê os lances completos de um trecho cortado no meio de uma tag (GAME-03)", () => {
+    const start = referenceGameHtml.indexOf('move-node-0-2"') + 5;
+    const end = referenceGameHtml.indexOf('data-figurine="B"></span>d6') + 10;
+    expect(parsed(referenceGameHtml.slice(start, end)).sanMoves).toEqual([
+      "Nc3",
+      "e6",
+      "Nf3",
+      "Nc6",
+      "e3",
+      "Nf6",
+      "Bd3",
+    ]);
+  });
+
   it("lê os lances completos de um trecho do HTML com lixo em volta (GAME-03)", () => {
     const start = referenceGameHtml.indexOf('<span data-id="move-node-0-2"');
     const end = referenceGameHtml.indexOf('<span data-id="move-node-0-10"');
@@ -88,6 +102,10 @@ describe("parseGameText rejeita o que não é partida", () => {
     "<div class='board'><span>sem lances aqui</span></div>",
   ])("texto sem lances → unrecognized (GAME-12)", (text) => {
     expect(parseGameText(text)).toEqual({ kind: "unrecognized" });
+  });
+
+  it("lista com texto estranho no meio → unrecognized (GAME-08)", () => {
+    expect(parseGameText("1.e4 e5 2.Xf3 Nc6 3.Bb5")).toEqual({ kind: "unrecognized" });
   });
 
   it("PGN com cabeçalhos → unrecognized, mesmo com lances (GAME-13)", () => {

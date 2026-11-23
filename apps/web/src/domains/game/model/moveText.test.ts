@@ -6,6 +6,7 @@ describe("tokenizeMoveText", () => {
     expect(tokenizeMoveText("1.d4 d5 2.Nc3 e6 3.Nf3")).toEqual({
       moves: ["d4", "d5", "Nc3", "e6", "Nf3"],
       result: null,
+      interrupted: false,
     });
   });
 
@@ -31,7 +32,7 @@ describe("tokenizeMoveText", () => {
 
   it("ignora anotações, NAGs, comentários e variantes (GAME-07)", () => {
     const annotated =
-      "1.e4! e5?! 2.Nf3!! {bom lance} Nc6?? 3.Bb5+ $1 (3.Bc4 Bc5) a6!? 4.Bxc6# ;fim";
+      "1.e4! e5?! 2.Nf3!! {bom lance} Nc6?? 3.Bb5+ $1 (3.Bc4 Bc5) a6? 4.Bxc6#!? ;fim";
     const clean = "1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Bxc6";
     expect(tokenizeMoveText(annotated).moves).toEqual(tokenizeMoveText(clean).moves);
     expect(tokenizeMoveText(annotated).moves).toEqual([
@@ -63,11 +64,15 @@ describe("tokenizeMoveText", () => {
     ["1.e4 e5 *", null],
     ["1.e4 e5", null],
   ])("lê o resultado em %s (GAME-09)", (text, result) => {
-    expect(tokenizeMoveText(text)).toEqual({ moves: ["e4", "e5"], result });
+    expect(tokenizeMoveText(text)).toEqual({ moves: ["e4", "e5"], result, interrupted: false });
   });
 
   it("para no resultado e ignora o que vem depois", () => {
-    expect(tokenizeMoveText("1.e4 e5 1-0 2.Nf3")).toEqual({ moves: ["e4", "e5"], result: "1-0" });
+    expect(tokenizeMoveText("1.e4 e5 1-0 2.Nf3")).toEqual({
+      moves: ["e4", "e5"],
+      result: "1-0",
+      interrupted: false,
+    });
   });
 
   it("lê o roque escrito com zeros (GAME-10)", () => {
@@ -89,6 +94,7 @@ describe("tokenizeMoveText", () => {
     expect(tokenizeMoveText("1.f3 e5 2.g4 Qh4# 0-1")).toEqual({
       moves: ["f3", "e5", "g4", "Qh4"],
       result: "0-1",
+      interrupted: false,
     });
   });
 
@@ -111,5 +117,37 @@ describe("tokenizeMoveText", () => {
 
   it("não aceita texto misturado sem o número do primeiro lance", () => {
     expect(tokenizeMoveText("veja e4 e5").moves).toEqual([]);
+  });
+
+  it("lê figurinos Unicode como letras de peça", () => {
+    expect(tokenizeMoveText("1.e4 e5 2.♘f3 ♞c6 3.♗b5 ♛h4").moves).toEqual([
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+      "Bb5",
+      "Qh4",
+    ]);
+  });
+
+  it("ignora o relógio copiado junto com os lances", () => {
+    expect(tokenizeMoveText("1.e4 0:59 e5 0:58 2.Nf3 [1:02:03] Nc6").moves).toEqual([
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+    ]);
+  });
+
+  it("marca como interrompida a lista com texto estranho no meio (GAME-08)", () => {
+    expect(tokenizeMoveText("1.e4 e5 2.Xf3 Nc6 3.Bb5")).toEqual({
+      moves: ["e4", "e5"],
+      result: null,
+      interrupted: true,
+    });
+  });
+
+  it("não marca como interrompida quando o texto estranho fica no fim", () => {
+    expect(tokenizeMoveText("1.e4 e5 2.Nf3 gg wp").interrupted).toBe(false);
   });
 });

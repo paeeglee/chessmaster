@@ -29,13 +29,16 @@ describe("fronteira do domínio game", () => {
   it("só o domínio game importa chess.js (GAME-23)", () => {
     const offenders = sourceFiles(SRC)
       .filter((file) => !file.startsWith(GAME_DIR))
-      .filter((file) => /from\s+["']chess\.js["']/.test(readFileSync(file, "utf8")))
+      .filter((file) =>
+        /(?:from\s+|import\s*\(?\s*)["']chess\.js["']/.test(readFileSync(file, "utf8")),
+      )
       .map((file) => relative(SRC, file));
     expect(offenders).toEqual([]);
   });
 
   it("o model/ não importa React, XState nem rede (GAME-24)", () => {
-    const forbidden = /from\s+["'](react|react-dom|xstate|@xstate\/react|msw)["']|\bfetch\(/;
+    const forbidden =
+      /(?:from\s+|import\s*\(?\s*)["'](react|react-dom|xstate|@xstate\/react|msw)["']|\bfetch\(|XMLHttpRequest|WebSocket|EventSource/;
     const offenders = sourceFiles(join(GAME_DIR, "model"))
       .filter((file) => forbidden.test(readFileSync(file, "utf8")))
       .map((file) => relative(SRC, file));
