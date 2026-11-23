@@ -1,18 +1,13 @@
 # F7 · Resultado Validation
 
-**Date**: 2026-11-23
+**Date**: 2026-11-23 (round 2)
 **Spec**: `.specs/features/review-screen/spec.md`
-**Diff range**: `origin/main..HEAD` (`91cc8cc..1146618`, 8 commits, 37 files)
+**Diff range**: `origin/main..HEAD` (`91cc8cc..e384ad0`). Round 2 re-verified the fix commit `e384ad0` on top of round 1 (`1146618`).
 **Verifier**: independent sub-agent (author ≠ verifier)
 
-**Verdict**: FAIL
+**Verdict**: PASS
 
-Both gates are green and every RV requirement has a test. Three discrimination mutants survive the whole suite, Vitest and Playwright both:
-
-- **M11 / M12:** the training buttons can send the wrong ply. Tests check only the event type.
-- **M15:** clicking a key-moment move in the move list can skip the moment sync (RV-10) without any test failing.
-
-These are fix tasks (F1–F2 below). The feature is not done until they are fixed.
+All 8 round-1 gaps (G1–G8) are closed. Both gates are green. All 22 sensor mutants are killed in Vitest: the 16 from round 1 plus 6 aimed at the new code.
 
 ---
 
@@ -20,20 +15,39 @@ These are fix tasks (F1–F2 below). The feature is not done until they are fixe
 
 | Task | Status | Notes |
 | ---- | ------ | ----- |
-| T1 Review model | ✅ Done | `review.ts` + 12 tests |
-| T2 Review machine and app wiring | ✅ Done | `reviewMachine.ts`, app `review`/`training` states |
-| T3 Board, chart and move list | ✅ Done | `explore.test.tsx` |
-| T4 Summary, moments, strengths, ask AI, footer | ✅ Done | `ReviewScreen.test.tsx` |
-| T5 E2E and visual check | ✅ Done | `e2e/review.spec.ts` |
+| T1 Review model | ✅ Done | `review.ts` (+ `hiddenMistakes` in round 2) |
+| T2 Review machine and app wiring | ✅ Done | `Question.inScope` added in round 2 |
+| T3 Board, chart and move list | ✅ Done | - |
+| T4 Summary, moments, strengths, ask AI, footer | ✅ Done | link, off-topic hint, tablebase footer added in round 2 |
+| T5 E2E and visual check | ✅ Done | headline assertion tightened in round 2 |
+| Fix round (G1–G8) | ✅ Done | `e384ad0` |
 
 ---
 
-## Gate Check
+## Gate Check (round 2, HEAD `e384ad0`)
 
-- **`make check`**: exit 0. Biome and Ruff clean, `tsc` and mypy clean. Vitest has 33 files and **358 passed**: 98.12% stmts, 90.34% branches, `review/model` at 98% stmts and 91.3% branches. pytest has 75 passed at 99.28%.
-- **`make test-e2e`**: exit 0, **14 passed** in 1.1 min, including `[full-analysis] e2e/review.spec.ts:7`. Ports 4173/8000 were free before and after the run.
-- **Test delta**: +52 `it(...)` cases in `apps/web/src`, 0 removed, plus 1 new Playwright spec.
+- **`make check`**: exit 0.
+  - Biome checked 118 files, Ruff clean, `tsc` and mypy clean.
+  - Vitest: 33 files, **365 passed**. Coverage 98.23% stmts and 90.54% branches overall; `review/model` at 98.05% stmts and 91.3% branches.
+  - pytest: 75 passed, 99.28%.
+- **`make test-e2e`**: exit 0, **14 passed** in 1.1 min, including `[full-analysis] e2e/analysis.spec.ts` and `e2e/review.spec.ts`. Ports 4173/8000 were free before and after the run.
+- **Test delta**: round 1 had 358 Vitest tests, round 2 has 365 (+7). No tests were removed. The only edits to existing assertions make them stricter (event payloads, the literal `+10`, the full headline regex).
 - **Skipped**: none.
+
+---
+
+## Round-1 gaps re-checked
+
+| Gap | Fix verified | Evidence |
+| --- | ------------ | -------- |
+| G1 RV-12 training ply | ✅ | `apps/web/src/domains/review/components/ReviewScreen.test.tsx:150-159`: expands `Ver 43...Te6`, then `expect(events).toEqual([{type:"TRAINING.REQUESTED", ply:86}, {type:"TRAINING.REQUESTED", ply:44}])`. M11 and M12 are now killed. |
+| G2 RV-10 move-list and chart entry points | ✅ | `ReviewScreen.test.tsx:170-179`: click `Te6??` in "Lances" → `Ver 43...Te6` `aria-expanded="true"` and "Antes de 43...Te6?". `ReviewScreen.test.tsx:161-168`: click `Momento 4: 43...Te6` → `aria-expanded="true"`. M15 and M4 are now killed in Vitest. |
+| G3 more than 5 candidates | ✅ | `apps/web/src/domains/review/model/review.ts:219-223` (`hiddenMistakes` counts only `kind === "mistake"`, the player's). Link at `KeyMomentsList.tsx:112-116`. Tests: `ReviewScreen.test.tsx:181-196` (`link` with `href="#lances"`) and `:198-201` (no link with ≤ 5). |
+| G4 RV-18 tablebase status | ✅ | `spec.md` RV-18 narrowed (F5 pending, only the AI can fail here). `ReviewSidebar.tsx:137-138` (`– Tabela de finais (ainda não disponível)`). `ReviewScreen.test.tsx:107-111`: `getByText("– Tabela de finais (ainda não disponível)")`, `queryByText(/✓ Tabela de finais/)` null. |
+| G5 headline AC | ✅ | `apps/web/e2e/analysis.spec.ts:29-31`: `toHaveText(/^Vitória\. A vantagem começou em 12\.\.\.Bxa1\./)`. Passed in `make test-e2e`. |
+| G6 off-topic question AC | ✅ | `reviewMachine.ts` keeps `inScope: event.output.in_scope`. `ReviewScreen.test.tsx:239-253`: an `in_scope:false` answer shows the answer and "Experimente uma das sugestões acima.". `:255-260`: an in-scope answer has no hint. |
+| G7 AI-failed AC | ✅ | `ReviewScreen.test.tsx:97-99`: the "Tabuleiro da partida", `/Vantagem de material/` and "Lances" regions are present with the AI failed. |
+| G8 RV-02 precision | ✅ | `apps/web/src/domains/review/model/review.test.ts:45-46`: `toBe("+10")`. |
 
 ---
 
@@ -43,65 +57,71 @@ These are fix tasks (F1–F2 below). The feature is not done until they are fixe
 
 | ID | Spec-defined outcome | `file:line` + assertion | Result |
 | -- | -------------------- | ----------------------- | ------ |
-| RV-01 | Band shows result tag, context line, verdict, patterns | `apps/web/src/domains/review/components/ReviewScreen.test.tsx:65-68`: `getByText("Vitória · 0-1")`, `"Você: pretas · 72 lances · xeque-mate"`, `heading level 1 toHaveTextContent(verdict)`, `getByText(patterns_sentence)`. `e2e/review.spec.ts:14-15` | ✅ |
-| RV-02 | Cards: number of key moments, best move, max advantage | `apps/web/src/domains/review/model/review.test.ts:42-45`: `{value:"5",…}`, `{value:"12...Bxa1!",…}`. Card 3 is asserted as `` `+${Math.max(...result.materialTimeline)}` ``, which recomputes the implementation formula. | ⚠️ Spec-precision gap: card 3 has no concrete expected value |
-| RV-03 | AI failed: "A explicação não pôde ser gerada." + "Tentar de novo"; habit and ask-AI hidden | `ReviewScreen.test.tsx:79-89`: heading present, `queryByText("Hábito…")` null, ask field null, `"✕ IA: falhou"`, retry shows the verdict. Machine: `apps/web/src/domains/review/machines/reviewMachine.test.ts:139-163` | ✅ |
-| RV-04 | No key moments: "Nenhuma perda de material importante" | `apps/web/src/app/App.test.tsx:142`: `getByText("Nenhuma perda de material importante.")` | ✅ |
-| RV-05 | Opens before the first key moment, from the player's side | `review.test.ts:70` `initialPosition → 43`. `reviewMachine.test.ts:42-46` `{position:43, orientation:"b"}`. `apps/web/src/domains/review/components/explore.test.tsx:57-59` `"Antes de 22...Ta7?"`, first square `h1`. `e2e/review.spec.ts:23-28` | ✅ |
-| RV-06 | Início/Anterior/Próximo/Fim buttons, ←/→/Home/End, Girar | `explore.test.tsx:65-90` (captions after each button and key; `firstSquare()` → `a8` after Girar). `reviewMachine.test.ts:49-70` (bounds 0/144) | ✅ |
-| RV-07 | Red lost-piece square, green best-move destination, legend "lance sugerido (X)" | `explore.test.tsx:60-62`: `a1 data-mark="red"`, `d4 "green"`, `/lance sugerido \(Bd4\+\)/`. `review.test.ts:81-84` | ✅ |
-| RV-08 | Material after every ply, numbered clickable circles, hidden under 15 moves | `review.test.ts:98-107` (145 points, marks at plies 44/54/82/86/112). `explore.test.tsx:96-98,113-116` | ✅ |
-| RV-09 | Two columns, `??` for loss ≥ 5, `?` for a key moment, `!` for a strength, selection highlighted | `review.test.ts:52-59` (72 rows, `Bxa1!`, `Ta7?`, `Te6??`). `explore.test.tsx:120-129` (`aria-current="true"` on `Ta7?`) | ✅ |
-| RV-10 | Choosing a moment in the list, chart **or move list** syncs board + expanded item + highlight | List: `ReviewScreen.test.tsx:115-127`. Chart: `explore.test.tsx:98-101` checks board and highlight; the expanded item is checked only in `e2e/review.spec.ts:33-41`. **Move list: no test clicks a key-moment move** (M15 survived). | ❌ GAP (move-list entry point) |
-| RV-11 | Ordered list, one expanded (`aria-expanded`), type tag, summary, explanation, best move, "Vantagem: +A → +B" | `ReviewScreen.test.tsx:94-127`: order of 5 labels, `"Peça atacada"`, `aria-expanded` true/false, `"Melhor: 22...Bd4+"`, `"Vantagem: +9 → +6"` | ✅ |
-| RV-12 | "Treinar este momento" trains **that** moment; "Treinar os N" starts at the **first** | `ReviewScreen.test.tsx:129-134` asserts only `["TRAINING.REQUESTED","TRAINING.REQUESTED"]` (no ply). The machine forwards the ply (`reviewMachine.test.ts:191-195`) and the app stores it (`apps/web/src/app/appMachine.test.ts:248-250`), but no test checks which ply the buttons send. M11 and M12 survived. | ❌ GAP |
-| RV-13 | Engine line after the moment, up to 6 plies | `reviewMachine.test.ts:80-94`: `position 44`, `fens.length ≤ 6`, steps to the end and back to `browsing`. The component test `ReviewScreen.test.tsx:139` uses a weak regex. | ✅ |
-| RV-14 | Strengths texts from the AI, or templates | `ReviewScreen.test.tsx:146,153`: `"12...Bxa1! — ganhou a torre em a1."`. Net-gain rule: `apps/web/src/domains/analysis/model/classify.test.ts:395-410` `kind "none"` for a recapture | ✅ |
-| RV-15 | Habit sentence shown | `ReviewScreen.test.tsx:147` | ✅ |
-| RV-16 | Chip or typed question calls `/api/questions`; "Pensando…" while waiting; answer shown | `ReviewScreen.test.tsx:158-181`. Real call through the proxy: `e2e/review.spec.ts:44-51`. Trim: `reviewMachine.test.ts:107-118`. The 500-char cap (`reviewMachine.ts:197`, `maxLength` in `ReviewSidebar.tsx:90`) is untested. | ✅ (cap untested, minor) |
-| RV-17 | Failure: "Não foi possível responder agora. Tente de novo." | `ReviewScreen.test.tsx:183-195` | ✅ |
-| RV-18 | Footer lists rules, evaluation, tablebase and AI with ✓ or "falhou" | `ReviewScreen.test.tsx:199-205,84,89` (AI ✓ and ✕). Rules, evaluation and tablebase are hard-coded ✓ (`apps/web/src/domains/review/components/ReviewSidebar.tsx:130-132`). | ⚠️ Spec-precision gap (see G4) |
-| RV-19 | Confirmation dialog; confirm returns to Colar with the field empty; cancel keeps the result | `ReviewScreen.test.tsx:207-219` (`alertdialog`, cancel then confirm). `reviewMachine.test.ts:180-189`. `appMachine.test.ts:197-226` (`text:""`, `playerColor:null`) | ✅ |
-| RV-20 | Lost game: neutral tag "Derrota · 1-0" | `review.test.ts:30` `{label:"Derrota · 0-1", tone:"loss"}`. The `loss` tone uses neutral styling (`SummaryBand.tsx:6`). | ✅ |
+| RV-01 | Result tag, context line, verdict, patterns | `ReviewScreen.test.tsx` "resumo" block: `getByText("Vitória · 0-1")`, `"Você: pretas · 72 lances · xeque-mate"`, `heading level 1`, `patterns_sentence`. `apps/web/e2e/review.spec.ts:14-15` | ✅ |
+| RV-02 | Key moment count, best move, max advantage | `review.test.ts:42-46`: `"5"`, `"12...Bxa1!"`, `"+10"` | ✅ |
+| RV-03 | Failure notice + "Tentar de novo"; habit and ask-AI hidden | `ReviewScreen.test.tsx:87-105`. `apps/web/src/domains/review/machines/reviewMachine.test.ts:139-163` | ✅ |
+| RV-04 | "Nenhuma perda de material importante" | `apps/web/src/app/App.test.tsx:142` | ✅ |
+| RV-05 | Before the first key moment, from the player's side | `review.test.ts:70`. `reviewMachine.test.ts:42-46` (`position:43, orientation:"b"`). `explore.test.tsx:57-59`. `e2e/review.spec.ts:23-28` | ✅ |
+| RV-06 | Buttons, ←/→/Home/End, Girar | `apps/web/src/domains/review/components/explore.test.tsx:65-90`. `reviewMachine.test.ts:49-70` | ✅ |
+| RV-07 | Red lost-piece square, green best-move destination, legend | `explore.test.tsx:60-62`. `review.test.ts:81-84` | ✅ |
+| RV-08 | Material per ply, numbered clickable circles, hidden under 15 moves | `review.test.ts:98-107`. `explore.test.tsx:96-101,113-116`. `ReviewScreen.test.tsx:161-168` | ✅ |
+| RV-09 | Two columns; `??` for loss ≥ 5, `?`, `!`; highlight | `review.test.ts:52-59`. `explore.test.tsx:120-129` | ✅ |
+| RV-10 | Moment from the list, chart or move list syncs board, expanded item and highlight | List: `ReviewScreen.test.tsx` "abrir outro momento". Chart: `:161-168` and `explore.test.tsx:98-101`. Move list: `:170-179`. E2E: `e2e/review.spec.ts:33-41` | ✅ |
+| RV-11 | Ordered list, `aria-expanded`, type tag, texts, best move, "Vantagem: +A → +B" | `ReviewScreen.test.tsx` "lista os cinco em ordem" (5 labels, "Peça atacada", "Melhor: 22...Bd4+", "Vantagem: +9 → +6") | ✅ |
+| RV-12 | Train this moment / train all from the first | `ReviewScreen.test.tsx:150-159` (ply 86 / ply 44). `apps/web/src/app/appMachine.test.ts:248-250` | ✅ |
+| RV-13 | Engine line after the moment, ≤ 6 plies | `reviewMachine.test.ts:80-94` | ✅ |
+| RV-14 | Strengths texts (AI or templates), net gains only | `ReviewScreen.test.tsx` "pontos fortes". `apps/web/src/domains/analysis/model/classify.test.ts:395-410` | ✅ |
+| RV-15 | Habit sentence | `ReviewScreen.test.tsx` "usa os textos da IA" | ✅ |
+| RV-16 | `/api/questions`, "Pensando…", answer shown | `ReviewScreen.test.tsx` "pergunta por um chip" / "pelo campo". `e2e/review.spec.ts:44-51` (real proxy call) | ✅ |
+| RV-17 | "Não foi possível responder agora. Tente de novo." | `ReviewScreen.test.tsx` "avisa quando não conseguiu responder" | ✅ |
+| RV-18 | Engine statuses; tablebase "ainda não disponível" until F5 | `ReviewScreen.test.tsx:107-111` and the AI ✓/✕ assertions in the RV-03 test | ✅ |
+| RV-19 | Confirmation dialog; confirm → Colar with an empty field; cancel keeps the result | `ReviewScreen.test.tsx` "pede confirmação antes de descartar". `reviewMachine.test.ts:180-189`. `appMachine.test.ts:197-226` | ✅ |
+| RV-20 | Neutral "Derrota" tag | `review.test.ts:30`. Neutral styling in `SummaryBand.tsx:6` | ✅ |
 
 ### step_03 §7 acceptance criteria
 
 | Criterion | Evidence | Result |
 | --------- | -------- | ------ |
-| Verdict says the advantage started at move 12 and material went back 5 times | The fake provider builds "A vantagem começou em …" (`apps/api/.../infrastructure/fake_provider.py:76-78`). The e2e only asserts `/^Vitória\./` (`e2e/analysis.spec.ts:29`). | ⚠️ Partial (G5) |
-| 5 key moments at 22, 27, 41, 43, 56 | `ReviewScreen.test.tsx:98-104` (fixture). `e2e/review.spec.ts:16-19` (the 4 stable moments; 27...Tb7 is borderline, documented in `docs/architecture/overview.md`) | ✅ |
+| Headline: advantage from move 12, material returned 5 times | `e2e/analysis.spec.ts:29-31` asserts "A vantagem começou em 12...Bxa1.". The count is 4 or 5 because 27...Tb7 is borderline (documented in `docs/architecture/overview.md`, "Lances limítrofes"), so the e2e does not pin it. | ✅ (count bounded by the known borderline) |
+| 5 key moments 22, 27, 41, 43, 56 | `ReviewScreen.test.tsx` "lista os cinco em ordem" (fixture). `e2e/review.spec.ts:16-19` (4 stable moments) | ✅ |
 | Board before 22...Ta7, Black at the bottom | `e2e/review.spec.ts:23-28` | ✅ |
-| Click circle 43 → board before 43...Te6, moment 4 expanded, move highlighted | `e2e/review.spec.ts:33-41` | ✅ |
-| Off-topic question → AI says it only talks about this game | The backend answer is F6 scope. F7 has no test that renders an `in_scope:false` answer. | ⚠️ Not covered in F7 (G6) |
-| AI failed → board, chart and annotated list plus the failure notice | Notice: `ReviewScreen.test.tsx:79-84`, `App.test.tsx:141`. That test does not check board, chart or list in the failed state; they render unconditionally (`ReviewScreen.tsx`). | ⚠️ Partial (G7) |
+| Circle 43 → position before 43...Te6, moment 4 expanded, move highlighted | `e2e/review.spec.ts:33-41` | ✅ |
+| Off-topic question → polite notice and suggestions | `ReviewScreen.test.tsx:239-253` | ✅ |
+| AI failed → board, chart, annotated list and failure notice | `ReviewScreen.test.tsx:87-99` | ✅ |
 
 ---
 
-## Discrimination Sensor
+## Discrimination Sensor (round 2)
 
-Scratch: `git worktree add --detach /tmp/f7-sensor HEAD` with copied `node_modules`. Each mutant ran against `vitest run src/domains/review src/domains/analysis src/app` (147 tests). Survivors were checked against the Playwright suite where the e2e touches the behavior. The scratch was removed (`git worktree remove --force`). The real worktree's `git status --porcelain` matched the empty baseline.
+Scratch: `git worktree add --detach /tmp/f7-sensor2 HEAD` with copied `node_modules`. Each mutant ran against `vitest run src/domains/review src/domains/analysis src/app`. The scratch was removed (`git worktree remove --force`, `git worktree prune`). The real worktree's `git status --porcelain` matched the empty pre-sensor baseline.
 
-| # | File:line | Mutation | Result |
-| - | --------- | -------- | ------ |
-| M1 | `review/model/review.ts:101` | `first.ply - 1` → `first.ply` (wrong initial position) | ✅ Killed (6) |
-| M2 | `review/machines/reviewMachine.ts:91` | orientation fixed to `"w"` | ✅ Killed (4) |
-| M3 | `review/model/review.ts:111` | `momentAt` off by one | ✅ Killed (8) |
-| M4 | `review/components/MaterialChart.tsx:93` | circle click sends `POSITION.SELECT` (no moment sync) | ⚠️ Survived Vitest; ✅ killed by `e2e/review.spec.ts:35` (run in scratch: `aria-expanded` "false") |
-| M5 | `review/components/MoveList.tsx:54` | highlight follows the position, not the moment | ✅ Killed (2) |
-| M6 | `review/machines/reviewMachine.ts:244` | `AI.RETRY` guard always true | ✅ Killed (1) |
-| M7 | `review/machines/reviewMachine.ts:269` | `NEW_GAME.REQUEST` skips confirmation | ✅ Killed (2) |
-| M8 | `analysis/model/classify.ts:120` | strength gain from `ply.fenBefore` | ✅ Killed (5) |
-| M9 | `review/model/review.ts:61` | `??` threshold `>= 5` → `> 5` | ✅ Killed (4) |
-| M10 | `review/model/review.ts:195` | chip text changed | ✅ Killed (2) |
-| M11 | `review/components/KeyMomentsList.tsx:115` | "Treinar os N" starts at the last moment | ❌ Survived (Vitest and e2e) |
-| M12 | `review/components/KeyMomentsList.tsx:93` | "Treinar este momento" sends `ply + 2` | ❌ Survived (Vitest and e2e) |
-| M13 | `review/machines/reviewMachine.ts:155` | engine line PV taken from the position before the mistake | ✅ Killed (1) |
-| M14 | `review/components/ReviewSidebar.tsx:133` | footer AI always ✓ | ✅ Killed (1) |
-| M15 | `review/components/MoveList.tsx:50` | key-moment move click only moves the board | ❌ Survived (Vitest and e2e) |
-| M16 | `review/machines/reviewMachine.ts:92` | no moment expanded at open | ✅ Killed (4) |
+| # | File | Mutation | Killed? |
+| - | ---- | -------- | ------- |
+| M1 | `review/model/review.ts` | `initialPosition` returns `first.ply` | ✅ (6) |
+| M2 | `review/machines/reviewMachine.ts` | orientation fixed to `"w"` | ✅ (4) |
+| M3 | `review/model/review.ts` | `momentAt` off by one | ✅ (9) |
+| M4 | `review/components/MaterialChart.tsx` | circle sends `POSITION.SELECT` | ✅ (1), was e2e-only in round 1 |
+| M5 | `review/components/MoveList.tsx` | highlight follows the position | ✅ (2) |
+| M6 | `review/machines/reviewMachine.ts` | `AI.RETRY` guard always true | ✅ (1) |
+| M7 | `review/machines/reviewMachine.ts` | `NEW_GAME.REQUEST` skips confirmation | ✅ (2) |
+| M8 | `analysis/model/classify.ts` | strength gain from `ply.fenBefore` | ✅ (6) |
+| M9 | `review/model/review.ts` | `??` threshold `> 5` | ✅ (5) |
+| M10 | `review/model/review.ts` | chip text changed | ✅ (3) |
+| M11 | `review/components/KeyMomentsList.tsx` | "Treinar os N" from the last moment | ✅ (1), survived round 1 |
+| M12 | `review/components/KeyMomentsList.tsx` | "Treinar este momento" sends `ply + 2` | ✅ (1), survived round 1 |
+| M13 | `review/machines/reviewMachine.ts` | PV from the position before the mistake | ✅ (1) |
+| M14 | `review/components/ReviewSidebar.tsx` | footer AI always ✓ | ✅ (1) |
+| M15 | `review/components/MoveList.tsx` | key-moment move click only moves the board | ✅ (1), survived round 1 |
+| M16 | `review/machines/reviewMachine.ts` | nothing expanded at open | ✅ (3) |
+| M17 | `review/model/review.ts` | `hiddenMistakes` floor 1 (link always shown) | ✅ (1) |
+| M18 | `review/model/review.ts` | `hiddenMistakes` also counts opponent mistakes | ✅ (1) |
+| M19 | `review/components/KeyMomentsList.tsx` | link condition `> 99` (never shown) | ✅ (1) |
+| M20 | `review/machines/reviewMachine.ts` | `inScope` forced `true` | ✅ (1) |
+| M21 | `review/components/ReviewSidebar.tsx` | off-topic hint on every answer | ✅ (1) |
+| M22 | `review/components/ReviewSidebar.tsx` | footer tablebase back to "✓" | ✅ (1) |
 
-**Sensor depth**: lightweight+ (16 behavior mutations)
-**Result**: 13/16 killed (12 by Vitest, 1 more by e2e). **FAIL**
+**Sensor depth**: lightweight+ (22 behavior mutations)
+**Result**: 22/22 killed - PASS
 
 ---
 
@@ -109,60 +129,39 @@ Scratch: `git worktree add --detach /tmp/f7-sensor HEAD` with copied `node_modul
 
 | Principle | Status |
 | --------- | ------ |
-| Minimum code / no scope creep | ✅ (the Material/Avaliação toggle and Salvar are correctly out of scope) |
-| DDD structure (`review/{model,machines,components,fixtures}`, public `index.ts`, `model/` free of xstate) | ✅ |
-| XState: side effects in actors (`askQuestion`, `explainGame`), swapped with `provide()` in tests | ✅ |
-| Matches patterns | ✅ |
-| Spec-anchored outcome check | ⚠️ RV-02 card 3 mirrors the implementation; RV-12 asserts only the event type |
+| Minimum code / no scope creep (toggle, Salvar, Minhas partidas out per spec and D2) | ✅ |
+| DDD structure; `model/` free of xstate; cross-domain imports through `index.ts` | ✅ |
+| Side effects in actors swapped with `provide()` | ✅ |
+| Spec-anchored outcome check (asserted values match the spec) | ✅ |
 | Every test maps to a spec requirement | ✅ |
 | Guidelines: `docs/engineering/quality.md`, `docs/architecture/code-structure.md` | ✅ |
 
 ## Edge Cases
 
 - [x] Lost game, neutral tag (RV-20)
-- [x] Short game hides the chart (`explore.test.tsx:113`)
-- [x] No key moments (`App.test.tsx:142`), initial position = final (`review.test.ts:77`)
-- [ ] More than 5 candidates: the "ver todos os lances anotados" link (step_03 §6, spec Assumptions) is not implemented. No match for the text in `apps/web/src`.
+- [x] Short game hides the chart (`explore.test.tsx:113-116`)
+- [x] No key moments (`App.test.tsx:142`; `review.test.ts:77`)
+- [x] More than 5 candidates → "ver todos os lances anotados" (`ReviewScreen.test.tsx:181-201`)
 
-## Visual check
+## Residual notes (non-blocking)
 
-The Verifier did not run an independent screenshot comparison (optional step). The author's T5 commit (`1146618`) records a layout match to `docs/design/step_03/Resultado.dc.html`.
+- The 500-character question cap (`maxLength` on the input, `.slice(0, 500)` in the machine) has no dedicated test.
+- The 4th stat card ("N lances para o mate") waits on F5. Training is a placeholder until F8. Both are out of F7 scope.
+- The Verifier did not run an independent screenshot comparison (optional). The author's T5 commit records the mockup match.
 
----
+## Round 1 history
 
-## Ranked Gaps and Fix Plans
-
-1. **G1 (Major, RV-12): training buttons send an unverified ply.** M11 and M12 survived.
-   - **Fix:** in `apps/web/src/domains/review/components/ReviewScreen.test.tsx:129-134`, record `JSON.stringify(event)` in the parent instead of `event.type`.
-   - Expand `Ver 43...Te6`, click "Treinar este momento", and expect `{type:"TRAINING.REQUESTED", ply:86}`.
-   - Then click "Treinar os 5 momentos" and expect `ply:44`.
-2. **G2 (Major, RV-10): move-list entry point of the moment sync is untested.** M15 survived.
-   - **Fix:** in `ReviewScreen.test.tsx`, add a test that clicks the `Te6??` button inside the `Lances` region.
-   - Expect `Ver 43...Te6` to have `aria-expanded="true"`, and expect the caption "Antes de 43...Te6?".
-   - Also assert `aria-expanded` in the chart test so M4 dies in Vitest and not only in the 30 s e2e. This matches confirmed lesson L-010.
-3. **G3 (Minor, step_03 §6): "Mais de 5 candidatos" state missing.**
-   - **Fix:** expose the candidate count from analysis and render the "ver todos os lances anotados" link that scrolls to `#lances`, with a component test.
-   - Or move the state to Out of Scope in `spec.md` with a reason.
-4. **G4 (Minor, RV-18): footer status is hard-coded.**
-   - Rules, evaluation and tablebase always show ✓ (`ReviewSidebar.tsx:130-132`). The tablebase (F5) does not exist yet.
-   - **Fix:** state in `spec.md` that only AI can fail on this screen (evaluation failure never reaches Resultado). Until F5 lands, hide or mark the tablebase line.
-5. **G5 (Minor, §7 verdict AC):** in `e2e/analysis.spec.ts:29` or `e2e/review.spec.ts`, assert `/A vantagem começou em 12\.\.\./` in the level-1 heading.
-6. **G6 (Minor, §7 off-topic AC):** add a component test where `askQuestion` resolves `{in_scope:false, answer:"Só falo sobre esta partida…"}` and the answer is shown.
-7. **G7 (Minor, §7 AI-failed AC):** in `ReviewScreen.test.tsx:78`, also assert the board region, the chart `img` and the `Lances` region with `Ta7?` in the AI-failed state.
-8. **G8 (Cosmetic, RV-02 precision):** replace the recomputed max in `review.test.ts:45` with the fixture's concrete value.
+Round 1 (HEAD `1146618`) had both gates green but three surviving mutants: M11, M12 and M15. The RV-10 move-list entry point and the RV-12 training ply were untested. It also found five minor gaps (G3–G7) and one cosmetic gap (G8). Fix commit `e384ad0` addressed all of them, and round 2 verified each one above. Lessons L-037–L-039 record the round-1 signals.
 
 ## Requirement Traceability Update
 
 | Requirement | New Status |
 | ----------- | ---------- |
-| RV-01, RV-03–RV-09, RV-11, RV-13–RV-17, RV-19, RV-20 | ✅ Verified |
-| RV-02, RV-18 | ⚠️ Verified with spec-precision gap |
-| RV-10, RV-12 | ❌ Needs fix (G2, G1) |
+| RV-01 – RV-20 | ✅ Verified |
 
 ## Summary
 
-**Overall**: ❌ Not ready. Two test-only fixes (G1, G2) close the surviving mutants. G3–G8 are minor.
-
-**Spec-anchored check**: 16/20 RV matched spec outcome; 2 gaps (RV-10, RV-12); 2 spec-precision gaps (RV-02, RV-18)
-**Sensor**: 13/16 killed
-**Gate**: `make check` 358 + 75 passed; `make test-e2e` 14 passed
+**Overall**: ✅ Ready
+**Spec-anchored check**: 20/20 RV and 6/6 step_03 §7 criteria matched
+**Sensor**: 22/22 killed
+**Gate**: `make check` (365 Vitest + 75 pytest) and `make test-e2e` (14) passed
