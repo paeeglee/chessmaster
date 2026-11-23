@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import type { ActorRefFrom } from "xstate";
 import { AnalyzingScreen } from "../domains/analysis";
 import { GameInputScreen, type gameInputMachine } from "../domains/game-input";
@@ -74,14 +74,30 @@ type AppProps = {
   logic?: ComponentProps<typeof AppMachineContext.Provider>["logic"];
 };
 
+/**
+ * Largura e espaçamento da página: a tela Resultado é mais larga (mockup step_03).
+ * Nos mockups o `max-width` não inclui o padding de 32 px de cada lado; aqui inclui,
+ * então a largura máxima soma 64 px (1240 → 1304, 1320 → 1384).
+ */
+function ScreenFrame({ children }: { children: ReactNode }) {
+  const screen = AppMachineContext.useSelector((snapshot) => snapshot.value);
+  const frame =
+    screen === "review"
+      ? "max-w-[1384px] gap-[22px] pt-7"
+      : screen === "training"
+        ? "max-w-[1304px] gap-[22px] pt-7"
+        : "max-w-[1304px] gap-6 pt-8";
+  return <main className={`mx-auto flex flex-col px-8 pb-12 ${frame}`}>{children}</main>;
+}
+
 export function App({ logic }: AppProps) {
   return (
     <AppMachineContext.Provider {...(logic ? { logic } : {})}>
       <div className="min-h-full font-sans text-ink">
         <AppHeader />
-        <main className="mx-auto flex max-w-[1240px] flex-col gap-6 px-8 pt-8 pb-12">
+        <ScreenFrame>
           <CurrentScreen />
-        </main>
+        </ScreenFrame>
       </div>
     </AppMachineContext.Provider>
   );

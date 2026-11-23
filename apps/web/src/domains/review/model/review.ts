@@ -63,7 +63,14 @@ export function annotationOf(verdict: MoveVerdict | undefined): "" | "?" | "??" 
   return "";
 }
 
-export type MoveCell = { ply: number; text: string };
+/** Tom do lance na lista: erro ("?", "??"), bom lance ("!") ou comum. */
+export type MoveTone = "mistake" | "good" | "plain";
+export type MoveCell = { ply: number; text: string; tone: MoveTone };
+
+function toneOf(annotation: ReturnType<typeof annotationOf>): MoveTone {
+  if (annotation === "!") return "good";
+  return annotation === "" ? "plain" : "mistake";
+}
 export type MoveRow = { number: number; white: MoveCell | null; black: MoveCell | null };
 
 /** Lista de lances em duas colunas, em notação portuguesa e anotada. */
@@ -71,9 +78,11 @@ export function moveRows(game: Game, verdicts: readonly MoveVerdict[]): MoveRow[
   const byPly = new Map(verdicts.map((verdict) => [verdict.ply, verdict]));
   const rows: MoveRow[] = [];
   for (const ply of game.plies) {
+    const annotation = annotationOf(byPly.get(ply.index));
     const cell = {
       ply: ply.index,
-      text: `${toPortugueseSan(ply.san)}${annotationOf(byPly.get(ply.index))}`,
+      text: `${toPortugueseSan(ply.san)}${annotation}`,
+      tone: toneOf(annotation),
     };
     if (ply.color === "w") {
       rows.push({ number: ply.moveNumber, white: cell, black: null });

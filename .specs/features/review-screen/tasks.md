@@ -144,7 +144,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] `make check && make test-e2e` pass
+- [x] `make check && make test-e2e` pass
 
 **Tests**: e2e
 **Gate**: full

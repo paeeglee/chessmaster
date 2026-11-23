@@ -1,5 +1,11 @@
 import type { ReviewContext, ReviewEvent } from "../machines/reviewMachine";
-import { type MoveCell, moveRows } from "../model/review";
+import { type MoveCell, type MoveTone, moveRows } from "../model/review";
+
+const TONE: Record<MoveTone, string> = {
+  mistake: "bg-danger-soft font-bold text-danger",
+  good: "bg-success-soft font-bold text-success",
+  plain: "bg-transparent text-ink",
+};
 
 type MoveListProps = {
   context: ReviewContext;
@@ -19,16 +25,18 @@ function Move({
 }) {
   if (!cell) return <span className={className} />;
   return (
-    <button
-      type="button"
-      aria-current={selected ? "true" : undefined}
-      onClick={() => onSelect(cell.ply)}
-      className={`${className} rounded-sm border-0 px-1 text-left ${
-        selected ? "bg-brand-soft font-bold text-brand" : "bg-transparent text-ink"
-      }`}
-    >
-      {cell.text}
-    </button>
+    <span className={className}>
+      <button
+        type="button"
+        aria-current={selected ? "true" : undefined}
+        onClick={() => onSelect(cell.ply)}
+        className={`rounded-sm border-0 px-1 text-left ${TONE[cell.tone]} ${
+          selected ? `outline-2 outline-brand ${cell.tone === "plain" ? "font-bold" : ""}` : ""
+        }`}
+      >
+        {cell.text}
+      </button>
+    </span>
   );
 }
 

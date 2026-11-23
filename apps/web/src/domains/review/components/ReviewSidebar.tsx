@@ -17,7 +17,7 @@ export function StrengthsList({ context }: Pick<Props, "context">) {
       <h2 id="strengths-title" className="m-0 font-semibold font-serif text-[20px]">
         O que você fez bem
       </h2>
-      <ul className="m-0 flex flex-col gap-1.5 pl-5">
+      <ul className="m-0 flex list-disc flex-col gap-1.5 pl-5 text-[15px] leading-[1.5]">
         {result.strengths.map((strength) => {
           const ai = result.explanation?.strengths.find((item) => item.ply === strength.ply);
           return (

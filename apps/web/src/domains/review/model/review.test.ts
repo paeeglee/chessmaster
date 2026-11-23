@@ -52,11 +52,11 @@ describe("lista de lances (RV-09)", () => {
     expect(rows).toHaveLength(72);
     expect(rows[11]).toEqual({
       number: 12,
-      white: { ply: 23, text: "Ce2" },
-      black: { ply: 24, text: "Bxa1!" },
+      white: { ply: 23, text: "Ce2", tone: "plain" },
+      black: { ply: 24, text: "Bxa1!", tone: "good" },
     });
-    expect(rows[21]?.black).toEqual({ ply: 44, text: "Ta7?" });
-    expect(rows[42]?.black?.text).toBe("Te6??");
+    expect(rows[21]?.black).toEqual({ ply: 44, text: "Ta7?", tone: "mistake" });
+    expect(rows[42]?.black).toMatchObject({ text: "Te6??", tone: "mistake" });
   });
 
   it("anota perdas grandes com ??", () => {
