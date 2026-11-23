@@ -121,6 +121,19 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   `newGame` (confirmação de "Analisar outra partida"). "Treinar" manda
   `TRAINING.REQUESTED` com o meio-lance do momento; "Analisar outra partida" manda
   `REVIEW.NEW_GAME`, que volta à tela Colar com o campo vazio e o nível mantido.
+- **Treino (F8):** no estado `training`, o `appMachine` invoca o `trainingMachine`
+  (domínio `training`) com o resultado, o meio-lance do momento escolhido e o motor
+  guardado na análise. Estados: `playing` (clique na peça e no destino; os destinos
+  legais vêm do motor de regras), `checking` (o ator `evaluateAttempt` avalia a
+  posição depois da tentativa no Stockfish), `refuting` (a resposta do motor fica
+  1,2 s no tabuleiro e a posição volta ao início), `solved`, `solutionShown` e
+  `finished` (resumo "N de M de primeira"). **Regra de aceite (T-03):** a tentativa
+  é classificada com a mesma regra do momento-chave (D3) e é aceita quando não perde
+  2 pontos de material ou mais em relação ao melhor lance; por isso 22...Bd4+ e
+  22...Bb2 são aceitos e 22...Te6 é refutado por 23.Txa1. Os textos de retorno,
+  dicas (padrão → peça) e princípios são templates com os fatos do motor; os textos
+  escritos pela IA para o treino ficam para depois do MVP. Arrastar peças também fica
+  para depois: o tabuleiro aceita clique e teclado (Tab até a casa e Enter).
 - **Máquinas de domínio (`domains/<domínio>/machines/`):** cada fluxo com estados
   próprios tem sua máquina, por exemplo:
   - carregamento do motor (baixando com porcentagem, pronto, falhou, tentar de

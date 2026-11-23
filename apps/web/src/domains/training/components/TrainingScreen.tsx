@@ -159,7 +159,8 @@ export function TrainingScreen({ trainingRef }: { trainingRef: TrainingRef }) {
         <button
           type="button"
           onClick={back}
-          className="min-h-11 border-0 bg-transparent p-0 font-semibold text-[15px] text-brand"
+          // Área de toque de 44 px sem empurrar o layout (o mockup usa um link de texto).
+          className="-my-3 min-h-11 border-0 bg-transparent p-0 font-semibold text-[15px] text-brand"
         >
           ← Voltar ao resultado
         </button>
