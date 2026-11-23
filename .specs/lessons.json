@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 6,
+  "next_id": 7,
   "lessons": [
     {
       "id": "L-001",
@@ -94,6 +94,24 @@
       ],
       "created": "2026-11-23T13:38:51Z",
       "last_seen": "2026-11-23T13:38:51Z"
+    },
+    {
+      "id": "L-006",
+      "key": "spec_precision_gap::for text parsers specify what happens to unrecognized tokens between valid tokens not only before and after them",
+      "text": "For text parsers, specify what happens to unrecognized tokens between valid tokens, not only before and after them",
+      "signal": "spec_precision_gap",
+      "scope": "parser",
+      "status": "candidate",
+      "features": [
+        "game-parser-rules"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md gap 1 / GAME-08 (apps/web/src/domains/game/model/moveText.ts:92-93) (parser)"
+      ],
+      "created": "2026-11-23T13:43:42Z",
+      "last_seen": "2026-11-23T13:43:42Z"
     }
   ]
 }

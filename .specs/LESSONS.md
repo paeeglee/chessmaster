@@ -44,6 +44,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: SCAF-06 / apps/web/src/app/App.test.tsx:41 (web-theme)
 - last seen: 2026-11-23T13:38:51Z
 
+### L-006 - For text parsers, specify what happens to unrecognized tokens between valid tokens, not only before and after them
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `parser` · harmful: 0
+- features: game-parser-rules
+- evidence: validation.md gap 1 / GAME-08 (apps/web/src/domains/game/model/moveText.ts:92-93) (parser)
+- last seen: 2026-11-23T13:43:42Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
