@@ -292,15 +292,16 @@ describe("classifyMove com posições feitas à mão", () => {
   });
 
   it("não aponta defensor saiu quando a peça tinha dois defensores (AN-08)", () => {
-    // Cavalo de e4 atacado pelo peão de d5, defendido pelo bispo de g2 e pelo peão f3.
-    const fen = "6k1/8/8/3p4/4N3/5P2/6B1/6K1 w - - 0 1";
-    const after = "6k1/8/8/3p4/4N3/5P1B/8/6K1 b - - 1 1";
+    // Cavalo de e4 atacado pelo peão de d5, defendido pelo bispo de g2 e pelo peão d3.
+    const fen = "6k1/8/8/3p4/4N3/3P4/6B1/6K1 w - - 0 1";
+    const after = "6k1/8/8/3p4/4N3/3P3B/8/6K1 b - - 1 1";
     const verdict = classifyMove({
       ply: pieceMove(fen, "g2", "h3", after, "b"),
       before: evaluation(fen, "e4c3", ["e4c3", "g8f8"]),
-      after: evaluation(after, "d5e4", ["d5e4", "f3e4", "g8f8"]),
+      after: evaluation(after, "d5e4", ["d5e4", "d3e4", "g8f8"]),
       playerColor: "w",
     });
+    expect(defendersOf(fen, "e4", "w").sort()).toEqual(["d3", "g2"]);
     expect(verdict).toMatchObject({
       kind: "mistake",
       loss: 2,
