@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 28,
+  "next_id": 32,
   "lessons": [
     {
       "id": "L-001",
@@ -492,6 +492,78 @@
       ],
       "created": "2026-11-23T17:09:52Z",
       "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-028",
+      "key": "surviving_mutant::expose visual board state such as square marks through an attribute and assert it since tests cannot see css only highlights",
+      "text": "Expose visual board state such as square marks through an attribute and assert it, since tests cannot see CSS-only highlights",
+      "signal": "surviving_mutant",
+      "scope": "web-ui",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md M29 AnalyzingScreen.tsx:28 (web-ui)"
+      ],
+      "created": "2026-11-23T17:23:33Z",
+      "last_seen": "2026-11-23T17:23:33Z"
+    },
+    {
+      "id": "L-029",
+      "key": "surviving_mutant::test numeric thresholds at the exact boundary value with synthetic data not only with the reference game",
+      "text": "Test numeric thresholds at the exact boundary value with synthetic data, not only with the reference game",
+      "signal": "surviving_mutant",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md M17 contract.ts:28 (domain-model)"
+      ],
+      "created": "2026-11-23T17:23:33Z",
+      "last_seen": "2026-11-23T17:23:33Z"
+    },
+    {
+      "id": "L-030",
+      "key": "ac_gap::derive every label shown with a board from the same ply index the board renders",
+      "text": "Derive every label shown with a board from the same ply index the board renders",
+      "signal": "ac_gap",
+      "scope": "web-ui",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "AS-11 AnalyzingScreen.tsx:22-28,97-99 (web-ui)"
+      ],
+      "created": "2026-11-23T17:23:33Z",
+      "last_seen": "2026-11-23T17:23:33Z"
+    },
+    {
+      "id": "L-031",
+      "key": "spec_precision_gap::when a spec narrows a prd list record each dropped prd item as an explicit decision in the spec",
+      "text": "When a spec narrows a PRD list, record each dropped PRD item as an explicit decision in the spec",
+      "signal": "spec_precision_gap",
+      "scope": "specs",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "AS-14 vs general.md 7.2; step_02 stage times (specs)"
+      ],
+      "created": "2026-11-23T17:23:33Z",
+      "last_seen": "2026-11-23T17:23:33Z"
     }
   ]
 }

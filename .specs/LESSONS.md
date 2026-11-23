@@ -174,6 +174,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: N9 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:32 (api-verification) (api-verification)
 - last seen: 2026-11-23T17:09:52Z
 
+### L-028 - Expose visual board state such as square marks through an attribute and assert it, since tests cannot see CSS-only highlights
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-ui` · harmful: 0
+- features: analysis-screen
+- evidence: validation.md M29 AnalyzingScreen.tsx:28 (web-ui)
+- last seen: 2026-11-23T17:23:33Z
+
+### L-029 - Test numeric thresholds at the exact boundary value with synthetic data, not only with the reference game
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-screen
+- evidence: validation.md M17 contract.ts:28 (domain-model)
+- last seen: 2026-11-23T17:23:33Z
+
+### L-030 - Derive every label shown with a board from the same ply index the board renders
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `web-ui` · harmful: 0
+- features: analysis-screen
+- evidence: AS-11 AnalyzingScreen.tsx:22-28,97-99 (web-ui)
+- last seen: 2026-11-23T17:23:33Z
+
+### L-031 - When a spec narrows a PRD list, record each dropped PRD item as an explicit decision in the spec
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `specs` · harmful: 0
+- features: analysis-screen
+- evidence: AS-14 vs general.md 7.2; step_02 stage times (specs)
+- last seen: 2026-11-23T17:23:33Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
