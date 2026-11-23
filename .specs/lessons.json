@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 13,
+  "next_id": 18,
   "lessons": [
     {
       "id": "L-001",
@@ -222,6 +222,96 @@
       ],
       "created": "2026-11-23T14:21:46Z",
       "last_seen": "2026-11-23T14:21:46Z"
+    },
+    {
+      "id": "L-013",
+      "key": "surviving_mutant::test every numeric threshold at exactly its boundary value and one step below it",
+      "text": "Test every numeric threshold at exactly its boundary value and one step below it",
+      "signal": "surviving_mutant",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-model"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M1/M23 apps/web/src/domains/analysis/model/classify.ts:17,73 (AN-03) (domain-model)"
+      ],
+      "created": "2026-11-23T17:00:09Z",
+      "last_seen": "2026-11-23T17:00:09Z"
+    },
+    {
+      "id": "L-014",
+      "key": "surviving_mutant::for each conjunct or guard in a rule build a fixture where only that condition decides the outcome",
+      "text": "For each conjunct or guard in a rule build a fixture where only that condition decides the outcome",
+      "signal": "surviving_mutant",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-model"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M2/M3/M21 apps/web/src/domains/analysis/model/classify.ts:43,73 (AN-03, AN-06, AN-08) (domain-model)"
+      ],
+      "created": "2026-11-23T17:00:09Z",
+      "last_seen": "2026-11-23T17:00:09Z"
+    },
+    {
+      "id": "L-015",
+      "key": "surviving_mutant::feed selection functions mixed inputs that include items they must exclude",
+      "text": "Feed selection functions mixed inputs that include items they must exclude",
+      "signal": "surviving_mutant",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-model"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M11 apps/web/src/domains/analysis/model/keyMoments.ts:25 (AN-17) (domain-model)"
+      ],
+      "created": "2026-11-23T17:00:09Z",
+      "last_seen": "2026-11-23T17:00:09Z"
+    },
+    {
+      "id": "L-016",
+      "key": "spec_precision_gap::reconcile each spec rule with the glossary definition and the spec s own assumptions table before tasks",
+      "text": "Reconcile each spec rule with the glossary definition and the spec's own assumptions table before tasks",
+      "signal": "spec_precision_gap",
+      "scope": "spec",
+      "status": "candidate",
+      "features": [
+        "analysis-model"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "AN-09 vs docs/product/glossary.md; AN-15 vs spec Assumptions table (spec)"
+      ],
+      "created": "2026-11-23T17:00:09Z",
+      "last_seen": "2026-11-23T17:00:09Z"
+    },
+    {
+      "id": "L-017",
+      "key": "ac_gap::apply domain coverage thresholds per domain folder not to one glob that averages all domains",
+      "text": "Apply domain coverage thresholds per domain folder, not to one glob that averages all domains",
+      "signal": "ac_gap",
+      "scope": "tooling",
+      "status": "candidate",
+      "features": [
+        "analysis-model"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "apps/web/vite.config.ts:43-48 analysis/model branches 88.57% (tooling)"
+      ],
+      "created": "2026-11-23T17:00:09Z",
+      "last_seen": "2026-11-23T17:00:09Z"
     }
   ]
 }
