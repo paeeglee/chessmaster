@@ -78,7 +78,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Transitions tested
+- [x] Transitions tested
 
 **Tests**: unit
 **Gate**: quick
