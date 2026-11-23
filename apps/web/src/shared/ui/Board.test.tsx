@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import { Board, readPlacement } from "./Board";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import { Board, readPlacement, squareLabel } from "./Board";
 
 const FINAL = "K7/2k5/r7/1p6/1p6/8/8/8 w - - 0 73";
 const START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -60,5 +61,54 @@ describe("Board", () => {
     expect(container.querySelector('[data-square="a1"]')?.textContent).toBe("♜︎");
     rerender(<Board fen={START} orientation="w" coordinates label="x" />);
     expect(container.querySelector('[data-square="a1"]')?.textContent).toBe("♜︎1a");
+  });
+});
+
+describe("Board interativo", () => {
+  it("vira um grupo de casas clicáveis com nomes acessíveis", async () => {
+    const onSquareClick = vi.fn();
+    render(
+      <Board
+        fen={START}
+        orientation="w"
+        label="Posição do treino"
+        onSquareClick={onSquareClick}
+        marks={{ g1: "selected" }}
+        destinations={["f3", "h3"]}
+      />,
+    );
+    const group = screen.getByRole("group", { name: "Posição do treino" });
+    expect(group.querySelectorAll("button")).toHaveLength(64);
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "g1, cavalo branco" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "f3, vazia" }));
+    expect(onSquareClick).toHaveBeenCalledWith("f3");
+  });
+
+  it("joga pelo teclado: Tab até a casa e Enter (§8)", async () => {
+    const onSquareClick = vi.fn();
+    render(<Board fen={START} orientation="w" label="Treino" onSquareClick={onSquareClick} />);
+    screen.getByRole("button", { name: "e2, peão branco" }).focus();
+    await userEvent.keyboard("{Enter}");
+    expect(onSquareClick).toHaveBeenCalledWith("e2");
+  });
+
+  it("bloqueia as casas quando desabilitado", async () => {
+    const onSquareClick = vi.fn();
+    render(
+      <Board fen={START} orientation="w" label="Treino" onSquareClick={onSquareClick} disabled />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "e2, peão branco" }));
+    expect(onSquareClick).not.toHaveBeenCalled();
+  });
+
+  it("nomeia peças com o gênero certo", () => {
+    expect(squareLabel("d8", "q")).toBe("d8, dama preta");
+    expect(squareLabel("a1", "R")).toBe("a1, torre branca");
+    expect(squareLabel("e1", "K")).toBe("e1, rei branco");
+    expect(squareLabel("e4", "")).toBe("e4, vazia");
   });
 });

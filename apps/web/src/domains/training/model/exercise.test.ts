@@ -6,6 +6,7 @@ import {
   attemptLabel,
   checkAttempt,
   exerciseFor,
+  exerciseMarks,
   hintText,
   outcomeOf,
   principleFor,
@@ -143,5 +144,23 @@ describe("textos por tipo e progresso", () => {
 
   it("falha com momento inexistente", () => {
     expect(() => exerciseFor(result, 1)).toThrow("Momento-chave 1 não encontrado");
+  });
+});
+
+describe("exerciseMarks", () => {
+  const base = { exercise, atStart: true, selected: null, lastMove: null, showSolution: false };
+
+  it("marca a peça em perigo na posição do exercício", () => {
+    expect(exerciseMarks(base)).toEqual({ a1: "red" });
+    expect(exerciseMarks({ ...base, atStart: false })).toEqual({});
+  });
+
+  it("marca a seleção, o último lance e a solução", () => {
+    expect(exerciseMarks({ ...base, selected: "a1" })).toEqual({ a1: "selected" });
+    expect(exerciseMarks({ ...base, atStart: false, lastMove: { from: "h1", to: "a1" } })).toEqual({
+      h1: "last",
+      a1: "last",
+    });
+    expect(exerciseMarks({ ...base, showSolution: true })).toEqual({ a1: "green", d4: "green" });
   });
 });

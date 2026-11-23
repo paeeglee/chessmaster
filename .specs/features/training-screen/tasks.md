@@ -100,7 +100,7 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Component tests by role/text, keyboard play
+- [x] Component tests by role/text, keyboard play
 
 **Tests**: unit
 **Gate**: quick

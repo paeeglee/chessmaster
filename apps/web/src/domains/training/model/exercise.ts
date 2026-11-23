@@ -221,3 +221,33 @@ export function refutationFen(result: AttemptResult, attemptFen: string): string
     playMove(attemptFen, result.replyUci.slice(0, 2), result.replyUci.slice(2, 4))?.fen ?? null
   );
 }
+
+export type TrainingMark = "red" | "green" | "last" | "selected";
+
+/**
+ * Marcas do tabuleiro do treino: na posição do exercício, a peça em perigo fica em
+ * vermelho (como no mockup); a peça escolhida fica selecionada; um lance jogado ou a
+ * refutação ficam como último lance; a solução mostra origem e destino em verde.
+ */
+export function exerciseMarks(input: {
+  exercise: Exercise;
+  atStart: boolean;
+  selected: string | null;
+  lastMove: { from: string; to: string } | null;
+  showSolution: boolean;
+}): Partial<Record<string, TrainingMark>> {
+  const marks: Partial<Record<string, TrainingMark>> = {};
+  const lost = input.exercise.moment.lostPiece;
+  if (input.atStart && lost) marks[lost.square] = "red";
+  if (input.lastMove) {
+    marks[input.lastMove.from] = "last";
+    marks[input.lastMove.to] = "last";
+  }
+  const best = input.exercise.before.bestMove;
+  if (input.showSolution && best) {
+    marks[best.slice(0, 2)] = "green";
+    marks[best.slice(2, 4)] = "green";
+  }
+  if (input.selected) marks[input.selected] = "selected";
+  return marks;
+}
