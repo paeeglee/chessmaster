@@ -79,6 +79,8 @@ def test_reports_a_number_not_in_the_contract(contract: GameContract) -> None:
         ("Depois de 12…Txa2 tudo mudou.", "lance 12…Txa2 não está no contrato"),
         ("Depois de 30. e4 tudo mudou.", "lance 30. e4 não está no contrato"),
         ("Com Bd4 em h8 não dá.", "casa h8 não está no contrato"),
+        ("Depois veio ...Dxh8.", "lance ...Dxh8 não está no contrato"),
+        ("Depois veio …Dxh8.", "lance …Dxh8 não está no contrato"),
     ],
 )
 def test_reports_every_kind_of_invented_move(
@@ -90,6 +92,14 @@ def test_reports_every_kind_of_invented_move(
 def test_accepts_contract_moves_written_with_spaces_and_signs(contract: GameContract) -> None:
     facts = allowed_facts(contract)
     assert verify_text("Em 22... Ta7+ e em 22…Ta7! o bispo caiu.", facts) == []
+    assert verify_text("Com ...Ta7 e …Ta7 o bispo caiu.", facts) == []
+
+
+def test_accepts_castling_written_with_zeros(contract: GameContract) -> None:
+    data = contract.model_dump()
+    data["moves"].append({"ply": 12, "label": "6...O-O", "san": "O-O"})
+    castled = GameContract.model_validate(data)
+    assert verify_text("O roque 0-0 e 6...0-0 foram bons.", allowed_facts(castled)) == []
 
 
 @pytest.mark.parametrize("decimal", ["+2,3", "2.3", "-0,5"])

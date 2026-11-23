@@ -17,8 +17,9 @@ _PAWN_PUSH = rf"[a-h][1-8](?:=?[{_PIECE}])?"
 _SAN = rf"(?:{_CASTLING}|{_PIECE_MOVE}|{_PAWN_CAPTURE}|{_PAWN_PUSH})[+#]?[!?]*"
 
 _LABELED_MOVE = re.compile(rf"(?<![\w.])\d+\s?(?:\.\.\.|…|\.)\s?{_SAN}(?![\w])")
+# Lance sem número, opcionalmente com reticências na frente ("...Dxh8", "…Dxh8").
 _UNLABELED_MOVE = re.compile(
-    rf"(?<![\w.…])(?:{_CASTLING}|{_PIECE_MOVE}|{_PAWN_CAPTURE})[+#]?(?!\w)"
+    rf"(?<![\w])(?:\.\.\.|…)?\s?(?:{_CASTLING}|{_PIECE_MOVE}|{_PAWN_CAPTURE})[+#]?(?!\w)"
 )
 _SQUARE = re.compile(r"[a-h][1-8]")
 _STANDALONE_SQUARE = re.compile(r"(?<![\w])[a-h][1-8](?!\w)")
@@ -79,7 +80,8 @@ def verify_text(text: str, facts: AllowedFacts) -> list[str]:
             violations.append(f"lance {match.group(0)} não está no contrato")
         remaining = remaining.replace(match.group(0), " ", 1)
     for match in _UNLABELED_MOVE.finditer(remaining):
-        if _normalize_move(match.group(0)) not in facts.moves:
+        move = re.sub(r"^(?:\.\.\.|…)\s?", "", match.group(0).strip())
+        if _normalize_move(move) not in facts.moves:
             violations.append(f"lance {match.group(0)} não está no contrato")
         remaining = remaining.replace(match.group(0), " ", 1)
     for square in _STANDALONE_SQUARE.findall(remaining):
