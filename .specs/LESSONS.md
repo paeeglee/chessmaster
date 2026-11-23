@@ -126,6 +126,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M21b round 3 apps/web/src/domains/analysis/model/classify.ts:43 (AN-08) (domain-model)
 - last seen: 2026-11-23T17:06:43Z
 
+### L-019 - Test text verification with moves cited without a move number but with a leading ellipsis, as Black moves are usually written
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `api-verification` · harmful: 0
+- features: explanation-api
+- evidence: EXP-05 round 2 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:21 (api-verification)
+- last seen: 2026-11-23T17:07:01Z
+
+### L-020 - Give every normalization rule a test where the normalized form must be accepted
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `api-verification` · harmful: 0
+- features: explanation-api
+- evidence: N9 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:32 (api-verification)
+- last seen: 2026-11-23T17:07:01Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

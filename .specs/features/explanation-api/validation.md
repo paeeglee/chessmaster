@@ -1,13 +1,13 @@
 # F6 · AI explanation layer Validation
 
-**Date**: 2026-11-23 (round 1)
-**Spec**: `.specs/features/explanation-api/spec.md`
-**Diff range**: `e31cb46..2c0ea85` (spec `49284f1`; code `608ae96`, `58f3961`, `dce79d1`, `2c0ea85`)
+**Date**: 2026-11-23 (round 2, after fix commit `e1426b9`)
+**Spec**: `.specs/features/explanation-api/spec.md` (EXP-05, EXP-07, EXP-08, EXP-12 and EXP-15 amended in `e1426b9`)
+**Diff range**: `e31cb46..e1426b9` (spec `49284f1`; code `608ae96`, `58f3961`, `dce79d1`, `2c0ea85`; round-1 report `4366d4e`; fixes `e1426b9`)
 **Verifier**: independent sub-agent (author ≠ verifier)
 
 ## Validation: FAIL
 
-The gate is green and 16 of 20 mutants are killed, but the verification rules (EXP-05, EXP-06) let whole families of invented moves and squares through, strengths are never checked against the contract (EXP-01), and four mutants survive. Paths below are relative to `apps/api/src/game_analyzer/domains/explanation/` unless they start with `apps/` or `Makefile`.
+Round 2 closes every round-1 gap. Every round-1 survivor is now killed, the gate is green, and the probes from round 1 are reported. One EXP-05 behavior hole remains: an **unnumbered move written with a leading ellipsis** (`...Dxh8`, `…Dxh8`), the usual way to cite a Black move without its number, is never checked. The player is Black in the reference game, so this case is likely in real texts. Paths below are relative to `apps/api/src/game_analyzer/domains/explanation/`.
 
 ---
 
@@ -15,10 +15,10 @@ The gate is green and 16 of 20 mutants are killed, but the verification rules (E
 
 | Task | Status | Notes |
 | ---- | ------ | ----- |
-| T1 Contract and verification | ⚠️ Partial | Verification misses English notation, pawn captures, castling and `N…move` labels (Gap 1); strengths not verified (Gap 3) |
-| T2 Use cases, port and prompts | ✅ Done | Question retry feedback untested (M2b) |
-| T3 Providers | ✅ Done | Factory model/key wiring untested (M14) |
-| T4 Routes, coverage gate, types, docs | ✅ Done | `schema.gen.ts` regenerated; `.env.example`, `overview.md`, `CLAUDE.md`, `Makefile` updated |
+| T1 Contract and verification | ⚠️ Partial | `...Move` / `…Move` bypass (Gap 1) |
+| T2 Use cases, port and prompts | ✅ Done | - |
+| T3 Providers | ✅ Done | - |
+| T4 Routes, coverage gate, types, docs | ✅ Done | - |
 
 ---
 
@@ -26,76 +26,62 @@ The gate is green and 16 of 20 mutants are killed, but the verification rules (E
 
 | ID | Spec-defined outcome | `file:line` + assertion | Result |
 | -- | -------------------- | ----------------------- | ------ |
-| EXP-01 | 200; `verdict`, `patterns_sentence`, one `key_moments` per contract moment (same plies, order), `strengths` for the contract strengths, `next_game_habit` | `tests/test_routes.py:36` `status_code == 200`; `:38` `[m["ply"] ...] == [44, 54]`; `:39` `set(body) == {...5 keys}`; `tests/test_providers.py:91` `strengths[0].text == "12...Bxa1 ganhou a torre em a1."` | ❌ GAP - strengths are never compared with the contract: `domain/verification.py:89-91` checks key-moment plies only. Probe: an explanation with `strengths=[]` for a contract with one strength verifies with `[]` violations |
-| EXP-02 | 422 on a body outside the contract | `tests/test_routes.py:50` `.status_code == 422` (extra field, `extra="forbid"` at `domain/contract.py:16`) | ✅ PASS |
-| EXP-03 | Prompt from versioned file in `prompts/`; includes level rules and contract JSON | `tests/test_use_cases.py:39-41` `load_prompt("explain_game", 1)`, `"{{contract_json}}" in user`; `:46` `"Nível Iniciante: sem jargão" in prompt.system`; `:47` `'"move_label": "22...Ta7"' in prompt.user` | ✅ PASS |
-| EXP-04 | Provider raises → 503 `{"detail": "ai_unavailable"}` | `tests/test_routes.py:57-58` `status_code == 503`, `json() == {"detail": "ai_unavailable"}` | ✅ PASS (explanations). Questions route `tests/test_routes.py:96` asserts status only (M15 survives) |
-| EXP-05 | A cited move not in the contract is reported | `tests/test_verification.py:43` `== ["lance 30...Txa2 não está no contrato"]`; `:50` `== ["lance Cf3 não está no contrato"]` | ❌ GAP (behavior) - probes against the reference contract return `[]` (no violation) for `Nf3`, `Qxh7#`, `Kg1`, `exd5`, `gxh3`, `dxe5`, `O-O-O`, `12…Txa2`. Cause: `domain/verification.py:14` (`\d+\s?\.(?:\.\.|…)?` needs a `.` before `…`), `:15` (piece class `[RDTBC]` only; no pawn captures, no castling), `:16` (`(?<![\w])` hides the square after a piece letter or `x`) |
-| EXP-06 | A cited square not in the contract's moves/pieces is reported | `tests/test_verification.py:60` `== ["casa h3 não está no contrato"]` | ❌ GAP (behavior) - squares inside any token the move regexes skip are invisible (`exd5` → `d5`, `Nf3` → `f3`, `12…Txa2` → `a2`); same cause, `domain/verification.py:16` |
-| EXP-07 | A cited integer not in the allowed numbers is reported | `tests/test_verification.py:65` `== ["número 7 não está no contrato"]`; `:66` `== []` for 72 and 3 | ✅ PASS for integers. ⚠️ Spec-precision gap: decimals are out of the AC, and `domain/verification.py:17` skips them, so invented evaluations `+2,3` and `2.3` pass, against general.md 7.2 / step_03 §5 "nunca inventar avaliações" |
-| EXP-08 | Verdict > 30 words reported; key-moment plies ≠ contract reported | `tests/test_verification.py:71` `== ["a manchete passou de 30 palavras"]` (31 words); `:80` `== ["os momentos-chave não batem com o contrato"]` | ✅ PASS |
-| EXP-09 | Retry once with the violations; second failure → 502 `{"detail": "explanation_unverified"}` | `tests/test_use_cases.py:60-61` `len(calls) == 2`, `"lance Cf3 não está no contrato" in calls[1][1]`; `:68-69` violations list and 2 calls; `tests/test_routes.py:72-73` `502`, `{"detail": "explanation_unverified"}` | ✅ PASS for explanations. Question use case retry feedback not asserted (M2b survives) |
-| EXP-10 | `POST /api/questions` (question 1–500 chars) → `{answer, in_scope}`, verified | `tests/test_routes.py:80-81` `200`, `in_scope is True`; `:84-89` `""` and 501 chars → 422; `tests/test_use_cases.py:87` second (verified) answer returned; `tests/test_routes.py:104` 502 | ✅ PASS (inherits the EXP-05/06 verification holes) |
-| EXP-11 | Off-topic answer starts with "Só consigo falar sobre esta partida." | `tests/test_use_cases.py:94-96` `== QuestionAnswer(answer="Só consigo falar sobre esta partida. Pergunte sobre 22...Ta7.", in_scope=False)`; `:103` no double prefix | ✅ PASS |
-| EXP-12 | `openai` → LangChain adapter with `AI_MODEL` and `OPENAI_API_KEY`; `fake` → fake; other → clear error | `tests/test_providers.py:126` `isinstance(build_provider(...), expected)`; `:130` `match="AI_PROVIDER desconhecido: outro"`; `:58-59` `created == [("gpt-5.1", "sk-test")]`, `kwargs == {..."json_schema", "strict": True}` | ⚠️ PASS with gaps: the factory's model/key wiring is not asserted (M14 survives: hard-coding the model passes). Spec-precision gap: "fail at startup of the route" has no defined HTTP outcome; today `get_provider` (`api/router.py:28-29`) raises at request time → unhandled 500, untested at route level |
-| EXP-13 | `openai` + empty key → routes 503 `ai_unavailable`; health keeps working | `tests/test_routes.py:113` health `200`; `:115` `status_code == 503`; `tests/test_providers.py:65` `ProviderError, match="OPENAI_API_KEY"` | ⚠️ PASS on status; `detail == "ai_unavailable"` not asserted on this path (same weakness as M15) |
-| EXP-14 | `domain/` imports no FastAPI/LangChain; `application/` depends only on `domain/` and its ports | Static read: `domain/contract.py:3-5` (typing, pydantic); `domain/verification.py:3-6` (re, dataclasses, contract); `application/ports.py:3-5` (typing, pydantic); `application/prompts.py:3-6`; `application/explain_game.py:3-6`; `application/answer_question.py:3-10` (application + domain only) | ✅ PASS by inspection. No automated import guard (no test fails if a forbidden import is added) |
-| EXP-15 | No key moments → empty `key_moments`, positive verdict (fake), verification accepts | `tests/test_verification.py:97` `verify_explanation(positive, clean) == []`; `tests/test_providers.py:97` `key_moments == []` | ⚠️ PASS with spec-precision gap: "positive verdict" is undefined and the fake's clean verdict (`infrastructure/fake_provider.py:75`) is never asserted |
+| EXP-01 | 200; 5 fields; key-moment plies = contract; strengths for contract strengths | `tests/test_routes.py:36` `== 200`; `:38` `== [44, 54]`; `:39` `[s["ply"] ...] == [24]`; `:40` `set(body) == {...}` | ✅ PASS |
+| EXP-02 | 422 on body outside contract | `tests/test_routes.py:51` `.status_code == 422` | ✅ PASS |
+| EXP-03 | Versioned prompt file with level rules and contract JSON | `tests/test_use_cases.py:39-41`, `:46`, `:47` | ✅ PASS |
+| EXP-04 | Provider raises → 503 `{"detail": "ai_unavailable"}` | `tests/test_routes.py:58-59` (explanations); `:97-98` (questions) | ✅ PASS |
+| EXP-05 | A move not in the contract, numbered or not, English or Portuguese letters, pawn captures, castling, is reported; spaces, check signs and `!`/`?` are ignored | `tests/test_verification.py:43` `30...Txa2`; `:50` `Cf3`; `:84-87` parametrized `== [violation]` for `Nf3`, `Qxh7#`, `Kg1`, `exd5`, `gxh3`, `O-O-O`, `0-0`, `12…Txa2`, `30. e4`; `:92` `"22... Ta7+ ... 22…Ta7!" == []` | ❌ GAP (behavior) - `...Dxh8` and `…Dxh8` return `[]` (probe, reference contract). `domain/verification.py:21` excludes `.` and `…` in the lookbehind of `_UNLABELED_MOVE`, and `_LABELED_MOVE` (`:19`) needs a number, so the token is never checked. Its square is not standalone (`:24`), so the square check misses it too. Same for `22. ..Dxh8` |
+| EXP-06 | A square not in the contract's moves/pieces is reported | `tests/test_verification.py:60` `== ["casa h3 ..."]`; `:84-87` case `"Com Bd4 em h8 não dá."` → `["casa h8 ..."]` | ✅ PASS (squares inside move tokens are covered through EXP-05, so they share Gap 1) |
+| EXP-07 | Integer not allowed, or any decimal, is reported | `tests/test_verification.py:65-66`; `:96-99` parametrized `+2,3`, `2.3`, `-0,5` → `["número decimal {d} não pode aparecer (avaliação inventada)"]` | ✅ PASS |
+| EXP-08 | Verdict > 30 words; key-moment plies ≠ contract; strength plies ≠ contract | `tests/test_verification.py:112` (31 words); `:121`; `:105` `== ["os pontos fortes não batem com o contrato"]` | ✅ PASS |
+| EXP-09 | Retry once with violations; then 502 `explanation_unverified` | `tests/test_use_cases.py:60-61`, `:68-69`; `tests/test_routes.py:73-74`, `:106-107` | ✅ PASS |
+| EXP-10 | `POST /api/questions` (1–500 chars) → `{answer, in_scope}`, verified (retry with violations) | `tests/test_routes.py:81-82`, `:86-90`; `tests/test_use_cases.py:87-89` `"casa h3 não está no contrato" in calls[1][1]` | ✅ PASS |
+| EXP-11 | Off-topic answer starts with "Só consigo falar sobre esta partida." | `tests/test_use_cases.py:95`, `:104` | ✅ PASS |
+| EXP-12 | openai adapter with `AI_MODEL`/`OPENAI_API_KEY`; fake; other → 503 `ai_unavailable` + logged error, health works | `tests/test_providers.py:126`; `:142` `created == [("gpt-x", "sk-abc")]`; `:59` strict json_schema; `tests/test_routes.py:125-128` health 200, `503`, `{"detail": "ai_unavailable"}` | ✅ PASS |
+| EXP-13 | openai + empty key → 503 `ai_unavailable`; health works | `tests/test_routes.py:116-119` | ✅ PASS |
+| EXP-14 | `domain/` without FastAPI/LangChain; `application/` only on `domain/` + ports | Static read: `domain/contract.py:3-5`, `domain/verification.py:3-6`, `application/*.py` imports (unchanged since round 1) | ✅ PASS by inspection (no automated guard) |
+| EXP-15 | No key moments → empty list, accepted; fake verdict exact text | `tests/test_verification.py:138` `== []`; `tests/test_providers.py:97`; `:148` `== "Vitória sem perdas de material importantes: parabéns pela partida limpa."` | ✅ PASS |
 
-**Status**: ❌ Gaps present (EXP-01, EXP-05, EXP-06) + ⚠️ spec-precision gaps (EXP-07, EXP-12, EXP-15)
+**Status**: ❌ 1 AC with a behavior gap (EXP-05). No spec-precision gaps remain.
 
-### Verification probes (reference contract, `verify_text`)
+### Probes (reference contract, `verify_text`, at `e1426b9`)
 
-| Text | Violations returned | Expected |
-| ---- | ------------------- | -------- |
-| `Nf3 era melhor.` | `[]` | move + square f3 |
-| `Qxh7# dava mate.` / `Kg1` | `[]` | move |
-| `exd5 ganhava.` / `gxh3` / `dxe5` | `[]` | move + square |
-| `O-O-O era melhor.` | `[]` | move |
-| `12…Txa2 perdeu.` | `[]` | move + square a2 |
-| `A avaliação era +2,3.` / `2.3` | `[]` | invented evaluation |
-| `Txh8`, `Dxh8+`, `30. Txa2`, `e4`, `-7 pontos` | reported | reported ✅ |
+| Text | Violations | Expected |
+| ---- | ---------- | -------- |
+| `Nf3`, `Qxh7#`, `Kg1`, `exd5`, `gxh3`, `O-O-O`, `12…Txa2`, `Nxe5`, `Dh5` | reported | ✅ |
+| `+2,3`, `2.3` | reported as decimals | ✅ |
+| `Txa1`, `Bd4+!`, `Rxg4`, `O resultado foi 0-1.` | `[]` (in the contract) | ✅ |
+| `...Dxh8`, `…Dxh8`, `22. ..Dxh8` | `[]` | ❌ should report `Dxh8` |
 
 ---
 
-## Edge Cases
+## Discrimination Sensor (round 2)
 
-- [x] EXP-15 empty key moments accepted by verification (`tests/test_verification.py:90-97`)
-- [ ] Moves written in English notation (glossary "Notação" lists both K Q R B N and R D T B C): not verified
-- [ ] Decimal numbers (evaluations): not verified
-
----
-
-## Discrimination Sensor
-
-Scratch worktree `…/scratchpad/f6-sensor` at `HEAD`, `uv sync --locked`, `uv run pytest -q --no-cov` per mutant, file restored after each.
+Fresh scratch worktree at `e1426b9`, `uv sync --locked`, `uv run pytest -q --no-cov` per mutant, file restored after each.
 
 | # | File:line | Mutation | Result |
 | - | --------- | -------- | ------ |
-| M1 | `application/explain_game.py:9` | `MAX_ATTEMPTS = 1` (no retry) | ✅ Killed (3 failed) |
-| M2a | `application/explain_game.py:27` | retry with `feedback=""` | ✅ Killed (`test_explain_retries_once_with_the_violations`) |
-| M2b | `application/answer_question.py:27` | question retry with `feedback=""` | ❌ Survived |
-| M3 | `domain/verification.py:75` | skip square check | ✅ Killed (2) |
-| M4 | `domain/verification.py:79` | skip number check | ✅ Killed |
-| M5 | `domain/verification.py:87` | allow 31-word verdict | ✅ Killed |
-| M6 | `domain/verification.py:90` | ignore key-moment ply mismatch | ✅ Killed |
-| M7a | `api/router.py:46,49,58,61` | 503↔502 swapped on both routes | ✅ Killed (5) |
-| M7b | `api/router.py:58,61` | 503↔502 swapped on questions only | ✅ Killed (2) |
-| M8 | `application/answer_question.py:40` | off-topic prefix not added | ✅ Killed |
-| M9 | `infrastructure/openai_provider.py:43` | `strict=True` removed | ✅ Killed |
-| M10 | `infrastructure/provider_factory.py:20` | unknown provider → `FakeProvider()` | ✅ Killed |
-| M11 | `infrastructure/openai_provider.py:39` | empty key not rejected | ✅ Killed |
-| M12 | `domain/verification.py:40` | best moves not allowed | ✅ Killed (11) |
-| M13a | `domain/verification.py:66` | labels compared raw on the text side | ❌ Survived |
-| M13b | `domain/verification.py:34,66` | labels compared raw on both sides | ✅ Killed |
-| M14 | `infrastructure/provider_factory.py:16` | factory ignores `AI_MODEL` | ❌ Survived |
-| M15 | `api/router.py:58` | questions 503 detail changed | ❌ Survived |
-| M16 | `domain/verification.py:71` | skip piece-move check | ✅ Killed (6) |
-| M17 | `application/answer_question.py:31` | questions not verified | ✅ Killed (3) |
+| M2b | `application/answer_question.py:27` | question retry with `feedback=""` | ✅ Killed |
+| M13a | `domain/verification.py:78` | labels compared without normalization | ✅ Killed (2) |
+| M14 | `infrastructure/provider_factory.py:16` | factory ignores `AI_MODEL` | ✅ Killed |
+| M14b | `infrastructure/provider_factory.py:16` | factory ignores the key (hard-coded `sk-other`) | ✅ Killed (a first attempt hard-coded the test's own `sk-abc` and was discarded as invalid) |
+| M15 | `api/router.py:65` | questions 503 detail changed | ✅ Killed |
+| N1 | `domain/verification.py:12` | English piece letters dropped | ✅ Killed (3) |
+| N2 | `domain/verification.py:21` | pawn-capture check dropped | ✅ Killed (2) |
+| N3 | `domain/verification.py:90` | decimal check dropped | ✅ Killed (3) |
+| N4 | `domain/verification.py:107` | strengths check dropped | ✅ Killed |
+| N5 | `api/router.py:32-36` | unknown provider → unhandled 500 | ✅ Killed |
+| N6 | `domain/verification.py:21` | unnumbered castling dropped | ✅ Killed (2) |
+| N7 | `domain/verification.py:19` | `…` no longer accepted in numbered labels | ✅ Killed |
+| N8 | `domain/verification.py:33` | `!`/`?` not stripped | ✅ Killed (2) |
+| N10 | `domain/verification.py:86` | standalone square check skipped | ✅ Killed (3) |
+| N11 | `domain/verification.py:82` | unnumbered move check skipped | ✅ Killed (13) |
+| N9 | `domain/verification.py:32` | `0-0` not normalized to `O-O` | ❌ Survived. Minor: no test cites a contract castling written as `0-0` (the spec lists `0-0` only as a move to report) |
+| N12 | `domain/verification.py:68` | squares taken from SANs only, not labels | ➖ Equivalent: a label is the move number plus the SAN, so the square sets are identical |
 
-**Sensor depth**: P0-style (20 manual mutants; the verification is the product's safety net)
-**Result**: 16/20 killed - ❌ FAIL
-**Isolation**: scratch removed with `git worktree remove --force`; real tree `git status --porcelain` equal to the baseline (empty before and after).
+**Sensor depth**: P0-style (17 mutants, all round-1 survivors re-run plus new rules)
+**Result**: 15/16 non-equivalent mutants killed (N9 survived, minor)
+**Isolation**: scratch removed with `git worktree remove --force`; real tree `git status --porcelain` equal to the pre-sensor baseline (empty).
 
 ---
 
@@ -103,59 +89,36 @@ Scratch worktree `…/scratchpad/f6-sensor` at `HEAD`, `uv sync --locked`, `uv r
 
 | Principle | Status |
 | --------- | ------ |
-| Minimum code | ✅ |
-| Surgical changes | ✅ |
-| No scope creep | ✅ |
-| Matches patterns (DDD layers per `docs/architecture/code-structure.md`) | ✅ |
-| Spec-anchored outcome check | ❌ EXP-01, EXP-05, EXP-06 |
-| Per-layer coverage (domain 1:1 ACs; routes happy + edge + error) | ⚠️ questions error paths assert status only |
-| Every test maps to a spec requirement | ✅ |
-| Documented guidelines followed: `docs/engineering/quality.md`, `docs/architecture/code-structure.md` | ⚠️ quality.md requires testing "a verificação automática que compara os números e lances citados"; English-notation and pawn-capture citations are untested and unverified |
-| Observability "no game content" (spec sweep) | ⚠️ `api/router.py:48,60` log the violation strings, which quote moves and squares |
+| Minimum code / surgical changes / no scope creep | ✅ |
+| DDD layering (`docs/architecture/code-structure.md`) | ✅ |
+| Spec-anchored outcome check | ❌ EXP-05 (Gap 1) |
+| Routes cover happy + edge + error with exact bodies | ✅ |
+| Every test maps to a requirement | ✅ |
+| `docs/engineering/quality.md` (verification of cited moves and numbers tested) | ⚠️ Gap 1 |
+| Observability: logs carry only violation counts | ✅ `api/router.py:55,67` |
 
 ---
 
 ## Gate Check
 
 - **Gate command**: `make check` (Node 26)
-- **Result**: exit 0. Biome clean; web Vitest 210 passed (19 files); API pytest 53 passed, total coverage 99%; per-layer gate `domain/` + `application/` 100% (189 statements, 0 missed)
-- **API test count before feature**: 9 (`e31cb46`: health 2, config 4, export 1, markers 2)
-- **API test count after feature**: 53
-- **Delta**: +44
-- **Skipped tests**: none (the `llm` marker deselects none in this feature)
-- **Failures**: none
+- **Result**: exit 0. Biome clean; web Vitest 210 passed; API pytest 71 passed, total 99%; `domain/` + `application/` 100% (203 statements, 0 missed)
+- **API tests**: 9 before the feature → 53 (round 1) → 71 (round 2)
+- **Skipped / failures**: none
 
 ---
 
 ## Fix Plans
 
-### Fix 1 (Blocker): verification misses whole move/square families - EXP-05, EXP-06
+### Fix 1 (Major): unnumbered move with a leading ellipsis is not verified - EXP-05
 
-- **Root cause**: `domain/verification.py:14-16`. Labels need a `.` before `…`; piece moves only match `[RDTBC]`; pawn captures and castling are never tokenized; `_SQUARE`'s `(?<![\w])` hides the square that follows a piece letter or `x`.
-- **Fix task**: tokenize every SAN-like token (Portuguese and English piece letters, pawn captures `[a-h]x[a-h][1-8]`, castling `O-O(-O)?`, labels `\d+\s?(\.{1,3}|\.?…)`), and check every square, including those inside move tokens. Allowed English-letter moves must still be rejected, since the contract is in Portuguese notation.
-- **Verify**: one `test_verification.py` case per probe above, each asserting the exact violation list.
+- **Root cause**: `domain/verification.py:21`. The `(?<![\w.…])` lookbehind of `_UNLABELED_MOVE` was meant to skip the tail of a numbered label, but numbered labels are already removed from `remaining` (`:80`) before this pass. So it only hides moves written `...Dxh8` / `…Dxh8`, and their squares are never standalone.
+- **Fix task**: let `_UNLABELED_MOVE` accept an optional `(?:\.\.\.|…)\s?` prefix (or drop `.`/`…` from the lookbehind), and normalize away the leading dots before comparing with `facts.moves`.
+- **Verify**: add `("Depois de ...Dxh8 acabou.", "lance ...Dxh8 não está no contrato")` and `…Dxh8` to the parametrized test at `tests/test_verification.py:84`, and assert `"...Ta7 perdeu o bispo." == []` for a contract move.
 
-### Fix 2 (Major): strengths not verified against the contract - EXP-01
+### Fix 2 (Minor): `0-0` equivalence untested - N9
 
-- **Fix task**: in `verify_explanation`, require `[s.ply for s in explanation.strengths] == [s.ply for s in contract.strengths]` with its own message; assert strengths plies in `tests/test_routes.py:38`.
-
-### Fix 3 (Major): decimal numbers (evaluations) pass - EXP-07 / general.md 7.2
-
-- **Fix task**: amend EXP-07 to say any decimal number is a violation (the contract carries none), then report decimals in `verify_text`.
-
-### Fix 4 (Major): surviving mutants
-
-- M2b: in `tests/test_use_cases.py:78-88`, assert `"casa h3 não está no contrato" in provider.calls[1][1]`.
-- M13a: add a test citing a contract label with spacing or a sign (e.g. `22... Ta7+`) that must verify as `[]`.
-- M14: in `tests/test_providers.py:125-126`, assert the built `OpenAIProvider` received `ai_model`/`openai_api_key` from `Settings`, e.g. through a public attribute or a factory spy.
-- M15 / EXP-13: assert `response.json() == {"detail": "ai_unavailable"}` at `tests/test_routes.py:96` and `:115`; also assert the 502 body at `:104`.
-
-### Fix 5 (Minor): spec precision
-
-- EXP-12: define the outcome for an unknown provider (e.g. fail in `create_app` at startup, or a 500 with a stated detail) and add a route-level test.
-- EXP-15: define "positive verdict" (e.g. the exact fake text, or "no loss words") and assert it in `tests/test_providers.py:94-100`.
-- EXP-14: optionally add an import-guard test that scans the `domain/` and `application/` imports.
-- Observability: log violation counts or kinds, not the quoted moves (`api/router.py:48,60`).
+- Add a test where a contract with `O-O` accepts text citing `0-0` (or drop the normalization if that equivalence is not wanted).
 
 ---
 
@@ -163,21 +126,18 @@ Scratch worktree `…/scratchpad/f6-sensor` at `HEAD`, `uv sync --locked`, `uv r
 
 | Requirement | Previous | New |
 | ----------- | -------- | --- |
-| EXP-01 | Implementing | ❌ Needs Fix |
-| EXP-02, EXP-03, EXP-04, EXP-08, EXP-09, EXP-10, EXP-11, EXP-14 | Implementing | ✅ Verified |
-| EXP-05, EXP-06 | Implementing | ❌ Needs Fix |
-| EXP-07, EXP-12, EXP-13, EXP-15 | Implementing | ⚠️ Verified with gaps |
+| EXP-01, EXP-07, EXP-12, EXP-13, EXP-15 | Needs Fix / gaps | ✅ Verified |
+| EXP-02, EXP-03, EXP-04, EXP-06, EXP-08, EXP-09, EXP-10, EXP-11, EXP-14 | Verified | ✅ Verified |
+| EXP-05 | Needs Fix | ❌ Needs Fix (ellipsis-prefixed moves only) |
 
 ---
 
 ## Summary
 
-**Overall**: ❌ Not Ready
+**Overall**: ❌ Not Ready (one narrow fix away)
 
-**Spec-anchored check**: 3 ACs fail (EXP-01, EXP-05, EXP-06); 3 spec-precision gaps (EXP-07, EXP-12, EXP-15)
-**Sensor**: 16/20 killed (M2b, M13a, M14, M15 survived)
-**Gate**: `make check` green; API 53 passed, web 210 passed
+**Spec-anchored check**: 14/15 ACs match the spec outcome; EXP-05 has one residual hole
+**Sensor**: 15/16 non-equivalent mutants killed (N9 minor); all round-1 survivors killed
+**Gate**: `make check` green; API 71 passed, web 210 passed
 
-**What works**: closed contract with `extra="forbid"`, retry-once flow, 502/503 mapping, off-topic prefix, strict `json_schema` structured output, fake provider end to end, clean layering, 100% domain/application coverage.
-
-**Next steps**: route Fixes 1-4 to an implementer, then re-verify (round 2 of max 3).
+**Next steps**: apply Fix 1 (+ Fix 2), then re-verify (round 3 of max 3).
