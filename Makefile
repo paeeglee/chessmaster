@@ -37,7 +37,7 @@ setup-env: ## Cria os .env a partir dos .env.example, sem sobrescrever os existe
 		fi; \
 	done
 
-setup-web: ## Instala o Node do .nvmrc (via nvm), o pnpm, as dependências do web e o Chromium do Playwright
+setup-web: ## Instala o Node do .nvmrc (via nvm), o pnpm, as dependências do web, o Stockfish em public/engine e o Chromium do Playwright
 	@if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" >/dev/null && nvm install >/dev/null; fi
 	@$(NVM_USE) node -e 'const [major] = process.versions.node.split("."); const wanted = require("fs").readFileSync(".nvmrc", "utf8").trim(); if (major !== wanted) { console.error(`Node $${wanted} é obrigatório (encontrado $${process.version}). Instale com: nvm install`); process.exit(1); }'
 	@$(NODE) pnpm_version=$$(node -p 'require("./package.json").packageManager.split("@")[1]'); \
@@ -46,6 +46,7 @@ setup-web: ## Instala o Node do .nvmrc (via nvm), o pnpm, as dependências do we
 			npm install -g "pnpm@$$pnpm_version"; \
 		fi
 	@$(NODE) pnpm install --frozen-lockfile
+	@$(NODE) pnpm copy-engine
 	@$(NODE) pnpm exec playwright install chromium
 
 setup-api: ## Instala as dependências do api com o uv (Python do .python-version)

@@ -8,21 +8,23 @@
     "node": ">=26 <27"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "dev": "node scripts/copy-engine.mjs && vite",
+    "build": "node scripts/copy-engine.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "biome check --error-on-warnings .",
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "copy-engine": "node scripts/copy-engine.mjs"
   },
   "dependencies": {
     "@xstate/react": "6.1.0",
     "chess.js": "1.4.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "stockfish": "19.0.1",
     "xstate": "5.33.4"
   },
   "devDependencies": {

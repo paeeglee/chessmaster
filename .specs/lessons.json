@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 8,
+  "next_id": 11,
   "lessons": [
     {
       "id": "L-001",
@@ -130,6 +130,60 @@
       ],
       "created": "2026-11-23T13:46:41Z",
       "last_seen": "2026-11-23T13:46:41Z"
+    },
+    {
+      "id": "L-008",
+      "key": "surviving_mutant::assert the value an adapter forwards into machine context not only the end state the actor reaches",
+      "text": "Assert the value an adapter forwards into machine context, not only the end state the actor reaches",
+      "signal": "surviving_mutant",
+      "scope": "web-machines",
+      "status": "candidate",
+      "features": [
+        "evaluation-engine"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M12 / apps/web/src/domains/evaluation/machines/engineLoaderMachine.ts:46 (EVAL-06) (web-machines)"
+      ],
+      "created": "2026-11-23T13:54:31Z",
+      "last_seen": "2026-11-23T13:54:31Z"
+    },
+    {
+      "id": "L-009",
+      "key": "surviving_mutant::when the spec names a timeout value test the default with fake timers instead of only an injected short timeout",
+      "text": "When the spec names a timeout value, test the default with fake timers instead of only an injected short timeout",
+      "signal": "surviving_mutant",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "evaluation-engine"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M16 / apps/web/src/domains/evaluation/engine/EngineClient.ts:26 (EVAL-08) (web-tests)"
+      ],
+      "created": "2026-11-23T13:54:31Z",
+      "last_seen": "2026-11-23T13:54:31Z"
+    },
+    {
+      "id": "L-010",
+      "key": "surviving_mutant::click every user action the spec names through the wired app not only in the presentational component",
+      "text": "Click every user action the spec names through the wired app, not only in the presentational component",
+      "signal": "surviving_mutant",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "evaluation-engine"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M17 / apps/web/src/app/EngineIndicator.tsx:19 (EVAL-09) (web-tests)"
+      ],
+      "created": "2026-11-23T13:54:31Z",
+      "last_seen": "2026-11-23T13:54:31Z"
     }
   ]
 }

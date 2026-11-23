@@ -56,6 +56,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md M22 (apps/web/src/domains/game/model/moveText.ts:120) (parser)
 - last seen: 2026-11-23T13:46:41Z
 
+### L-008 - Assert the value an adapter forwards into machine context, not only the end state the actor reaches
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-machines` · harmful: 0
+- features: evaluation-engine
+- evidence: M12 / apps/web/src/domains/evaluation/machines/engineLoaderMachine.ts:46 (EVAL-06) (web-machines)
+- last seen: 2026-11-23T13:54:31Z
+
+### L-009 - When the spec names a timeout value, test the default with fake timers instead of only an injected short timeout
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: evaluation-engine
+- evidence: M16 / apps/web/src/domains/evaluation/engine/EngineClient.ts:26 (EVAL-08) (web-tests)
+- last seen: 2026-11-23T13:54:31Z
+
+### L-010 - Click every user action the spec names through the wired app, not only in the presentational component
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: evaluation-engine
+- evidence: M17 / apps/web/src/app/EngineIndicator.tsx:19 (EVAL-09) (web-tests)
+- last seen: 2026-11-23T13:54:31Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
