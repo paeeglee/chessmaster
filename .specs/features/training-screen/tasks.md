@@ -56,7 +56,7 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] 22...Te6 refuted, 22...Bd4+ and 22...Bb2 accepted with fixture evaluations
+- [x] 22...Te6 refuted, 22...Bd4+ and 22...Bb2 accepted with fixture evaluations
 
 **Tests**: unit
 **Gate**: quick
