@@ -147,6 +147,14 @@ describe("tokenizeMoveText", () => {
     });
   });
 
+  it("marca como interrompida quando só um número de lance vem depois (GAME-08)", () => {
+    expect(tokenizeMoveText("1.e4 e5 2.Nf3 Nc6 obrigado 3.")).toEqual({
+      moves: ["e4", "e5", "Nf3", "Nc6"],
+      result: null,
+      interrupted: true,
+    });
+  });
+
   it("não marca como interrompida quando o texto estranho fica no fim", () => {
     expect(tokenizeMoveText("1.e4 e5 2.Nf3 gg wp").interrupted).toBe(false);
   });

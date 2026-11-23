@@ -106,6 +106,7 @@ describe("parseGameText rejeita o que não é partida", () => {
 
   it("lista com texto estranho no meio → unrecognized (GAME-08)", () => {
     expect(parseGameText("1.e4 e5 2.Xf3 Nc6 3.Bb5")).toEqual({ kind: "unrecognized" });
+    expect(parseGameText("1.e4 e5 2.Nf3 Nc6 obrigado 3.")).toEqual({ kind: "unrecognized" });
   });
 
   it("PGN com cabeçalhos → unrecognized, mesmo com lances (GAME-13)", () => {
