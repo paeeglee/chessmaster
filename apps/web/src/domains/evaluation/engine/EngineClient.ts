@@ -24,6 +24,8 @@ export type StartOptions = {
 };
 
 export const DEFAULT_START_TIMEOUT_MS = 120_000;
+/** Quanto esperar o `bestmove` da busca cancelada antes de seguir sem ele. */
+export const STALE_BESTMOVE_TIMEOUT_MS = 2000;
 
 type LineConsumer = {
   /** Recebe cada linha; devolve true quando terminou de consumir. */
@@ -43,6 +45,8 @@ export class EngineClient {
   private terminated = false;
   /** Muda a cada cancelamento; buscas de uma geração antiga não chegam a rodar. */
   private generation = 0;
+  /** Há um `go` em andamento, cujo `bestmove` ainda vai chegar. */
+  private searching = false;
 
   constructor(private readonly worker: WorkerLike) {
     worker.onmessage = (event) => {
@@ -99,11 +103,24 @@ export class EngineClient {
       return;
     }
     this.generation += 1;
+    const wasSearching = this.searching;
     this.worker.postMessage("stop");
     this.fail(new Error("Análise cancelada"));
-    // O `bestmove` da busca interrompida ainda vai chegar; esperar o `readyok` garante
-    // que ele não seja lido como resultado da próxima busca.
-    this.queue = this.send("isready", (line) => line === "readyok").catch(() => undefined);
+    // O `bestmove` da busca interrompida ainda vai chegar, e o motor pode responder ao
+    // `isready` antes dele. Por isso a próxima busca espera primeiro esse `bestmove`
+    // (com limite de tempo, caso ele não venha) e depois o `readyok`.
+    const stale = wasSearching
+      ? Promise.race([
+          this.waitFor((line) => line.startsWith("bestmove")),
+          new Promise<void>((resolve) => setTimeout(resolve, STALE_BESTMOVE_TIMEOUT_MS)),
+        ])
+      : Promise.resolve();
+    this.queue = stale
+      .then(() => {
+        this.consumer = null;
+        return this.send("isready", (line) => line === "readyok");
+      })
+      .catch(() => undefined);
   }
 
   terminate(): void {
@@ -134,6 +151,7 @@ export class EngineClient {
   private search(command: string): Promise<SearchResult> {
     let info: InfoLine | null = null;
     let bestMove: string | null = null;
+    this.searching = true;
     return this.send(command, (line) => {
       info = parseInfoLine(line) ?? info;
       const best = parseBestMove(line);
@@ -142,10 +160,23 @@ export class EngineClient {
         return true;
       }
       return false;
-    }).then(() => ({ info, bestMove }));
+    })
+      .then(() => ({ info, bestMove }))
+      .finally(() => {
+        this.searching = false;
+      });
   }
 
   private send(command: string, isDone: (line: string) => boolean): Promise<void> {
+    const done = this.waitFor(isDone);
+    if (!this.terminated) {
+      this.worker.postMessage(command);
+    }
+    return done;
+  }
+
+  /** Espera uma linha do motor sem mandar comando. */
+  private waitFor(isDone: (line: string) => boolean): Promise<void> {
     if (this.terminated) {
       return Promise.reject(new Error("Motor encerrado"));
     }
@@ -160,7 +191,6 @@ export class EngineClient {
         },
         reject,
       };
-      this.worker.postMessage(command);
     });
   }
 

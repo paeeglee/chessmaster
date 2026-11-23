@@ -53,5 +53,5 @@ type AnalysisResult = {
 | Concern | Location | Impact | Mitigation |
 | ------- | -------- | ------ | ---------- |
 | `stop` arrives while no search runs | EngineClient.cancel | Harmless UCI no-op | Always send `stop`; queue reset |
-| Multi-thread search is not deterministic | analysis at 200 ms | Under heavy CPU load a borderline key moment can be missed | Capture line also uses the actual reply (+ engine PV after it); min depth 12; e2e analysis tests run serially; observed 5/5 and 3/3 full-suite runs green |
+| Multi-thread search is not deterministic | analysis at 200 ms | Under heavy CPU load a borderline key moment can be missed | Capture line also uses the actual reply (+ engine PV after it); min depth 12; full-analysis Playwright project runs alone after the others (workers: 1). Residual: 27...Tb7 is borderline for the engine itself (eval drop 1.3; Be2 vs Nxf4 near-equal) and is missed in ~1 of 4 real runs; e2e asserts the 4 stable moments, Vitest asserts all 5 with fixed evaluations |
 | Engine child not ready when analysis starts | appMachine | Should not happen (Colar guards) | Guard on ANALYSIS.REQUESTED reads engine; tests cover |

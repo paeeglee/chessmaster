@@ -64,7 +64,15 @@ divergirem, o PRD vale.
   motor), e vale a pior das duas: com várias threads, a variante do motor pode não
   começar pela captura. Por isso cada meio-lance é classificado quando a posição
   depois da resposta já foi avaliada (`classifyPly`, usado no resumo e durante a
-  análise). É momento-chave
+  análise).
+- **Lances limítrofes:** a busca de 200 ms com várias threads não é determinística.
+  Quando o melhor lance e uma alternativa saem quase iguais para o motor, a linha do
+  melhor lance pode mudar de uma rodada para outra e um momento-chave limítrofe pode
+  aparecer ou não. Na partida de referência isso acontece com 27...Tb7 (cerca de 1 em
+  4 rodadas no navegador); os outros quatro momentos saem sempre. Os testes do Vitest
+  usam avaliações fixas (profundidade 18) e conferem os 5; o e2e confere os 4
+  estáveis. A cancela do motor espera o `bestmove` da busca interrompida antes do
+  `isready`, para ele nunca ser lido como resultado da busca seguinte. É momento-chave
   quando o material do jogador cai 2 pontos ou mais em relação a antes do lance **e**
   em relação à linha do melhor lance. A peça perdida é a primeira do jogador
   capturada nessa linha. "Defensor saiu": o lance tirou o único defensor dela; "peça

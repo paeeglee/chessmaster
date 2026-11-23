@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { DownloadProgress } from "../model/types";
-import { EngineClient, type WorkerLike } from "./EngineClient";
+import { EngineClient, STALE_BESTMOVE_TIMEOUT_MS, type WorkerLike } from "./EngineClient";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const AFTER_E4 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
@@ -206,6 +206,8 @@ describe("EngineClient.evaluate", () => {
   it("cancela a busca atual e a fila, e continua pronto (AS-08)", async () => {
     let answer = false;
     const { client, worker } = engineWith((command, reply) => {
+      // A busca interrompida termina com o seu bestmove, como no Stockfish.
+      if (command === "stop") reply("bestmove h2h3");
       if (command === "go movetime 200" && answer) {
         reply("info depth 20 score cp 5 pv e2e4");
         reply("bestmove e2e4");
@@ -259,5 +261,81 @@ describe("EngineClient.evaluate", () => {
     client.cancel();
     await expect(cancelled).rejects.toThrow("Análise cancelada");
     await expect(client.evaluate(START_FEN)).resolves.toMatchObject({ bestMove: "e2e4" });
+  });
+
+  it("espera o bestmove atrasado mesmo quando o readyok chega antes dele (UCI)", async () => {
+    // O UCI manda responder ao isready mesmo durante a busca: o readyok pode vir antes
+    // do bestmove da busca interrompida.
+    let searches = 0;
+    const worker = new FakeWorker((command, reply) => {
+      if (command === "uci") reply("uciok");
+      if (command === "isready") reply("readyok");
+      if (command === "stop") {
+        setTimeout(() => {
+          reply("info depth 20 score cp 999 pv h2h3");
+          reply("bestmove h2h3");
+        }, 3);
+      }
+      if (command === "go movetime 200" && ++searches > 1) {
+        setTimeout(() => {
+          reply("info depth 20 score cp 5 pv e2e4");
+          reply("bestmove e2e4");
+        }, 10);
+      }
+    });
+    const client = new EngineClient(worker);
+    await client.start({ threads: 1 });
+    const cancelled = client.evaluate(START_FEN);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    client.cancel();
+    await expect(cancelled).rejects.toThrow("Análise cancelada");
+    await expect(client.evaluate(START_FEN)).resolves.toMatchObject({ bestMove: "e2e4" });
+    // O isready só sai depois do bestmove atrasado.
+    expect(worker.commands.filter((command) => command === "isready")).toHaveLength(2);
+  });
+
+  it("segue sem o bestmove atrasado depois do limite de tempo", async () => {
+    vi.useFakeTimers();
+    try {
+      let searches = 0;
+      const worker = new FakeWorker((command, reply) => {
+        if (command === "uci") reply("uciok");
+        if (command === "isready") reply("readyok");
+        if (command === "go movetime 200" && ++searches > 1) {
+          reply("info depth 20 score cp 5 pv e2e4");
+          reply("bestmove e2e4");
+        }
+      });
+      const client = new EngineClient(worker);
+      await client.start({ threads: 1 });
+      const cancelled = client.evaluate(START_FEN).catch((error: Error) => error.message);
+      await vi.advanceTimersByTimeAsync(0);
+      client.cancel();
+      expect(await cancelled).toBe("Análise cancelada");
+      const next = client.evaluate(START_FEN);
+      await vi.advanceTimersByTimeAsync(STALE_BESTMOVE_TIMEOUT_MS);
+      await expect(next).resolves.toMatchObject({ bestMove: "e2e4" });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancelar sem busca em andamento não espera bestmove", async () => {
+    const { client, worker } = engineWith((command, reply) => {
+      if (command === "go movetime 200") {
+        reply("info depth 20 score cp 5 pv e2e4");
+        reply("bestmove e2e4");
+      }
+    });
+    await client.start({ threads: 1 });
+    await client.evaluate(START_FEN);
+    client.cancel();
+    await expect(client.evaluate(START_FEN)).resolves.toMatchObject({ bestMove: "e2e4" });
+    expect(worker.commands.slice(-4)).toEqual([
+      "stop",
+      "isready",
+      `position fen ${START_FEN}`,
+      "go movetime 200",
+    ]);
   });
 });

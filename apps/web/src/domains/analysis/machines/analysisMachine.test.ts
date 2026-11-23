@@ -181,4 +181,20 @@ describe("analysisMachine", () => {
     );
     expect(actor.getSnapshot().output?.keyMoments[0]?.moveLabel).toBe("22...Ta7");
   });
+
+  it("o último lance da partida também vira achado no fim da avaliação (AS-03)", async () => {
+    // A partida cortada termina em 22...Ta7: não há resposta, então o lance é
+    // classificado quando a avaliação termina.
+    const full = referenceRequest();
+    const request = { ...full, game: { ...full.game, plies: full.game.plies.slice(0, 44) } };
+    const engine = fakeEngine();
+    const machine = analysisMachine.provide({
+      actors: { explainGame: fromPromise(async () => explanation) },
+    });
+    const actor = createActor(machine, { input: { request, engine } }).start();
+    await waitFor(actor, (snapshot) => snapshot.status === "done");
+    expect(engine.calls).toHaveLength(45);
+    const labels = actor.getSnapshot().context.findings.map((finding) => finding.moveLabel);
+    expect(labels.at(-1)).toBe("22...Ta7?");
+  });
 });
