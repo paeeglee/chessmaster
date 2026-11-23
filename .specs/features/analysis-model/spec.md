@@ -68,7 +68,7 @@ general.md 7.1 and D3 define how the product decides what went wrong: a key mome
 ### P1: Selection and texts ⭐ MVP
 
 1. WHEN there are more than 5 mistakes THEN `selectKeyMoments` SHALL keep the 5 with the largest loss and return them in chronological order. <!-- AN-14 -->
-2. `findingText(verdict)` SHALL return: mistake → "deixou {peça} em {casa} ser capturad{o/a}"; opponent mistake → "o adversário deixou {peça} em {casa} ser capturad{o/a}"; strength → "ganhou {peça} em {casa}"; with the generic "perdeu material" / "ganhou material" when no piece is identified. <!-- AN-15 -->
+2. `findingText(verdict)` SHALL return: mistake → "deixou {o/a} {peça} em {casa} ser capturad{o/a}"; opponent mistake → "o adversário deixou {o/a} {peça} em {casa} ser capturad{o/a}"; strength → "ganhou {o/a} {peça} em {casa}"; with the generic "perdeu material" / "ganhou material" when no piece is identified. <!-- AN-15 -->
 3. `groupPatterns(keyMoments)` SHALL group key moments by mistake type with counts, ordered by count then first occurrence. <!-- AN-16 -->
 4. `selectStrengths` SHALL keep up to 3 strengths with the largest gain, in chronological order. <!-- AN-17 -->
 
@@ -103,28 +103,28 @@ general.md 7.1 and D3 define how the product decides what went wrong: a key mome
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| AN-01 | Material | Design | Pending |
-| AN-02 | Material | Design | Pending |
-| AN-03 | Classify | Design | Pending |
-| AN-04 | Classify | Design | Pending |
-| AN-05 | Classify | Design | Pending |
-| AN-06 | Classify | Design | Pending |
-| AN-07 | Classify | Design | Pending |
-| AN-08 | Types | Design | Pending |
-| AN-09 | Types | Design | Pending |
-| AN-10 | Types | Design | Pending |
-| AN-11 | Reference | Design | Pending |
-| AN-12 | Reference | Design | Pending |
-| AN-13 | Reference | Design | Pending |
-| AN-14 | Selection | Design | Pending |
-| AN-15 | Selection | Design | Pending |
-| AN-16 | Selection | Design | Pending |
-| AN-17 | Selection | Design | Pending |
-| AN-18 | Boundary | Design | Pending |
-| AN-19 | Edge | Design | Pending |
-| AN-20 | Edge | Design | Pending |
+| AN-01 | Material | Tasks | Implementing |
+| AN-02 | Material | Tasks | Implementing |
+| AN-03 | Classify | Tasks | Implementing |
+| AN-04 | Classify | Tasks | Implementing |
+| AN-05 | Classify | Tasks | Implementing |
+| AN-06 | Classify | Tasks | Implementing |
+| AN-07 | Classify | Tasks | Implementing |
+| AN-08 | Types | Tasks | Implementing |
+| AN-09 | Types | Tasks | Implementing |
+| AN-10 | Types | Tasks | Implementing |
+| AN-11 | Reference | Tasks | Implementing |
+| AN-12 | Reference | Tasks | Implementing |
+| AN-13 | Reference | Tasks | Implementing |
+| AN-14 | Selection | Tasks | Implementing |
+| AN-15 | Selection | Tasks | Implementing |
+| AN-16 | Selection | Tasks | Implementing |
+| AN-17 | Selection | Tasks | Implementing |
+| AN-18 | Boundary | Tasks | Implementing |
+| AN-19 | Edge | Tasks | Implementing |
+| AN-20 | Edge | Tasks | Implementing |
 
-**Coverage:** 20 total, 0 mapped to tasks, 20 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 20 total, 20 mapped to tasks (T1–T3), 0 unmapped
 
 ---
 

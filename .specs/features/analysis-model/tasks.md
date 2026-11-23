@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/analysis-model/design.md`
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -98,7 +98,7 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] `make check` passes with ≥ 90% on `analysis/model`
+- [x] `make check` passes with ≥ 90% on `analysis/model`
 
 **Tests**: unit
 **Gate**: full
