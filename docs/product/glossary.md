@@ -29,6 +29,9 @@ Se um conceito novo aparecer, adicione-o aqui antes de usá-lo no código.
 | Defensor saiu | defender moved | O lance moveu a única peça que protegia a peça perdida. |
 | Outro | other | Erro que as regras determinísticas não classificam; descrito pela IA. |
 | Afogamento | stalemate | Empate por falta de lances legais sem estar em xeque. |
+| Fim da partida | termination | Como a partida terminou no tabuleiro: xeque-mate, afogamento ou sem fim decidido pelas regras. |
+| Notação | notation | Idioma das letras das peças: inglês (K Q R B N) ou português (R D T B C). |
+| Lance como escrito | written move | O lance exatamente como o jogador colou, usado nas mensagens de erro. |
 | Já encontrado | findings so far | Achados mostrados durante a tela Analisando. |
 | Manchete / veredito | verdict | Frase de resumo da partida na tela Resultado. |
 | Padrões | patterns | Erros do mesmo tipo agrupados. |
