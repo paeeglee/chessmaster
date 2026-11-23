@@ -137,7 +137,7 @@ T5 → T6 → T7
 
 **Done when**:
 
-- [ ] quick-api gate passes with coverage ≥ 80%
+- [x] quick-api gate passes with coverage ≥ 80%
 
 **Tests**: unit, integration
 **Gate**: quick-api
