@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PositionEvaluation } from "../../evaluation";
-import { type Game, type Ply, parseGameText, replayGame } from "../../game";
+import { defendersOf, type Game, type Ply, parseGameText, replayGame } from "../../game";
 import referenceGameHtml from "../../game/fixtures/reference-game.chesscom.html?raw";
 import referenceEvaluations from "../fixtures/reference-game.evaluations.json";
 import { classifyGame, classifyMove } from "./classify";
