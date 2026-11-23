@@ -147,7 +147,7 @@ for that screen and must be followed.
 | `make lint` | Run Biome and Ruff. |
 | `make format` | Format the code with Biome and Ruff. |
 | `make typecheck` | Run `tsc --noEmit` and mypy. |
-| `make test` | Run Vitest and pytest. |
+| `make test` | Run Vitest and pytest (with coverage gates: 80% per app, 90% on domain layers). |
 | `make test-e2e` | Run the Playwright tests. |
 | `make check` | `lint` + `typecheck` + `test`. Must pass before any commit. |
 | `make generate-api-types` | Regenerate the frontend API types from the backend OpenAPI. |

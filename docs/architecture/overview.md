@@ -191,6 +191,23 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   arquivo de licença e um link para o código-fonte da versão exata usada (por
   exemplo, no rodapé "Motores usados"). Validar com o jurídico antes do lançamento.
 
+## Camada de IA no backend (domínio `explanation`)
+
+- **Rotas:** `POST /api/explanations` recebe o contrato (`GameContract`) e devolve o
+  `GameExplanation` (manchete, frase de padrões, textos dos momentos-chave, pontos
+  fortes, hábito). `POST /api/questions` recebe `{ game, question }` e devolve
+  `{ answer, in_scope }`.
+- **Erros:** provedor indisponível ou sem chave → 503 `ai_unavailable`; texto que cita
+  lance, casa ou número fora do contrato duas vezes seguidas → 502
+  `explanation_unverified`; corpo fora do contrato → 422.
+- **Verificação automática:** lances (com ou sem número), casas e números inteiros
+  citados precisam existir no contrato; manchete com no máximo 30 palavras; um texto
+  por momento-chave, na mesma ordem. Na primeira reprovação, o caso de uso chama o
+  provedor de novo com a lista de problemas.
+- **Provedores:** `AI_PROVIDER=openai` usa o `ChatOpenAI` do LangChain com saída
+  estruturada (`json_schema`, `strict`); `AI_PROVIDER=fake` gera textos por template
+  só com fatos do contrato, útil para rodar o app sem chave.
+
 ## Prompts da IA
 
 - Os prompts ficam como arquivos versionados dentro do domínio `explanation` do

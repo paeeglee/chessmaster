@@ -94,8 +94,10 @@ test: test-web test-api ## Roda Vitest e pytest, com cobertura mínima
 test-web: ## Roda o Vitest com cobertura
 	@$(NODE) pnpm test
 
-test-api: ## Roda o pytest com cobertura (pula os testes marcados com llm)
-	@$(PY) uv run pytest
+test-api: ## Roda o pytest com cobertura (pula os testes marcados com llm) e exige 90% em domain/ e application/
+	@$(PY) uv run pytest && uv run coverage report --fail-under=90 \
+		--include='src/game_analyzer/domains/*/domain/*,src/game_analyzer/domains/*/application/*' \
+		--omit='*/tests/*' > /dev/null || (echo "Cobertura de domain/ e application/ abaixo de 90%"; exit 1)
 
 test-e2e: ## Roda os testes Playwright contra o build (vite preview) com isolamento de origem
 	@$(NODE) pnpm test:e2e

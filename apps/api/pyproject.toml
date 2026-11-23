@@ -5,6 +5,8 @@ description = "Camada de IA do Analisador de partidas (motor 5)"
 requires-python = ">=3.14,<3.15"
 dependencies = [
     "fastapi>=0.165.0",
+    "langchain>=1.5.2",
+    "langchain-openai>=1.8.5",
     "pydantic-settings>=2.16.3",
     "uvicorn[standard]>=0.54.0",
 ]
@@ -36,13 +38,17 @@ plugins = ["pydantic.mypy"]
 files = ["src", "tests"]
 
 [tool.pytest]
-testpaths = ["tests"]
+testpaths = ["tests", "src"]
 addopts = [
     "--strict-markers",
     "-m", "not llm",
     "--cov=game_analyzer",
     "--cov-report=term-missing",
     "--cov-fail-under=80",
+]
+filterwarnings = [
+    # Aviso interno do plugin pytest do langsmith (dependência do LangChain).
+    "ignore::DeprecationWarning:langsmith.*",
 ]
 markers = [
     "llm: testes que chamam um provedor de IA de verdade (rode com -m llm)",
