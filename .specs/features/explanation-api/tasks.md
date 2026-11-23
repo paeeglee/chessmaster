@@ -56,7 +56,7 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Verification rules tested with exact violations
+- [x] Verification rules tested with exact violations
 
 **Tests**: unit
 **Gate**: quick
