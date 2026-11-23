@@ -66,8 +66,8 @@ T1 → T2 → T3 → T4 → T5
 
 ### T2: Contract builder and explanation client
 
-**What**: `buildContract`, `requestExplanation` (MSW-tested).
-**Where**: `apps/web/src/domains/explanation/model/contract.ts`
+**What**: `buildContract` (analysis domain, to avoid a cycle) and `requestExplanation`/`askQuestion` (explanation domain, MSW-tested).
+**Where**: `apps/web/src/domains/analysis/model/contract.ts`
 **Depends on**: T1
 **Reuses**: generated `schema.gen.ts`
 **Requirement**: AS-14, AS-15
@@ -79,7 +79,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Reference contract asserted field by field
+- [x] Reference contract asserted field by field
 
 **Tests**: unit
 **Gate**: quick

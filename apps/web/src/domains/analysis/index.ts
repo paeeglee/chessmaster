@@ -1,5 +1,6 @@
 // Ponto de entrada público do domínio `analysis`.
 export { classifyGame, classifyMove, KEY_MOMENT_THRESHOLD } from "./model/classify";
+export { ADVANTAGE_THRESHOLD, buildContract } from "./model/contract";
 export {
   type Finding,
   type FindingTag,
