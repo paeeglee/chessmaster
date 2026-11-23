@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 
 // Cabeçalhos que deixam a página cross-origin isolated, liberando o
 // SharedArrayBuffer para o Stockfish multi-thread (D1). Valem no dev e no preview.
-const crossOriginIsolationHeaders = {
+export const crossOriginIsolationHeaders = {
   "Cross-Origin-Opener-Policy": "same-origin",
   "Cross-Origin-Embedder-Policy": "require-corp",
 };

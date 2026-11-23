@@ -100,7 +100,7 @@ The repository has docs, designs and a Makefile with only `setup`, `design` and 
 8. WHEN `make test-e2e` runs THEN it SHALL build the web app, serve it with `vite preview` (isolation headers on), and run Playwright against it. <!-- SCAF-21 -->
 9. WHEN `make check` runs THEN it SHALL run `lint`, `typecheck` and `test` in that order and stop at the first failure. <!-- SCAF-22 -->
 10. WHEN `make generate-api-types` runs THEN it SHALL export the backend OpenAPI schema without starting a server and generate `apps/web/src/domains/explanation/api/schema.gen.ts` with `openapi-typescript`. <!-- SCAF-23 -->
-11. Every aggregate target SHALL have per-app variants named `<target>-web` and `<target>-api`, and `make help` SHALL list all targets. <!-- SCAF-24 -->
+11. The aggregate targets `setup`, `dev`, `lint`, `format`, `typecheck` and `test` SHALL have per-app variants named `<target>-web` and `<target>-api` (`test-e2e`, `check` and `generate-api-types` span both apps by nature and have none), and `make help` SHALL list all targets. <!-- SCAF-24 -->
 12. `apps/web/package.json` `engines.node` SHALL match `.nvmrc` (26) and `apps/api/pyproject.toml` `requires-python` SHALL match `.python-version` (3.14). <!-- SCAF-25 -->
 
 **Independent Test**: on a fresh worktree, `make setup && make check && make test-e2e` all exit 0; introducing a lint error or a type error makes `make check` exit non-zero.

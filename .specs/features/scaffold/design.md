@@ -33,7 +33,7 @@ graph LR
 ### Web app (`apps/web`)
 - `package.json`: `packageManager: pnpm@12.21.0`, `engines.node: ">=26 <27"`, scripts `dev`, `build`, `preview`, `lint`, `format`, `typecheck`, `test`, `test:e2e`, `generate:api-types`.
 - `vite.config.ts`: `@vitejs/plugin-react`, `@tailwindcss/vite`; `server.port 5173` / `preview.port 4173`, both `strictPort`; `server.headers` and `preview.headers` = the shared `crossOriginIsolationHeaders` const; `server.proxy['/api'] → http://localhost:8000` (preview inherits `server.proxy` per Vite docs). Vitest config in the same file (`test` block): `jsdom`, `setupFiles: ['./vitest.setup.ts']`, coverage v8 with global 80% and `'src/domains/**/model/**': 90%`.
-- `vitest.setup.ts`: `@testing-library/jest-dom/vitest`; MSW `server.listen({ onUnhandledRequest: 'error' })`, `resetHandlers`, `close`.
+- `vitest.setup.ts`: `@testing-library/jest-dom/vitest`; MSW `server.listen({ onUnhandledFrame: "error" })`, `resetHandlers`, `close`.
 - `src/shared/lib/testing/server.ts`: `setupServer()` with no handlers (domains add theirs with `server.use`).
 - `src/app/theme.css`: `@import "tailwindcss"` + `@theme` tokens (below) + base body styles from the mockup helmet.
 - `src/app/appMachine.ts`: `setup({ types: { context: {}, events: {} as never-ish } }).createMachine({ id: 'app', initial: 'gameInput', states: { gameInput: {} } })`.
@@ -108,4 +108,4 @@ Board square and highlight colors are left to the board feature (first screen th
 | Vitest config location | `test` block in `vite.config.ts` | One config; Vitest reads it natively |
 | Running both dev servers | `make -j2` | No extra dependency (no `concurrently`) |
 | OpenAPI export | Python module printing `app.openapi()` | No running server needed (SCAF-23) |
-| MSW default | `onUnhandledRequest: 'error'` | Enforces "no test calls the real network" |
+| MSW default | `onUnhandledFrame: "error"` (MSW 3) | Enforces "no test calls the real network" |
