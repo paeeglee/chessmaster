@@ -98,7 +98,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Fixture parses to 144 tokens and `0-1`; rejections return their outcomes
+- [x] Fixture parses to 144 tokens and `0-1`; rejections return their outcomes
 
 **Tests**: unit
 **Gate**: quick

@@ -52,8 +52,20 @@ function classify(raw: string): Token[] {
   if (raw in RESULTS) {
     return [{ kind: "result", value: RESULTS[raw] ?? null }];
   }
+  const move = readMoveToken(raw);
+  return move ? [{ kind: "move", value: move }] : [{ kind: "other" }];
+}
+
+/** Tira anotações de um lance (+, #, !, ?, e.p.) e devolve-o se tiver forma de SAN. */
+export function readMoveToken(raw: string): string | null {
   const move = raw.replace(/e\.p\.$/, "").replace(/[+#!?]+$/, "");
-  return SAN.test(move) ? [{ kind: "move", value: move }] : [{ kind: "other" }];
+  return SAN.test(move) ? move : null;
+}
+
+/** Normaliza o texto de um resultado; devolve undefined se não for um resultado. */
+export function readResultToken(raw: string): GameResult | null | undefined {
+  const value = raw.trim().replace("½-½", "1/2-1/2");
+  return value in RESULTS ? (RESULTS[value] ?? null) : undefined;
 }
 
 /**

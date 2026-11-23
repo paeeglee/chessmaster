@@ -50,7 +50,7 @@ Every later engine (evaluation, classification, AI contract) and every screen ne
 
 **Acceptance Criteria**:
 
-1. WHEN `parseGameText` receives the reference fixture THEN it SHALL return format `chesscom-html`, 144 move tokens whose first four are `d4`, `d5`, `Nc3`, `e6` and last is `Ra6#`, and result `0-1`. <!-- GAME-01 -->
+1. WHEN `parseGameText` receives the reference fixture THEN it SHALL return format `chesscom-html`, 144 move tokens (annotations stripped, GAME-07) whose first four are `d4`, `d5`, `Nc3`, `e6` and last is `Ra6`, and result `0-1`. <!-- GAME-01 -->
 2. WHEN a Chess.com HTML paste has no `game-result-node` THEN the parser SHALL return the moves with result `null`. <!-- GAME-02 -->
 3. WHEN the HTML is a fragment (starts or ends mid-element, has extra page text) THEN the parser SHALL still return every complete `move-text` in order. <!-- GAME-03 -->
 
