@@ -41,6 +41,8 @@ export class EngineClient {
   private consumer: LineConsumer | null = null;
   private queue: Promise<unknown> = Promise.resolve();
   private terminated = false;
+  /** Muda a cada cancelamento; buscas de uma geração antiga não chegam a rodar. */
+  private generation = 0;
 
   constructor(private readonly worker: WorkerLike) {
     worker.onmessage = (event) => {
@@ -77,9 +79,28 @@ export class EngineClient {
 
   /** Avalia uma posição: ~200 ms e, se não chegar à profundidade 12, busca até ela. */
   evaluate(fen: string): Promise<PositionEvaluation> {
-    const run = this.queue.then(() => this.evaluateNow(fen));
+    const generation = this.generation;
+    const run = this.queue.then(() => {
+      if (generation !== this.generation) {
+        throw new Error("Análise cancelada");
+      }
+      return this.evaluateNow(fen);
+    });
     this.queue = run.catch(() => undefined);
     return run;
+  }
+
+  /**
+   * Cancela a análise em andamento: manda `stop` ao motor, rejeita a busca atual e as
+   * que estavam na fila. O motor continua pronto para novas buscas.
+   */
+  cancel(): void {
+    if (this.terminated) {
+      return;
+    }
+    this.generation += 1;
+    this.worker.postMessage("stop");
+    this.fail(new Error("Análise cancelada"));
   }
 
   terminate(): void {

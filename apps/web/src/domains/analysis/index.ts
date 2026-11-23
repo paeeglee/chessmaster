@@ -1,6 +1,13 @@
 // Ponto de entrada público do domínio `analysis`.
 export { classifyGame, classifyMove, KEY_MOMENT_THRESHOLD } from "./model/classify";
-export { findingText, MISTAKE_TYPE_LABEL, pieceWithArticle } from "./model/findings";
+export {
+  type Finding,
+  type FindingTag,
+  findingsFrom,
+  findingText,
+  MISTAKE_TYPE_LABEL,
+  pieceWithArticle,
+} from "./model/findings";
 export {
   groupPatterns,
   MAX_KEY_MOMENTS,
@@ -9,6 +16,8 @@ export {
   selectStrengths,
 } from "./model/keyMoments";
 export { materialBalance, materialTimeline, PIECE_VALUES } from "./model/material";
+export { type AnalysisProgress, analysisProgress } from "./model/progress";
+export { type AnalysisSummary, summarizeAnalysis } from "./model/summary";
 export type {
   MistakeType,
   MistakeVerdict,

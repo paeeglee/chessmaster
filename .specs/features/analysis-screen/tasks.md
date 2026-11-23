@@ -57,7 +57,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Summary of the reference game matches F4a results; progress math tested
+- [x] Summary of the reference game matches F4a results; progress math tested
 
 **Tests**: unit
 **Gate**: quick

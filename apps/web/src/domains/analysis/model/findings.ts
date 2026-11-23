@@ -21,6 +21,33 @@ export function pieceWithArticle(piece: PieceOnSquare): string {
   return `${feminine ? "a" : "o"} ${name} em ${piece.square}`;
 }
 
+/** "do cavalo em c3" / "da torre em e4". */
+function ofPiece(piece: PieceOnSquare): string {
+  const { name, feminine } = PIECES[piece.type];
+  return `${feminine ? "da" : "do"} ${name} em ${piece.square}`;
+}
+
+export type FindingTag = "Erro" | "Adversário";
+
+export type Finding = { ply: number; tag: FindingTag; moveLabel: string; text: string };
+
+/** Itens de "Já encontrado": erros do jogador e do adversário, em ordem cronológica. */
+export function findingsFrom(verdicts: readonly MoveVerdict[]): Finding[] {
+  return verdicts.flatMap((verdict) => {
+    if (verdict.kind !== "mistake" && verdict.kind !== "opponent-mistake") {
+      return [];
+    }
+    return [
+      {
+        ply: verdict.ply,
+        tag: verdict.kind === "mistake" ? "Erro" : "Adversário",
+        moveLabel: `${verdict.moveLabel}?`,
+        text: findingText(verdict) ?? "",
+      },
+    ];
+  });
+}
+
 function captured(piece: PieceOnSquare): string {
   return PIECES[piece.type].feminine ? "capturada" : "capturado";
 }
@@ -31,9 +58,13 @@ export function findingText(verdict: MoveVerdict): string | null {
     case "none":
       return null;
     case "mistake":
-      return verdict.lostPiece
-        ? `deixou ${pieceWithArticle(verdict.lostPiece)} ser ${captured(verdict.lostPiece)}`
-        : "perdeu material";
+      if (!verdict.lostPiece) {
+        return "perdeu material";
+      }
+      // Mockup do passo 2: "41...Ta1? tirou a proteção do cavalo em c3".
+      return verdict.mistakeType === "defender-moved"
+        ? `tirou a proteção ${ofPiece(verdict.lostPiece)}`
+        : `deixou ${pieceWithArticle(verdict.lostPiece)} ser ${captured(verdict.lostPiece)}`;
     case "opponent-mistake":
       return verdict.lostPiece
         ? `o adversário deixou ${pieceWithArticle(verdict.lostPiece)} ser ${captured(verdict.lostPiece)}`

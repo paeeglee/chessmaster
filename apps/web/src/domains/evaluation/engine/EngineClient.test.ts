@@ -202,4 +202,25 @@ describe("EngineClient.evaluate", () => {
     expect(worker.terminated).toBe(true);
     await expect(client.evaluate(START_FEN)).rejects.toThrow("Motor encerrado");
   });
+
+  it("cancela a busca atual e a fila, e continua pronto (AS-08)", async () => {
+    let answer = false;
+    const { client, worker } = engineWith((command, reply) => {
+      if (command === "go movetime 200" && answer) {
+        reply("info depth 20 score cp 5 pv e2e4");
+        reply("bestmove e2e4");
+      }
+    });
+    await client.start({ threads: 1 });
+    const running = client.evaluate(START_FEN);
+    const queued = client.evaluate(AFTER_E4);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    client.cancel();
+    await expect(running).rejects.toThrow("Análise cancelada");
+    await expect(queued).rejects.toThrow("Análise cancelada");
+    expect(worker.commands).toContain("stop");
+    expect(worker.terminated).toBe(false);
+    answer = true;
+    await expect(client.evaluate(START_FEN)).resolves.toMatchObject({ bestMove: "e2e4" });
+  });
 });
