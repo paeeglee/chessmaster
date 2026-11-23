@@ -228,6 +228,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md round 3 E1 e2e/analysis.spec.ts:25 playwright.config.ts:10 (e2e)
 - last seen: 2026-11-23T22:09:40Z
 
+### L-037 - Assert the payload of every event a button sends, such as the target ply, not only the event type
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: review-screen
+- evidence: M11+M12 / apps/web/src/domains/review/components/ReviewScreen.test.tsx:129-134 (RV-12) (web-tests)
+- last seen: 2026-11-23T22:42:19Z
+
+### L-038 - When a requirement lists several entry points for the same action, test each entry point and assert the full synced outcome
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: review-screen
+- evidence: M15 / apps/web/src/domains/review/components/MoveList.tsx:50 (RV-10) (web-tests)
+- last seen: 2026-11-23T22:42:19Z
+
+### L-039 - Assert concrete fixture values instead of recomputing the expected value with the implementation formula
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: review-screen
+- evidence: RV-02 / apps/web/src/domains/review/model/review.test.ts:45 (web-tests)
+- last seen: 2026-11-23T22:42:19Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
