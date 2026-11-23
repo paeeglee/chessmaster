@@ -229,4 +229,125 @@ describe("classifyMove com posições feitas à mão", () => {
       color: "b",
     });
   });
+
+  function pieceMove(
+    fenBefore: string,
+    from: string,
+    to: string,
+    fenAfter: string,
+    piece: Ply["piece"],
+  ): Ply {
+    return { ...whitePly(fenBefore, from, to, fenAfter), piece };
+  }
+
+  // Bispo preto de b6 ataca d4; o peão de e3 defende d4. Td4?? perde a torre (5) e
+  // recupera o bispo (3): perda de exatamente 2.
+  const exchangeFen = "6k1/8/1b6/8/8/4P3/P7/3R2K1 w - - 0 1";
+
+  it("marca como erro uma perda de exatamente 2 pontos (AN-03, limite)", () => {
+    const after = "6k1/8/1b6/8/3R4/4P3/P7/6K1 b - - 1 1";
+    const verdict = classifyMove({
+      ply: pieceMove(exchangeFen, "d1", "d4", after, "r"),
+      before: evaluation(exchangeFen, "g1f2", ["g1f2", "g8f8"]),
+      after: evaluation(after, "b6d4", ["b6d4", "e3d4", "g8f8"]),
+      playerColor: "w",
+    });
+    expect(verdict).toMatchObject({ kind: "mistake", loss: 2 });
+  });
+
+  it("não marca como erro uma perda de 1 ponto (AN-03, abaixo do limite)", () => {
+    // O peão de e3 fica sem defesa diante do bispo de b6.
+    const after = "6k1/8/1b6/8/8/P3P3/8/3R2K1 b - - 0 1";
+    const verdict = classifyMove({
+      ply: pieceMove(exchangeFen, "a2", "a3", after, "p"),
+      before: evaluation(exchangeFen, "g1f2", ["g1f2", "g8f8"]),
+      after: evaluation(after, "b6e3", ["b6e3", "g1f1"]),
+      playerColor: "w",
+    });
+    expect(verdict.kind).toBe("none");
+  });
+
+  it("não marca como erro uma perda forçada, que o melhor lance também sofre (AN-03)", () => {
+    const fen = "4k3/8/8/8/8/2n5/8/R3K3 w - - 0 1";
+    const after = "4k3/8/8/8/8/2n5/R7/4K3 b - - 1 1";
+    const verdict = classifyMove({
+      ply: pieceMove(fen, "a1", "a2", after, "r"),
+      before: evaluation(fen, "a1b1", ["a1b1", "c3b1"]),
+      after: evaluation(after, "c3a2", ["c3a2", "e1d2"]),
+      playerColor: "w",
+    });
+    expect(verdict.kind).toBe("none");
+  });
+
+  it("não marca o melhor lance como erro mesmo quando a linha jogada perde (AN-06)", () => {
+    const fen = "4k3/8/8/8/8/2n5/8/R3K3 w - - 0 1";
+    const after = "4k3/8/8/8/8/2n5/R7/4K3 b - - 1 1";
+    const verdict = classifyMove({
+      ply: pieceMove(fen, "a1", "a2", after, "r"),
+      before: evaluation(fen, "a1a2", ["a1a2", "e8e7"]),
+      after: evaluation(after, "c3a2", ["c3a2", "e1d2"]),
+      playerColor: "w",
+    });
+    expect(verdict.kind).toBe("none");
+  });
+
+  it("não aponta defensor saiu quando a peça tinha dois defensores (AN-08)", () => {
+    // Cavalo de e4 atacado pelo peão de d5, defendido pelo bispo de g2 e pelo peão f3.
+    const fen = "6k1/8/8/3p4/4N3/5P2/6B1/6K1 w - - 0 1";
+    const after = "6k1/8/8/3p4/4N3/5P1B/8/6K1 b - - 1 1";
+    const verdict = classifyMove({
+      ply: pieceMove(fen, "g2", "h3", after, "b"),
+      before: evaluation(fen, "e4c3", ["e4c3", "g8f8"]),
+      after: evaluation(after, "d5e4", ["d5e4", "f3e4", "g8f8"]),
+      playerColor: "w",
+    });
+    expect(verdict).toMatchObject({
+      kind: "mistake",
+      loss: 2,
+      mistakeType: "hanging-piece",
+      lostPiece: { type: "n", square: "e4" },
+    });
+  });
+
+  it("não aponta peça atacada quando o lance protegeu a peça (glossário)", () => {
+    // O bispo vai para g2 e passa a defender o cavalo de e4, que cai mesmo assim.
+    const fen = "6k1/8/8/3p4/4N3/8/8/5BK1 w - - 0 1";
+    const after = "6k1/8/8/3p4/4N3/8/6B1/6K1 b - - 1 1";
+    const verdict = classifyMove({
+      ply: pieceMove(fen, "f1", "g2", after, "b"),
+      before: evaluation(fen, "e4c3", ["e4c3", "g8f8"]),
+      after: evaluation(after, "d5e4", ["d5e4", "g2e4", "g8f8"]),
+      playerColor: "w",
+    });
+    expect(verdict).toMatchObject({ kind: "mistake", loss: 2, mistakeType: "other" });
+  });
+
+  it("aponta outro, sem peça perdida, quando o adversário promove (AN-10)", () => {
+    const fen = "6k1/8/8/8/8/8/1p6/2R4K w - - 0 1";
+    const after = "6k1/8/8/8/8/8/1pR5/7K b - - 1 1";
+    const verdict = classifyMove({
+      ply: pieceMove(fen, "c1", "c2", after, "r"),
+      before: evaluation(fen, "c1b1", ["c1b1", "g8f7"]),
+      after: evaluation(after, "b2b1q", ["b2b1q", "h1h2"]),
+      playerColor: "w",
+    });
+    expect(verdict).toMatchObject({ kind: "mistake", mistakeType: "other", lostPiece: null });
+  });
+
+  it("marca como ponto forte um ganho de exatamente 2 pontos (AN-05, limite)", () => {
+    // Bxd4 toma a torre (5) e o peão de e5 retoma o bispo (3).
+    const fen = "6k1/8/8/4p3/3r4/8/1B6/6K1 w - - 0 1";
+    const after = "6k1/8/8/4p3/3B4/8/8/6K1 b - - 0 1";
+    const verdict = classifyMove({
+      ply: pieceMove(fen, "b2", "d4", after, "b"),
+      before: evaluation(fen, "b2d4", ["b2d4", "e5d4"]),
+      after: evaluation(after, "e5d4", ["e5d4", "g1f2"]),
+      playerColor: "w",
+    });
+    expect(verdict).toMatchObject({
+      kind: "strength",
+      gain: 2,
+      wonPiece: { type: "r", square: "d4" },
+    });
+  });
 });

@@ -56,7 +56,15 @@ describe("selectKeyMoments (AN-14)", () => {
 
 describe("selectStrengths (AN-17)", () => {
   it("fica com até 3 de maior ganho, em ordem cronológica", () => {
-    const verdicts = [strength(3, 2), strength(5, 9), strength(7, 3), strength(9, 5)];
+    const verdicts: MoveVerdict[] = [
+      strength(3, 2),
+      mistake(4, 9),
+      strength(5, 9),
+      { ...mistake(6, 9), kind: "opponent-mistake", color: "w" },
+      strength(7, 3),
+      { kind: "none", ply: 8, color: "b" },
+      strength(9, 5),
+    ];
     expect(selectStrengths(verdicts).map((item) => item.ply)).toEqual([5, 7, 9]);
   });
 });

@@ -29,10 +29,10 @@ general.md 7.1 and D3 define how the product decides what went wrong: a key mome
 | Opponent mistake ("Adversário") | Same rule applied to the opponent's moves | step_02 rule: opponent error that favored the player | n |
 | Strength ("O que você fez bem") | Player move whose played line gains ≥ 2 (`playedLine − materialBefore ≥ 2`) and is not a key moment; top 3 by gain, chronological | R-10: only real gains calculated by the engine | n |
 | Lost piece | The first player piece captured in the played line (square and type); none → type `other` | Needed for mistake type and texts | n |
-| Mistake type | `defender-moved` if the moved piece was the only defender of the lost piece's square before the move; else `hanging-piece` if the lost piece was already attacked before the move and was not the moved piece; else `other` | Glossary definitions; "defender moved" names the cause when both apply | n |
+| Mistake type | `defender-moved` if the moved piece was the only defender of the lost piece's square before the move; else `hanging-piece` if the lost piece was already attacked before the move, was not the moved piece and was not protected by the move (glossary); else `other` | Glossary definitions; "defender moved" names the cause when both apply | n |
 | Key moment cap | At most 5: the 5 with the largest loss, shown in chronological order; ties by earlier move | general.md 7.1 / step_03 state "Mais de 5 candidatos" | y (PRD) |
 | Material timeline | Material balance after every ply from the player's point of view (index 0 = initial position) | R-06 chart | y (PRD) |
-| Findings texts | Template, no AI: mistake → "{lance}? deixou {o bispo em a1} ser capturado"; opponent → "{lance}? do adversário entregou {o bispo em a1}"... (exact strings in GAME-style table below) | step_02: findings are template text | n |
+| Findings texts | Template, no AI, exact strings in AN-15 (the move label is shown next to the text by the screen) | step_02: findings are template text | n |
 
 **Open questions:** none - all resolved or logged above.
 
@@ -56,7 +56,7 @@ general.md 7.1 and D3 define how the product decides what went wrong: a key mome
 ### P1: Mistake types ⭐ MVP
 
 1. IF the moved piece was the only defender of the lost piece THEN the type SHALL be `defender-moved`. <!-- AN-08 -->
-2. IF the lost piece was attacked before the move and was not moved THEN the type SHALL be `hanging-piece`. <!-- AN-09 -->
+2. IF the lost piece was attacked before the move, was not moved and the move did not protect it THEN the type SHALL be `hanging-piece`. <!-- AN-09 -->
 3. IF neither applies (or no piece is lost in the line) THEN the type SHALL be `other`. <!-- AN-10 -->
 
 ### P1: Reference game ⭐ MVP

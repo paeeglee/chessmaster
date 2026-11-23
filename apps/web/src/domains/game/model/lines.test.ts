@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { defendersOf, isAttackedBy, playCaptureLine, uciToSan } from "./lines";
 
-// Bispo branco em c4 atacado pelo peão d5; cavalo preto em f6 defendido só pelo peão g7.
+// Bispo branco em c4 atacado pelo peão d5; cavalo preto em f6 defendido por g7 e d8.
 const POSITION = "rnbqkb1r/ppp2ppp/5n2/3p4/2B5/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4";
 
 describe("playCaptureLine", () => {

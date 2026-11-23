@@ -43,9 +43,11 @@ function mistakeTypeOf(ply: Ply, lostPiece: PieceOnSquare | null): MistakeType {
   if (defenders.length === 1 && defenders[0] === ply.from && lostPiece.square !== ply.to) {
     return "defender-moved";
   }
-  // A peça já estava atacada e ficou onde estava.
+  // A peça já estava atacada, ficou onde estava e o lance não a protegeu (glossário).
+  const protectedByMove = defendersOf(ply.fenAfter, lostPiece.square, mover).includes(ply.to);
   if (
     lostPiece.square !== ply.to &&
+    !protectedByMove &&
     isAttackedBy(ply.fenBefore, lostPiece.square, opposite(mover))
   ) {
     return "hanging-piece";
