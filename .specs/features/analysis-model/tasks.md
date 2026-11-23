@@ -76,7 +76,7 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Reference game yields exactly the five expected key moments
+- [x] Reference game yields exactly the five expected key moments
 
 **Tests**: unit
 **Gate**: quick
