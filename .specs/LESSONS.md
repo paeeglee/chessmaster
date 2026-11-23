@@ -120,6 +120,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M21 round 2 apps/web/src/domains/analysis/model/classify.test.ts:294-310 (AN-08) (domain-model)
 - last seen: 2026-11-23T17:04:33Z
 
+### L-019 - Do not let a test pass only because of a library's result ordering; also cover the order-reversed case
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-model
+- evidence: M21b round 3 apps/web/src/domains/analysis/model/classify.ts:43 (AN-08) (domain-model)
+- last seen: 2026-11-23T17:06:43Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

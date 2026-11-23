@@ -1,19 +1,30 @@
 # F4a · analysis-model Validation
 
-## Validation: analysis-model - FAIL (round 2)
+## Validation: analysis-model - FAIL (round 3)
 
 **Date**: 2026-11-23
 **Spec**: `.specs/features/analysis-model/spec.md`
-**Diff range**: `e31cb46..HEAD` (HEAD = `acbe470`). The branch was rebased onto `origin/main` after F3 was squash-merged as `e31cb46`. Round 1 ran on `249a603..228badf` (report `19f1486`, lessons `6e76023`). The round-2 fixes are in `09a8ea4` and `acbe470`.
+**Diff range**: `e31cb46..HEAD` (HEAD = `89fcfdd`). Round 3 fixes are `3ad0b5e` and `89fcfdd` (missing import; `3ad0b5e` alone fails tsc, so it was verified at `89fcfdd`). The branch was rebased onto `origin/main` after F3 was squash-merged as `e31cb46`. Round 1 ran on `249a603..228badf` (report `19f1486`, lessons `6e76023`). The round-2 fixes are in `09a8ea4` and `acbe470`.
 **Verifier**: independent sub-agent (author ≠ verifier)
 
-Round 2 fixes kill 6 of the 7 round-1 survivors (M1, M2, M3, M11, M23, M26). They also close the
-AN-09/glossary and AN-15/Assumptions spec gaps, and per-domain coverage thresholds now work in the
-gate. **One mutant still survives: M21 ("only defender")**. The new AN-08 test at
-`apps/web/src/domains/analysis/model/classify.test.ts:294-310` claims the knight on e4 has two
-defenders, the bishop on g2 and the pawn on f3. chess.js shows `attackers(e4, w) = ["f3"]`: the
-bishop on g2 is blocked by the pawn on f3. The moved piece was never a defender, so the test cannot
-tell "only defender" from "any defender". This is a test defect; the application code is correct.
+### Round 3 summary
+
+Round 3 replaces the AN-08 position with a real two-defender position
+(`6k1/8/8/3p4/4N3/3P4/6B1/6K1 w`) and asserts
+`defendersOf(fen, "e4", "w").sort()` equals `["d3", "g2"]` at
+`apps/web/src/domains/analysis/model/classify.test.ts:304`. M21 (`defenders.includes(ply.from)`) is
+now **killed**.
+
+A sibling mutant still **survives**: M21b, which drops only the size check and leaves
+`defenders[0] === ply.from` at `classify.ts:43`. chess.js returns attackers in board-scan order
+(`["d3","g2"]`). In the test the moved piece is `g2`, which is second in that order, so a rule that
+looks only at the first defender gives the same answer. The "only" condition passes because of the
+library's ordering, not because the test pins it down. This is a test defect; the application code
+is correct.
+
+Round 2 history: fixes `09a8ea4` and `acbe470` killed M1, M2, M3, M11, M23 and M26, added the
+glossary "protected by the move" rule (M28–M30 killed), and made the per-domain coverage threshold
+work (M31 killed).
 
 ---
 
@@ -41,7 +52,7 @@ Test paths are relative to `apps/web/src/domains/`.
 | AN-05 | gain ≥ 2, not a mistake → `strength` + `gain` | `analysis/model/classify.test.ts:347` `{ kind: "strength", gain: 2, wonPiece: {r,d4} }`; `:90-97` gain 5 | ✅ PASS (M26 killed) |
 | AN-06 | played = best → never a mistake | `analysis/model/classify.test.ts:282-291`: played line loses the rook, the best PV has no capture, `toBe("none")` | ✅ PASS (M3 killed). The old test at `:187-210` still cannot fail on its own; it is harmless |
 | AN-07 | PT label, PT SAN best move, piece | `analysis/model/classify.test.ts:67-76`, `:146-152` (`bestMoveSan: "Rf2"`), `:90-97` | ✅ PASS |
-| AN-08 | moved piece was the **only** defender → `defender-moved` | `analysis/model/classify.test.ts:146-152` (single defender → `defender-moved`); `:294-310` intended negative case | ❌ GAP: the position at `:296` has only one defender (`f3`), so M21 survives |
+| AN-08 | moved piece was the **only** defender → `defender-moved` | `analysis/model/classify.test.ts:146-152` (single defender → `defender-moved`); `:304` `toEqual(["d3","g2"])` + `:305-310` `mistakeType: "hanging-piece"` | ⚠️ PARTIAL: M21 is killed; M21b survives because the moved defender is never first in chess.js scan order |
 | AN-09 | attacked before, not moved, **not protected by the move** → `hanging-piece` | `analysis/model/classify.test.ts:132-136` (hanging); `:322` move protects the piece → `mistakeType: "other"`; `:180-184` (moved piece) | ✅ PASS (M28, M29, M30 killed). The spec now matches the glossary |
 | AN-10 | neither / no piece → `other` | `analysis/model/classify.test.ts:180-184`; `:334` promotion → `{ mistakeType: "other", lostPiece: null }` | ✅ PASS |
 | AN-11 | 22...Ta7, 27...Tb7, 41...Ta1, 43...Te6, 56...Ta8 | `analysis/model/classify.test.ts:57-63` | ✅ PASS (unchanged by the protected-by-move rule) |
@@ -55,7 +66,7 @@ Test paths are relative to `apps/web/src/domains/`.
 | AN-19 | empty PV → first move only | `game/model/lines.test.ts:25` | ✅ PASS |
 | AN-20 | stale PV → stop | `game/model/lines.test.ts:30` | ✅ PASS |
 
-**Status**: ❌ 1 gap (AN-08 negative case); 0 spec-precision gaps open.
+**Status**: ⚠️ 1 partial (AN-08: order-dependent case); 0 spec-precision gaps open.
 
 ### Chess-fact sanity check of the new positions (chess.js script, not committed)
 
@@ -63,14 +74,30 @@ Test paths are relative to `apps/web/src/domains/`.
 | ---- | ----- | -------- |
 | `classify.test.ts:245` exchangeFen | Bb6 attacks d4; e3 defends d4; Rd4 loses exactly 2 | `isAttacked(d4,b)=true`, defenders `[e3,d1]`, `Rd4`/`a3`/`Kf2` legal ✅ |
 | `:270-279` forced | Rb1 is also taken (Nxb1) | legal ✅ |
-| `:296` two defenders | Ne4 defended by Bg2 **and** f3 | `attackers(e4,w)=["f3"]`: **Bg2 is blocked by f3** ❌ |
+| `:296` two defenders (round 3) | Ne4 defended by Bg2 **and** d3 | `attackers(e4,w)=["d3","g2"]` (scan order), e4 attacked by d5 ✅ |
 | `:314` protected by move | Bf1-g2 starts defending e4, which was undefended | before `[]`, after `["g2"]` ✅ |
 | `:327` promotion | Rc2 lets b1=Q; no white piece captured | `Rc2`, `Rb1`, `b1=Q+` legal ✅ |
 | `:339` gain 2 | Bxd4 wins R, e5 recaptures | d4 defenders `[e5]`, `Bxd4` legal ✅ |
 
 ---
 
-## Discrimination Sensor (round 2)
+## Discrimination Sensor (round 3, AN-08)
+
+Fresh scratch: `git worktree add --detach <scratchpad>/f4a-sensor3 HEAD` at `89fcfdd`, then
+`pnpm install --frozen-lockfile`, then `pnpm test` (252 tests) per mutant. The scratch was removed
+afterwards, and the real-tree `git status --porcelain` was empty before and after.
+
+| # | File:line | Mutation | Killed? |
+| - | --------- | -------- | ------- |
+| M21 | `analysis/model/classify.ts:43` | `defenders.includes(ply.from)` (any defender) | ✅ Killed |
+| M21b | `analysis/model/classify.ts:43` | `defenders[0] === ply.from` (size check dropped) | ❌ **Survived** |
+| M6b | `analysis/model/classify.ts:43-45` | defender-moved branch removed | ✅ Killed |
+| M25 | `analysis/model/classify.ts:43` | moved-piece exclusion dropped | ✅ Killed |
+| M32 | `analysis/model/classify.ts:41` | defenders read from `fenAfter` | ✅ Killed |
+
+**Round 3 sensor result**: 4/5 killed, 1 survived (M21b) → FAIL
+
+## Discrimination Sensor (round 2, history)
 
 Fresh scratch: `git worktree add --detach <scratchpad>/f4a-sensor2 HEAD`, then
 `pnpm install --frozen-lockfile`, then `pnpm test` (`vitest run --coverage`, 252 tests) per mutant.
@@ -92,7 +119,7 @@ Each mutation was reverted after its run.
 
 The round-1 killed mutants (M4–M20, M22, M24, M25, M27) cover code the fixes did not touch, except
 `classify.ts:46-52`, which M28–M30 cover again.
-**Sensor result**: 10/11 killed, 1 survived (M21) → FAIL
+**Round 2 sensor result**: 10/11 killed, 1 survived (M21, fixed in round 3)
 **Isolation**: real-tree `git status --porcelain` was empty before and after; `f4a-sensor2` removed (`git worktree list` has no entry).
 
 ---
@@ -112,7 +139,7 @@ The round-1 killed mutants (M4–M20, M22, M24, M25, M27) cover code the fixes d
 ## Gate Check
 
 - **Gate command**: `make check`
-- **Gate result**: exit 0. Web: 23 files, 252 passed, 0 failed, 0 skipped. API: 9 passed
+- **Gate result (round 3, `89fcfdd`)**: exit 0. Web: 23 files, 252 passed, 0 failed, 0 skipped; `analysis/model` 100% statements / 91.54% branches. API: 9 passed
 - **Test count**: 242 (round 1) → 252 (+10). None removed
 - **Failures**: none
 
@@ -120,14 +147,17 @@ The round-1 killed mutants (M4–M20, M22, M24, M25, M27) cover code the fixes d
 
 ## Fix Plans
 
-### Fix A (Minor, test only): make the AN-08 two-defender test real, kills M21
-- **Where**: `apps/web/src/domains/analysis/model/classify.test.ts:294-310`
-- **Task**: replace the pawn on f3 with a pawn on d3 so the bishop on g2 really defends e4.
-  - `fen = "6k1/8/8/3p4/4N3/3P4/6B1/6K1 w - - 0 1"` (checked with chess.js: `attackers(e4,w) = ["d3","g2"]`, e4 attacked by d5)
-  - `after = "6k1/8/8/3p4/4N3/3P3B/8/6K1 b - - 1 1"`
-  - `after.pv = ["d5e4", "d3e4", "g8f8"]`
-  - Keep the expectation `{ kind: "mistake", loss: 2, mistakeType: "hanging-piece", lostPiece: { type: "n", square: "e4" } }`. With M21 this returns `defender-moved`.
-- **Done when**: M21 is killed.
+### Fix B (Minor, test only): make the "only" check independent of attacker order, kills M21b
+- **Where**: `apps/web/src/domains/analysis/model/classify.test.ts`, next to `:294-310`
+- **Task**: add a case on the same `fen` where the **first** defender in scan order moves.
+  - ply `d3d4` (pawn)
+  - `after = "6k1/8/8/3p4/3PN3/8/6B1/6K1 b - - 0 1"`
+  - `before = evaluation(fen, "e4c3", ["e4c3","g8f8"])`
+  - `after.pv = ["d5e4","g2e4","g8f8"]`
+  - expect `{ kind: "mistake", loss: 2, mistakeType: "hanging-piece", lostPiece: { type: "n", square: "e4" } }`
+
+  Checked with chess.js: defenders before are `["d3","g2"]`, defenders after are `["g2"]`, e4 is attacked by d5, and `dxe4 Bxe4` is legal. With M21b this returns `defender-moved`.
+- **Done when**: M21 and M21b are both killed.
 
 ---
 
@@ -136,7 +166,7 @@ The round-1 killed mutants (M4–M20, M22, M24, M25, M27) cover code the fixes d
 | Requirement | Status |
 | ----------- | ------ |
 | AN-01..AN-07, AN-09..AN-20 | ✅ Verified |
-| AN-08 | ⚠️ Needs Fix (test) |
+| AN-08 | ⚠️ Needs Fix (test, Fix B) |
 
 ---
 
@@ -145,8 +175,8 @@ The round-1 killed mutants (M4–M20, M22, M24, M25, M27) cover code the fixes d
 **Overall**: ❌ Not Ready (one test fix)
 
 **Overall result**: FAIL
-**Spec-anchored check**: 19/20 ACs matched; 1 gap (AN-08 negative case)
-**Sensor**: 10/11 killed this round (M21 survived)
-**Gate**: 252 web + 9 api passed
+**Spec-anchored check**: 19/20 ACs fully matched; AN-08 partial
+**Sensor**: round 3 4/5 killed (M21b survived)
+**Gate**: 252 web + 9 api passed at `89fcfdd`
 
-**Next steps**: apply Fix A (test only), then re-verify M21.
+**Next steps**: apply Fix B (one extra test), then re-verify M21/M21b.

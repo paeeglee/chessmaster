@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 19,
+  "next_id": 20,
   "lessons": [
     {
       "id": "L-001",
@@ -330,6 +330,24 @@
       ],
       "created": "2026-11-23T17:04:33Z",
       "last_seen": "2026-11-23T17:04:33Z"
+    },
+    {
+      "id": "L-019",
+      "key": "surviving_mutant::do not let a test pass only because of a library s result ordering also cover the order reversed case",
+      "text": "Do not let a test pass only because of a library's result ordering; also cover the order-reversed case",
+      "signal": "surviving_mutant",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-model"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M21b round 3 apps/web/src/domains/analysis/model/classify.ts:43 (AN-08) (domain-model)"
+      ],
+      "created": "2026-11-23T17:06:43Z",
+      "last_seen": "2026-11-23T17:06:43Z"
     }
   ]
 }
