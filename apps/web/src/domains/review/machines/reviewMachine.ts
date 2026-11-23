@@ -20,6 +20,9 @@ export type Question = {
   answer: string | null;
 };
 
+export type AskInput = { result: AnalysisResult; question: string };
+export type ExplainInput = { result: AnalysisResult };
+
 export type ReviewContext = {
   result: AnalysisResult;
   /** 0 = posição inicial; k = depois do meio-lance k. */
@@ -66,14 +69,13 @@ export const reviewMachine = setup({
     events: {} as ReviewEvent,
   },
   actors: {
-    askQuestion: fromPromise<QuestionAnswer, { result: AnalysisResult; question: string }>(
-      ({ input }) =>
-        askQuestion({
-          game: buildContract(input.result.request, input.result),
-          question: input.question,
-        }),
+    askQuestion: fromPromise<QuestionAnswer, AskInput>(({ input }) =>
+      askQuestion({
+        game: buildContract(input.result.request, input.result),
+        question: input.question,
+      }),
     ),
-    explainGame: fromPromise<GameExplanation, { result: AnalysisResult }>(({ input }) =>
+    explainGame: fromPromise<GameExplanation, ExplainInput>(({ input }) =>
       requestExplanation(buildContract(input.result.request, input.result)),
     ),
   },
