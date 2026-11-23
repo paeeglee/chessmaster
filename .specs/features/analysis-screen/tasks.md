@@ -101,7 +101,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Every transition tested with fake engine and fake API
+- [x] Every transition tested with fake engine and fake API
 
 **Tests**: unit
 **Gate**: quick

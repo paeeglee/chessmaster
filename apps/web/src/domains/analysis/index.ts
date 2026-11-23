@@ -1,4 +1,11 @@
 // Ponto de entrada público do domínio `analysis`.
+export {
+  type AnalysisContext,
+  type AnalysisInput,
+  type AnalysisResult,
+  analysisMachine,
+  positionsOf,
+} from "./machines/analysisMachine";
 export { classifyGame, classifyMove, KEY_MOMENT_THRESHOLD } from "./model/classify";
 export { ADVANTAGE_THRESHOLD, buildContract } from "./model/contract";
 export {
