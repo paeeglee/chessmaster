@@ -81,6 +81,8 @@ máquinas deixam esses estados e transições explícitos e testáveis.
 - **Máquina raiz (`app/`):** decide a tela atual e carrega os dados entre as telas
   (a partida lida, a cor, o nível, as prioridades, o resultado da análise). A tela
   mostrada é derivada do estado dessa máquina. Não há roteador de URL no MVP.
+- **Testes de ponta a ponta:** o Playwright sobe o api com `AI_PROVIDER=fake`, então o
+  fluxo completo roda com o motor de verdade e textos de IA por template.
 - **Tela Colar (F3):** o `appMachine` invoca o `gameInputMachine` (domínio
   `game-input`) no estado `gameInput`, passando o rascunho salvo (texto, cor, nível,
   prioridades). A cada mudança o filho envia `GAME_INPUT.DRAFT_SAVED` ao pai, e ao
@@ -88,6 +90,14 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   isso, cancelar a análise volta à tela com tudo preenchido. O que a tela mostra
   (formato, lances legais, resultado) é derivado do texto por funções puras
   (`inspectGame`), sem guardar cópia na máquina.
+- **Análise (F4b):** ao receber `ANALYSIS.REQUESTED`, o `appMachine` guarda o
+  `EngineClient` pronto e invoca o `analysisMachine` (domínio `analysis`). Ele avalia
+  as posições uma a uma (`evaluating`), classifica cada meio-lance assim que as duas
+  posições em volta estão avaliadas (achados de "Já encontrado"), resume a análise e
+  chama `POST /api/explanations` com o contrato montado por `buildContract`
+  (`explaining`). Se a IA falhar, o resultado segue com `aiFailed: true`. Cancelar
+  para o ator, que manda `stop` ao motor e rejeita a fila (`EngineClient.cancel`).
+  Ao terminar, o `appMachine` vai para `review` com o `AnalysisResult`.
 - **Máquinas de domínio (`domains/<domínio>/machines/`):** cada fluxo com estados
   próprios tem sua máquina, por exemplo:
   - carregamento do motor (baixando com porcentagem, pronto, falhou, tentar de

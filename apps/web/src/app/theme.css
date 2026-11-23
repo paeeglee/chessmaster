@@ -60,6 +60,8 @@
     background-color: var(--color-canvas);
     color: var(--color-ink);
     font-family: var(--font-sans);
+    /* Os mockups usam a altura de linha padrão do navegador, não o 1.5 do Tailwind. */
+    line-height: normal;
   }
 
   a {

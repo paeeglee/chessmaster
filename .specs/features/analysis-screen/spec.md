@@ -90,24 +90,24 @@ After "Analisar partida", the app must evaluate every position with the loaded e
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| AS-01 | Pipeline | Design | Pending |
-| AS-02 | Pipeline | Design | Pending |
-| AS-03 | Pipeline | Design | Pending |
-| AS-04 | Pipeline | Design | Pending |
-| AS-05 | Pipeline | Design | Pending |
-| AS-06 | Pipeline | Design | Pending |
-| AS-07 | Pipeline | Design | Pending |
-| AS-08 | Pipeline | Design | Pending |
-| AS-09 | Screen | Design | Pending |
-| AS-10 | Screen | Design | Pending |
-| AS-11 | Screen | Design | Pending |
-| AS-12 | Screen | Design | Pending |
-| AS-13 | Screen | Design | Pending |
-| AS-14 | Contract | Design | Pending |
-| AS-15 | Contract | Design | Pending |
-| AS-16 | Edge | Design | Pending |
+| AS-01 | Pipeline | Tasks | Implementing |
+| AS-02 | Pipeline | Tasks | Implementing |
+| AS-03 | Pipeline | Tasks | Implementing |
+| AS-04 | Pipeline | Tasks | Implementing |
+| AS-05 | Pipeline | Tasks | Implementing |
+| AS-06 | Pipeline | Tasks | Implementing |
+| AS-07 | Pipeline | Tasks | Implementing |
+| AS-08 | Pipeline | Tasks | Implementing |
+| AS-09 | Screen | Tasks | Implementing |
+| AS-10 | Screen | Tasks | Implementing |
+| AS-11 | Screen | Tasks | Implementing |
+| AS-12 | Screen | Tasks | Implementing |
+| AS-13 | Screen | Tasks | Implementing |
+| AS-14 | Contract | Tasks | Implementing |
+| AS-15 | Contract | Tasks | Implementing |
+| AS-16 | Edge | Tasks | Implementing |
 
-**Coverage:** 16 total, 0 mapped to tasks, 16 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 16 total, 16 mapped to tasks (T1–T5), 0 unmapped
 
 ---
 
