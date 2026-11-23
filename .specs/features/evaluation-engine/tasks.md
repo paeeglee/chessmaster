@@ -79,7 +79,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Parser and orientation tested with real Stockfish output lines
+- [x] Parser and orientation tested with real Stockfish output lines
 
 **Tests**: unit
 **Gate**: quick
