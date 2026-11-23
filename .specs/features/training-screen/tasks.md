@@ -78,7 +78,7 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Transitions tested with a fake engine
+- [x] Transitions tested with a fake engine
 
 **Tests**: unit
 **Gate**: quick

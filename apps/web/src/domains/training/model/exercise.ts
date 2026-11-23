@@ -8,9 +8,11 @@ import {
 } from "../../analysis";
 import type { PositionEvaluation } from "../../evaluation";
 import {
+  legalDestinations,
   type PlayedMove,
   type PlayerColor,
   type Ply,
+  playMove,
   portugueseLine,
   toPortugueseSan,
   uciToSan,
@@ -190,4 +192,32 @@ export function outcomeOf(
 export function summaryText(outcomes: readonly TrainingOutcome[]): string {
   const firstTry = outcomes.filter((outcome) => outcome === "first-try").length;
   return `${firstTry} de ${outcomes.length} de primeira`;
+}
+
+export type SquareClick =
+  | { kind: "select"; square: string; destinations: string[] }
+  | { kind: "move"; move: PlayedMove }
+  | { kind: "clear" };
+
+/**
+ * T-02: o que um clique numa casa faz. Com uma peça selecionada, um destino legal
+ * joga o lance; uma peça do lado que joga (com lances) passa a ser a selecionada;
+ * qualquer outra casa limpa a seleção.
+ */
+export function squareClick(fen: string, selected: string | null, square: string): SquareClick {
+  if (selected && selected !== square) {
+    const move = playMove(fen, selected, square);
+    if (move) return { kind: "move", move };
+  }
+  if (selected === square) return { kind: "clear" };
+  const destinations = legalDestinations(fen, square);
+  return destinations.length > 0 ? { kind: "select", square, destinations } : { kind: "clear" };
+}
+
+/** A posição depois da resposta do adversário (refutação), se ela for legal. */
+export function refutationFen(result: AttemptResult, attemptFen: string): string | null {
+  if (!result.replyUci) return null;
+  return (
+    playMove(attemptFen, result.replyUci.slice(0, 2), result.replyUci.slice(2, 4))?.fen ?? null
+  );
 }
