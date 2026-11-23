@@ -101,7 +101,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Fake-worker tests assert exact UCI commands and resolved values
+- [x] Fake-worker tests assert exact UCI commands and resolved values
 
 **Tests**: unit
 **Gate**: quick
