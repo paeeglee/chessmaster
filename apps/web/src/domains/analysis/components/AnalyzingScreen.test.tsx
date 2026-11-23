@@ -106,6 +106,19 @@ describe("AnalyzingScreen", () => {
     expect(screen.getByText("44.Cd4")).toBeInTheDocument();
     const board = screen.getByRole("img", { name: /Posição em análise/ });
     expect(board.querySelector("[data-square]")).toHaveAttribute("data-square", "h1");
+    // O último lance (44.Cd4, de f5 para d4) fica destacado.
+    expect(board.querySelector('[data-square="f5"]')).toHaveAttribute("data-mark", "last");
+    expect(board.querySelector('[data-square="d4"]')).toHaveAttribute("data-mark", "last");
+    expect(board.querySelectorAll("[data-mark]")).toHaveLength(2);
+  });
+
+  it("a legenda acompanha o lance do tabuleiro num lance das pretas", async () => {
+    const { actor, evaluateUpTo } = startAnalysis();
+    render(<AnalyzingScreen analysisRef={actor} onCancel={() => {}} />);
+    await evaluateUpTo(89);
+    expect(screen.getByText("Lance 44 de 72")).toBeInTheDocument();
+    expect(screen.getByText("44...Texe3+")).toBeInTheDocument();
+    expect(screen.getByText(/^lance 44 de 72/)).toBeInTheDocument();
   });
 
   it("lista os achados à medida que o motor confirma (AS-12)", async () => {

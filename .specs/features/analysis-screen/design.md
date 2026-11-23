@@ -21,11 +21,11 @@ graph TD
 
 | File | Responsibility |
 | ---- | -------------- |
-| `evaluation/engine/EngineClient.ts` | `cancel()`: sends `stop`, rejects queued work ("Análise cancelada") |
-| `analysis/model/result.ts` | `AnalysisResult` type, `summarizeAnalysis(request, evaluations)` (verdicts, key moments, strengths, patterns, timeline, opponent mistakes) |
+| `evaluation/engine/EngineClient.ts` | `cancel()`: sends `stop`, rejects queued work ("Análise cancelada") and waits for `readyok` before the next search |
+| `analysis/model/summary.ts` | `summarizeAnalysis(game, evaluations, color)` (verdicts, key moments, strengths, patterns, timeline, opponent mistakes); `AnalysisResult` lives in `analysisMachine.ts` |
 | `analysis/model/progress.ts` | `progressOf(evaluated, total, elapsedMs)` → percent, current move number, remaining seconds |
 | `analysis/model/findings.ts` | Finding item (`tag`, `label`, `text`) from verdicts; defender-moved phrasing |
-| `explanation/model/contract.ts` | `buildContract(request, result)` → generated `GameContract` type |
+| `analysis/model/contract.ts` | `buildContract(request, summary)` → generated `GameContract` type (in `analysis` to avoid an analysis ↔ explanation cycle) |
 | `explanation/client/explanationClient.ts` | `requestExplanation(contract)` via `fetch('/api/explanations')`, throws on non-2xx |
 | `analysis/machines/analysisMachine.ts` | States `evaluating` (with `failed`), `explaining`, final `done`; output `AnalysisResult` |
 | `analysis/components/AnalyzingScreen.tsx` | Stages list, live board, findings, cancel |

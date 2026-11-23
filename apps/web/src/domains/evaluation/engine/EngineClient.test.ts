@@ -218,7 +218,8 @@ describe("EngineClient.evaluate", () => {
     client.cancel();
     await expect(running).rejects.toThrow("Análise cancelada");
     await expect(queued).rejects.toThrow("Análise cancelada");
-    expect(worker.commands).toContain("stop");
+    const afterStop = worker.commands.slice(worker.commands.indexOf("stop"));
+    expect(afterStop.slice(0, 2)).toEqual(["stop", "isready"]);
     expect(worker.terminated).toBe(false);
     answer = true;
     await expect(client.evaluate(START_FEN)).resolves.toMatchObject({ bestMove: "e2e4" });

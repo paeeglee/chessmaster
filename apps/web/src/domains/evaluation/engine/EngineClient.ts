@@ -101,6 +101,9 @@ export class EngineClient {
     this.generation += 1;
     this.worker.postMessage("stop");
     this.fail(new Error("Análise cancelada"));
+    // O `bestmove` da busca interrompida ainda vai chegar; esperar o `readyok` garante
+    // que ele não seja lido como resultado da próxima busca.
+    this.queue = this.send("isready", (line) => line === "readyok").catch(() => undefined);
   }
 
   terminate(): void {

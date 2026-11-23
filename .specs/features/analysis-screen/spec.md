@@ -24,9 +24,10 @@ After "Analisar partida", the app must evaluate every position with the loaded e
 
 | Assumption / decision | Chosen default | Rationale | Confirmed? |
 | --------------------- | -------------- | --------- | ---------- |
-| "Lance N de M" | Full moves: N = move number of the position being evaluated, M = total moves (72 for the reference game) | step_02 mockup "Lance 44 de 72" | y (design) |
+| "Lance N de M" | Full moves: N = move number of the last evaluated position shown on the board (the same move as the label next to it), M = total moves (72 for the reference game) | step_02 mockup pairs "Lance 44 de 72" with "44...Texe3+" | y (design) |
 | Progress | `evaluated positions ÷ (plies + 1)`, integer percent; remaining time = remaining positions × average time per evaluated position, shown as "~N s restantes" | A-03 | y (PRD) |
-| Stages 1–2 | Shown as completed with the counts already known ("Extrai os N lances…", "Reconstrói e valida cada posição…") | Parsing/replay happened on the Colar screen (C-03) | n |
+| Stages 1–2 | Shown as completed with the counts already known ("Extrai os N lances…", "Reconstrói e valida cada posição…"), **without** the per-stage time of the mockup ("0,2 s") | Parsing/replay happened on the Colar screen (C-03); re-timing it here would show a number unrelated to this screen. Deliberate narrowing of step_02 §2 | n |
+| Contract without positions/scores | The contract carries moves, verdicts and the material timeline but not FENs or engine scores | step_03 §5: the AI must not cite evaluations; material facts are enough for the texts. Deliberate narrowing of general.md 7.2 | n |
 | Stage 4 | "não necessária" | Tablebase arrives in F5 | n |
 | Findings | Added as soon as both positions around a ply are evaluated; tags "Erro" (player mistake), "Adversário" (opponent mistake); max 6 visible, chronological; text from `findingText`, with "defensor saiu" phrased "tirou a proteção de {peça}" | step_02 A-05 and mockup | n |
 | Cancel | Stops the pipeline actor; the engine receives `stop`; pending evaluations reject; app returns to `gameInput` with the saved draft | A-09 | y (PRD) |

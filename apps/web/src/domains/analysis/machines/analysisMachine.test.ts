@@ -141,4 +141,17 @@ describe("analysisMachine", () => {
     actor.stop();
     expect(engine.cancels).toBe(1);
   });
+
+  it("uma partida sem momentos-chave também chega ao fim (AS-16)", async () => {
+    const request = referenceRequest();
+    const short = { ...request, game: { ...request.game, plies: request.game.plies.slice(0, 4) } };
+    const engine = fakeEngine();
+    const machine = analysisMachine.provide({
+      actors: { explainGame: fromPromise(async () => explanation) },
+    });
+    const actor = createActor(machine, { input: { request: short, engine } }).start();
+    await waitFor(actor, (snapshot) => snapshot.status === "done");
+    expect(engine.calls).toHaveLength(5);
+    expect(actor.getSnapshot().output?.keyMoments).toEqual([]);
+  });
 });

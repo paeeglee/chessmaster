@@ -100,4 +100,18 @@ describe("buildContract (AS-14, AS-15)", () => {
     );
     expect(buildContract(short, summary).advantage_started_at).toBeNull();
   });
+
+  it("a vantagem começa no primeiro meio-lance com saldo de exatamente +2", () => {
+    const request = referenceRequest();
+    const summary = summarizeAnalysis(
+      request.game,
+      referenceEvaluations as PositionEvaluation[],
+      "b",
+    );
+    const contract = buildContract(request, {
+      ...summary,
+      materialTimeline: [0, 1, 2, 3, ...summary.materialTimeline.slice(4)],
+    });
+    expect(contract.advantage_started_at).toEqual({ ply: 2, label: "1...d5" });
+  });
 });

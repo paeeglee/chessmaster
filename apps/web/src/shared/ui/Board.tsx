@@ -69,6 +69,7 @@ export function Board({
       <div
         key={name}
         data-square={name}
+        data-mark={marks[name]}
         className={`relative flex items-center justify-center leading-none ${light ? palette.light : palette.dark}`}
       >
         {piece && (

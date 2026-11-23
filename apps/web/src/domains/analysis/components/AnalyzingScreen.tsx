@@ -94,7 +94,7 @@ export function AnalyzingScreen({ analysisRef, onCancel }: AnalyzingScreenProps)
           />
           <div className="flex w-full justify-between text-[15px]">
             <span className="font-bold">
-              Lance {progress.currentMove} de {progress.totalMoves}
+              Lance {lastPly ? lastPly.moveNumber : 1} de {progress.totalMoves}
             </span>
             <span className="text-ink-muted">{lastPly ? formatMoveLabel(lastPly) : ""}</span>
           </div>

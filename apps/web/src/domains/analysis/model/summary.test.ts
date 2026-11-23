@@ -86,9 +86,10 @@ describe("summarizeAnalysis", () => {
 
 describe("analysisProgress (AS-10)", () => {
   it("calcula porcentagem, lance atual e tempo restante", () => {
-    // 145 posições; 87 avaliadas em 17,4 s → 0,2 s por posição, 58 faltando (11,6 s).
-    expect(analysisProgress(87, 145, 17_400)).toEqual({
-      percent: 60,
+    // 145 posições; 89 avaliadas em 17,8 s → 0,2 s por posição, 56 faltando (11,2 s). A
+    // última avaliada é a posição 88, depois de 44...Texe3+: lance 44.
+    expect(analysisProgress(89, 145, 17_800)).toEqual({
+      percent: 61,
       currentMove: 44,
       totalMoves: 72,
       remainingSeconds: 12,
