@@ -54,6 +54,46 @@ divergirem, o PRD vale.
   nível escolhido fica no armazenamento local.
 - **Cor do jogador (D5):** sempre escolhida pelo jogador, sem valor padrão.
 
+## Estado do frontend: XState 5
+
+O estado da aplicação no frontend é controlado com **XState 5** (`xstate` e
+`@xstate/react`). O fluxo do produto já é uma máquina de estados (Colar →
+Analisando → Resultado ⇄ Treino, com cancelamento, falhas e novas tentativas), e as
+máquinas deixam esses estados e transições explícitos e testáveis.
+
+- **Máquina raiz (`app/`):** decide a tela atual e carrega os dados entre as telas
+  (a partida lida, a cor, o nível, as prioridades, o resultado da análise). A tela
+  mostrada é derivada do estado dessa máquina. Não há roteador de URL no MVP.
+- **Máquinas de domínio (`domains/<domínio>/machines/`):** cada fluxo com estados
+  próprios tem sua máquina, por exemplo:
+  - carregamento do motor (baixando com porcentagem, pronto, falhou, tentar de
+    novo), que começa ao abrir a página (D1);
+  - tela Colar (vazio, reconhecida, formato não reconhecido, lance ilegal) e as
+    condições do botão "Analisar partida";
+  - pipeline da análise (as cinco etapas, cada uma aguardando, em andamento,
+    concluída ou com falha; cancelamento; resultado parcial);
+  - sessão de treino (tentativas, níveis de dica, solução, próximo momento).
+- **Como escrever:** cada máquina é criada com `setup({ types, actions, guards,
+  actors }).createMachine(...)`, com `context`, eventos e `input` tipados em
+  `types`. Ações, guards e atores são referenciados pelo nome declarado no
+  `setup`.
+- **Efeitos colaterais ficam em atores:** Web Workers (Stockfish, tabela de finais)
+  viram atores `fromCallback`, que repassam as mensagens do worker como eventos e
+  encerram o worker quando o ator para (assim "Cancelar análise" só precisa parar
+  o ator). Chamadas à API (`/api/...`) viram atores `fromPromise`. O
+  armazenamento local do nível fica numa ação ou ator próprio.
+- **Regras de negócio fora das máquinas:** guards e ações chamam funções puras de
+  `model/`. A máquina orquestra; ela não calcula material, momento-chave nem tipo
+  de erro.
+- **React:** a máquina raiz é exposta com `createActorContext` do `@xstate/react`.
+  Os componentes leem só a fatia de que precisam com seletores e mudam o estado
+  enviando eventos. Não use `useState`, `useReducer`, Context próprio nem outra
+  biblioteca de estado para estado de fluxo; `useState` serve só para detalhes
+  visuais locais de um componente (hover, menu aberto).
+- **Testes:** as máquinas são testadas sem React, com `createActor` e
+  `machine.provide()` para trocar workers, rede e armazenamento por versões falsas
+  (ver `docs/engineering/quality.md`).
+
 ## Privacidade
 
 - A partida não sai do navegador, exceto o JSON enviado à IA.

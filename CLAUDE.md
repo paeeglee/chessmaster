@@ -26,7 +26,7 @@ This rule applies to every coding agent working in this repository, including
 subagents.
 
 - Before writing or changing code that uses a library, framework or tool (React,
-  Vite, Tailwind CSS, FastAPI, LangChain, Pydantic, Stockfish, Vitest, Playwright,
+  Vite, Tailwind CSS, XState, FastAPI, LangChain, Pydantic, Stockfish, Vitest, Playwright,
   pytest, Biome, Ruff, mypy, pnpm, uv and any other), look up its current
   documentation and best practices in [Context7](https://context7.com/) (the
   Context7 MCP server: resolve the library ID, then fetch the docs for the topic).
@@ -54,7 +54,7 @@ Read when the task needs it:
 | File | What it covers | When to read it |
 | ---- | -------------- | --------------- |
 | [`docs/product/general.md`](docs/product/general.md) | Product PRD overview: problem, audience, goals, MVP scope (in and out), main flow, the five engines, classification rules, engine → AI contract, non-functional requirements, risks, MVP decisions (D1–D5). | Before any task that touches product behavior, scope or architecture. |
-| [`docs/architecture/overview.md`](docs/architecture/overview.md) | Technical architecture: where each engine runs, MVP technical decisions, cross-origin isolation, privacy, frontend ↔ backend contract, ports and proxy, environment variables, Stockfish distribution and license, AI prompts and reference games. | Before any code that crosses apps, touches engines, the AI layer, configuration or the build. |
+| [`docs/architecture/overview.md`](docs/architecture/overview.md) | Technical architecture: where each engine runs, MVP technical decisions, frontend state with XState, cross-origin isolation, privacy, frontend ↔ backend contract, ports and proxy, environment variables, Stockfish distribution and license, AI prompts and reference games. | Before any code that crosses apps, touches engines, the AI layer, configuration or the build. |
 | [`docs/product/step_01.md`](docs/product/step_01.md) | Screen 1 PRD, "Paste the game": parsing and validation of the Chess.com HTML and plain move lists, color/level/priorities, engine download indicator. | Before working on the game input screen. |
 | [`docs/product/step_02.md`](docs/product/step_02.md) | Screen 2 PRD, "Analyzing": the five stages, Web Worker / Stockfish pipeline, findings so far, cancellation, partial results, handoff to the AI. | Before working on the analysis pipeline or progress screen. |
 | [`docs/product/step_03.md`](docs/product/step_03.md) | Screen 3 PRD, "Result": verdict, patterns, stat cards, board, chart, move list, key moments, strengths, next-game habit, "Ask the AI", content rules for the AI. | Before working on the result screen or AI-written text. |
@@ -91,7 +91,7 @@ for that screen and must be followed.
 ```
 .
 ├── apps/
-│   ├── web/        # Frontend: React + Vite + Tailwind CSS + TypeScript (UI and engines 1–4)
+│   ├── web/        # Frontend: React + Vite + Tailwind CSS + TypeScript + XState (UI and engines 1–4)
 │   └── api/        # Backend: Python + FastAPI + LangChain + Pydantic (AI layer, engine 5)
 ├── docs/
 │   ├── product/    # PRDs (general.md, step_0N.md) and glossary
@@ -111,9 +111,18 @@ for that screen and must be followed.
 
 ## Tech stack
 
-- **Frontend (`apps/web`):** React, Vite, Tailwind CSS, TypeScript (strict).
-  Package manager: [pnpm](https://pnpm.io/) only (no npm or yarn). Commit
-  `pnpm-lock.yaml`.
+- **Frontend (`apps/web`):** React, Vite, Tailwind CSS, TypeScript (strict),
+  XState 5 (`xstate` + `@xstate/react`). Package manager:
+  [pnpm](https://pnpm.io/) only (no npm or yarn). Commit `pnpm-lock.yaml`.
+- **Frontend state:** application and flow state (current screen, game input,
+  engine loading, analysis pipeline, training session) lives in XState 5
+  machines, not in `useState`/`useReducer`, React Context stores or another state
+  library. Build machines with `setup({ types, actions, guards, actors })`, keep
+  side effects (Web Workers, `fetch`, `localStorage`) in actors so tests can swap
+  them with `machine.provide()`, and keep business rules in pure `model/` code
+  that guards and actions call. `useState` is fine only for purely visual,
+  component-local state (hover, an open dropdown). Details in
+  `docs/architecture/overview.md`.
 - **Backend (`apps/api`):** Python, FastAPI, LangChain, Pydantic. Package manager:
   [uv](https://docs.astral.sh/uv/) only (no pip, poetry or `requirements.txt`).
   Dependencies in `pyproject.toml`; use `uv sync`, `uv add <package>` and
