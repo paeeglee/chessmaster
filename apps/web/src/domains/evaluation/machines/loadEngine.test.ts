@@ -75,4 +75,31 @@ describe("loadEngine com o EngineClient de verdade", () => {
     actor.stop();
     expect(worker.terminated).toBe(true);
   });
+
+  it("publica a porcentagem inteira do download (EVAL-06)", async () => {
+    const worker = new ScriptedWorker(false);
+    vi.spyOn(workerFactory, "createEngineWorker").mockReturnValue(worker);
+    const actor = createActor(engineLoaderMachine).start();
+    worker.progressPort?.postMessage({ percent: 0.429, loaded: 429, total: 1000 });
+    await settle();
+    expect(actor.getSnapshot().value).toBe("loading");
+    expect(actor.getSnapshot().context.percent).toBe(42);
+    actor.stop();
+  });
+
+  it("falha depois de 120 s sem uciok e encerra o worker (EVAL-08)", async () => {
+    vi.useFakeTimers();
+    try {
+      const worker = new ScriptedWorker(false);
+      vi.spyOn(workerFactory, "createEngineWorker").mockReturnValue(worker);
+      const actor = createActor(engineLoaderMachine).start();
+      await vi.advanceTimersByTimeAsync(119_999);
+      expect(actor.getSnapshot().value).toBe("loading");
+      await vi.advanceTimersByTimeAsync(1);
+      expect(actor.getSnapshot().value).toBe("failed");
+      expect(worker.terminated).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

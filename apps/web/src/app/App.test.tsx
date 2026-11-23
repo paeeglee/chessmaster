@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { fromCallback } from "xstate";
 import { engineLoaderMachine } from "../domains/evaluation";
@@ -82,5 +83,26 @@ describe("App", () => {
     render(<App logic={appWithEngine("ENGINE.FAILED")} />);
     expect(screen.getByText("Não foi possível carregar o motor")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tentar de novo" })).toBeInTheDocument();
+  });
+
+  it("tentar de novo recomeça o download do motor (EVAL-09)", async () => {
+    let starts = 0;
+    const logic = appMachine.provide({
+      actors: {
+        engineLoader: engineLoaderMachine.provide({
+          actors: {
+            loadEngine: fromCallback(({ sendBack }) => {
+              starts += 1;
+              if (starts === 1) sendBack({ type: "ENGINE.FAILED" });
+            }),
+          },
+        }),
+      },
+    });
+    render(<App logic={logic} />);
+    await userEvent.click(screen.getByRole("button", { name: "Tentar de novo" }));
+    expect(screen.getByText("Carregando o motor de análise… 0%")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Tentar de novo" })).not.toBeInTheDocument();
+    expect(starts).toBe(2);
   });
 });
