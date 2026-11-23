@@ -292,3 +292,16 @@ Scratch worktree at `HEAD` (`.../scratchpad/f4b-sensor`), `pnpm install --frozen
 **Sensor**: 29/31 killed (M17, M29 survived)
 **Gate**: `make check` 293 + 75 passed; `make test-e2e` 13 passed
 **Next steps**: fix Gaps 1–3 (plus 4–5 cheaply), then re-verify.
+
+---
+
+## Author follow-up after round 3 (not re-verified: round limit reached)
+
+The round limit in validate.md was reached, so these fixes were applied by the author and are reported to the user instead of a 4th verifier round.
+
+| Gap | Resolution | Evidence |
+| --- | ---------- | -------- |
+| E1 flaky e2e | `full-analysis` Playwright project (analysis/review/training specs) runs after the others with `workers: 1`. Diagnosis with 8 serial real-engine runs: only 27...Tb7 varies (missed 2/8); it is borderline for the engine itself (eval −8.70 → −7.37, Be2 vs Nxf4 near-equal at 200 ms). e2e asserts the 4 stable moments; Vitest still asserts all 5 with the fixed fixture | `apps/web/playwright.config.ts`, `apps/web/e2e/analysis.spec.ts:32`, `docs/architecture/overview.md` ("Lances limítrofes"); `make test-e2e` 3/3 green |
+| E2 last-ply finding | Machine test with the game cut at 22...Ta7 expects the finding after EVALUATION.DONE; mutant (no classification on DONE) killed | `apps/web/src/domains/analysis/machines/analysisMachine.test.ts` (last test) |
+| E3 readyok before bestmove | `cancel()` waits for the stopped search's `bestmove` (2 s cap) before `isready`; tests for readyok-first order, timeout and no-search cancel; mutant (skip the wait) killed | `apps/web/src/domains/evaluation/engine/EngineClient.ts` (`cancel`), `EngineClient.test.ts` |
+| E4 product confirmation | Open: the played-line rule (actual reply + engine PV after it) refines how D3 is measured; flagged to the user | `.specs/features/analysis-screen/spec.md` (assumptions) |
