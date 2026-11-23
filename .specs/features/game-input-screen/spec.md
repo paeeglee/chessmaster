@@ -103,33 +103,33 @@ The player needs to paste a game, see that it was understood, choose their color
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| IN-01 | Paste | Design | Pending |
-| IN-02 | Paste | Design | Pending |
-| IN-03 | Paste | Design | Pending |
-| IN-04 | Paste | Design | Pending |
-| IN-05 | Paste | Design | Pending |
-| IN-06 | Paste | Design | Pending |
-| IN-07 | Paste | Design | Pending |
-| IN-08 | Paste | Design | Pending |
-| IN-09 | Paste | Design | Pending |
-| IN-10 | Field | Design | Pending |
-| IN-11 | Field | Design | Pending |
-| IN-12 | Field | Design | Pending |
-| IN-13 | Choices | Design | Pending |
-| IN-14 | Choices | Design | Pending |
-| IN-15 | Choices | Design | Pending |
-| IN-16 | Choices | Design | Pending |
-| IN-17 | Choices | Design | Pending |
-| IN-18 | Start | Design | Pending |
-| IN-19 | Start | Design | Pending |
-| IN-20 | Start | Design | Pending |
-| IN-21 | Start | Design | Pending |
-| IN-22 | Start | Design | Pending |
-| IN-23 | Start | Design | Pending |
-| IN-24 | Start | Design | Pending |
-| IN-25 | Edge case | Design | Pending |
+| IN-01 | Paste | Tasks | Implementing |
+| IN-02 | Paste | Tasks | Implementing |
+| IN-03 | Paste | Tasks | Implementing |
+| IN-04 | Paste | Tasks | Implementing |
+| IN-05 | Paste | Tasks | Implementing |
+| IN-06 | Paste | Tasks | Implementing |
+| IN-07 | Paste | Tasks | Implementing |
+| IN-08 | Paste | Tasks | Implementing |
+| IN-09 | Paste | Tasks | Implementing |
+| IN-10 | Field | Tasks | Implementing |
+| IN-11 | Field | Tasks | Implementing |
+| IN-12 | Field | Tasks | Implementing |
+| IN-13 | Choices | Tasks | Implementing |
+| IN-14 | Choices | Tasks | Implementing |
+| IN-15 | Choices | Tasks | Implementing |
+| IN-16 | Choices | Tasks | Implementing |
+| IN-17 | Choices | Tasks | Implementing |
+| IN-18 | Start | Tasks | Implementing |
+| IN-19 | Start | Tasks | Implementing |
+| IN-20 | Start | Tasks | Implementing |
+| IN-21 | Start | Tasks | Implementing |
+| IN-22 | Start | Tasks | Implementing |
+| IN-23 | Start | Tasks | Implementing |
+| IN-24 | Start | Tasks | Implementing |
+| IN-25 | Edge case | Tasks | Implementing |
 
-**Coverage:** 25 total, 0 mapped to tasks, 25 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 25 total, 25 mapped to tasks (T1–T5), 0 unmapped
 
 ---
 
