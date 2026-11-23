@@ -3,7 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 const previewUrl = "http://localhost:4173";
 
 // Os testes rodam contra o build servido pelo `vite preview`, que envia os mesmos
-// cabeçalhos de isolamento de origem do servidor de desenvolvimento.
+// cabeçalhos de isolamento de origem do servidor de desenvolvimento, com o api de pé
+// atrás do proxy de /api.
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -22,6 +23,14 @@ export default defineConfig({
       url: previewUrl,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
+    },
+    {
+      name: "api",
+      command: "uv run uvicorn game_analyzer.main:app --port 8000",
+      cwd: "../api",
+      url: "http://localhost:8000/api/health",
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
     },
   ],
 });

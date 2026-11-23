@@ -104,10 +104,10 @@ check: lint typecheck test ## lint + typecheck + test; obrigatório antes de qua
 # --- Contrato frontend ↔ backend ---------------------------------------------
 
 generate-api-types: ## Gera os tipos TypeScript do api a partir do OpenAPI do backend
-	@schema="$$(mktemp -t openapi).json"; \
+	@tmp_dir="$$(mktemp -d)"; schema="$$tmp_dir/openapi.json"; \
 		(cd $(API_DIR) && uv run python -m game_analyzer.export_openapi > "$$schema") && \
-		$(NVM_USE) cd $(WEB_DIR) && pnpm exec openapi-typescript "$$schema" -o $(API_TYPES); \
-		status=$$?; rm -f "$$schema"; exit $$status
+		($(NVM_USE) cd $(WEB_DIR) && pnpm exec openapi-typescript "$$schema" -o $(API_TYPES)); \
+		status=$$?; rm -rf "$$tmp_dir"; exit $$status
 
 # --- Design ------------------------------------------------------------------
 

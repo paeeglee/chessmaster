@@ -181,8 +181,8 @@ T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `make test-e2e` passes
-- [ ] `schema.gen.ts` contains `/api/health` and type-checks
+- [x] `make test-e2e` passes
+- [x] `schema.gen.ts` contains `/api/health` and type-checks
 
 **Tests**: e2e
 **Gate**: e2e
