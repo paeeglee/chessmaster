@@ -27,6 +27,8 @@ Se um conceito novo aparecer, adicione-o aqui antes de usá-lo no código.
 | Tipo de erro | mistake type | Classificação de um momento-chave. |
 | Peça atacada | hanging piece | A peça perdida já estava atacada antes do lance e não foi movida nem protegida. |
 | Defensor saiu | defender moved | O lance moveu a única peça que protegia a peça perdida. |
+| Erro do adversário | opponent mistake | Lance do adversário que perde 2 pontos de material ou mais pela mesma regra do momento-chave; tag "Adversário". |
+| Linha de capturas | capture line | O lance seguido das capturas da variante principal do motor, usada para medir a perda de material (7.1). |
 | Outro | other | Erro que as regras determinísticas não classificam; descrito pela IA. |
 | Afogamento | stalemate | Empate por falta de lances legais sem estar em xeque. |
 | Fim da partida | termination | Como a partida terminou no tabuleiro: xeque-mate, afogamento ou sem fim decidido pelas regras. |

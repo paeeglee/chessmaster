@@ -1,4 +1,6 @@
 /// <reference types="vitest/config" />
+import { readdirSync } from "node:fs";
+import { resolve } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -40,12 +42,14 @@ export default defineConfig({
         functions: 80,
         branches: 80,
         statements: 80,
-        "src/domains/**/model/**": {
-          lines: 90,
-          functions: 90,
-          branches: 90,
-          statements: 90,
-        },
+        // 90% em cada camada de domínio separadamente (quality.md), não na média.
+        ...Object.fromEntries(
+          // Os scripts do pnpm rodam a partir de apps/web.
+          readdirSync(resolve("src/domains")).map((domain) => [
+            `src/domains/${domain}/model/**`,
+            { lines: 90, functions: 90, branches: 90, statements: 90 },
+          ]),
+        ),
       },
     },
   },

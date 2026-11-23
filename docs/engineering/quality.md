@@ -77,7 +77,9 @@
 - **Cobertura mínima:** 90% nas camadas de domínio (`model/` no frontend, `domain/`
   e `application/` no backend); 80% no total de cada app.
   - Frontend: o Vitest aplica os dois limites (`coverage.thresholds` no
-    `vite.config.ts`, com um limite próprio para `src/domains/**/model/**`).
+    `vite.config.ts`), com um limite de 90% separado para o `model/` de cada domínio
+    (a lista sai das pastas em `src/domains/`), para um domínio não esconder outro na
+    média.
   - Backend: o pytest aplica os 80% no total (`--cov-fail-under`). O limite de 90%
     para `domain/` e `application/` entra junto com essas camadas, na feature da
     camada de IA.

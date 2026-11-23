@@ -84,6 +84,48 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M20 / apps/web/src/domains/game-input/model/estimate.ts:10 (IN-24) (web-tests)
 - last seen: 2026-11-23T14:21:46Z
 
+### L-013 - Test every numeric threshold at exactly its boundary value and one step below it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-model
+- evidence: M1/M23 apps/web/src/domains/analysis/model/classify.ts:17,73 (AN-03) (domain-model)
+- last seen: 2026-11-23T17:00:09Z
+
+### L-014 - For each conjunct or guard in a rule build a fixture where only that condition decides the outcome
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-model
+- evidence: M2/M3/M21 apps/web/src/domains/analysis/model/classify.ts:43,73 (AN-03, AN-06, AN-08) (domain-model)
+- last seen: 2026-11-23T17:00:09Z
+
+### L-015 - Feed selection functions mixed inputs that include items they must exclude
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-model
+- evidence: M11 apps/web/src/domains/analysis/model/keyMoments.ts:25 (AN-17) (domain-model)
+- last seen: 2026-11-23T17:00:09Z
+
+### L-016 - Reconcile each spec rule with the glossary definition and the spec's own assumptions table before tasks
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: analysis-model
+- evidence: AN-09 vs docs/product/glossary.md; AN-15 vs spec Assumptions table (spec)
+- last seen: 2026-11-23T17:00:09Z
+
+### L-017 - Apply domain coverage thresholds per domain folder, not to one glob that averages all domains
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `tooling` · harmful: 0
+- features: analysis-model
+- evidence: apps/web/vite.config.ts:43-48 analysis/model branches 88.57% (tooling)
+- last seen: 2026-11-23T17:00:09Z
+
+### L-018 - Verify each hand-made chess test position with the rules engine before relying on what it claims
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-model
+- evidence: M21 round 2 apps/web/src/domains/analysis/model/classify.test.ts:294-310 (AN-08) (domain-model)
+- last seen: 2026-11-23T17:04:33Z
+
+### L-019 - Do not let a test pass only because of a library's result ordering; also cover the order-reversed case
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `domain-model` · harmful: 0
+- features: analysis-model
+- evidence: M21b round 3 apps/web/src/domains/analysis/model/classify.ts:43 (AN-08) (domain-model)
+- last seen: 2026-11-23T17:06:43Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
