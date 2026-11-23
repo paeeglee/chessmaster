@@ -1,12 +1,12 @@
 # F2 · Evaluation engine Validation
 
-**Date**: 2026-11-23 (round 1)
+**Date**: 2026-11-23 (round 2, after test commit `9137084`)
 **Spec**: `.specs/features/evaluation-engine/spec.md`
-**Diff range**: `6f6e9eb..18c36b9` (spec `71b234b`; code `0d53a8f`, `27fef51`, `f25fa91`, `9961d13`, `18c36b9`)
+**Diff range**: `6f6e9eb..9137084` (spec `71b234b`; code `0d53a8f`, `27fef51`, `f25fa91`, `9961d13`, `18c36b9`; round-1 report `2121fae`; fix tests `9137084`)
 **Verifier**: independent sub-agent (author ≠ verifier)
-**Verdict**: FAIL
+**Verdict**: PASS
 
-Three behavior-level mutants survive the test suite (M12, M16, M17). Each maps to a spec outcome that has no discriminating assertion: the loader's integer percent from the progress port (EVAL-06), the 120 s `uciok` limit (EVAL-08) and the "Tentar de novo" button reaching the loader in the app (EVAL-09). All gates pass; the code behaves as specified on reading. The gaps are in the tests only.
+Round 2: `9137084` adds the three tests from Fixes 1–3 (test-only, no application code changed). M12, M16 and M17 are now killed in a fresh scratch worktree; all 20 ACs have discriminating evidence. Round 1 had failed on those three surviving mutants (EVAL-06, EVAL-08, EVAL-09).
 
 ---
 
@@ -17,7 +17,7 @@ Three behavior-level mutants survive the test suite (M12, M16, M17). Each maps t
 | T1 Engine files and build choice | ✅ Done | - |
 | T2 UCI parsing and score orientation | ✅ Done | - |
 | T3 EngineClient | ✅ Done | - |
-| T4 Loader machine, status, app wiring | ⚠️ Partial | Progress wiring and retry wiring not discriminated by tests (M12, M17) |
+| T4 Loader machine, status, app wiring | ✅ Done | Round 1 gaps (M12, M17) closed by `9137084` |
 | T5 Real engine e2e and docs | ✅ Done | - |
 
 ---
@@ -33,10 +33,10 @@ Paths are relative to `apps/web/`.
 | EVAL-03 | Isolated → mt URL, `hardwareConcurrency − 1` threads, min 1 | `src/domains/evaluation/model/engineBuild.test.ts:8` `toEqual({ variant: "multi-thread", scriptUrl: "/engine/stockfish-19.0.1-mt.js", threads: 7 })`; `:16` `.threads).toBe(1)` for 1 core | ✅ PASS |
 | EVAL-04 | Not isolated → st URL, 1 thread | `src/domains/evaluation/model/engineBuild.test.ts:22` `toEqual({ variant: "single-thread", scriptUrl: "/engine/stockfish-19.0.1-st.js", threads: 1 })`; `src/domains/evaluation/machines/engineLoaderMachine.test.ts:75` `build.variant).toBe("single-thread")` (jsdom) | ✅ PASS |
 | EVAL-05 | Download starts on app start without user action | `src/domains/evaluation/machines/engineLoaderMachine.test.ts:31-33` `value).toBe("loading")`, `percent).toBe(0)`, `controls.started).toBe(1)`; `src/app/App.test.tsx:78` `getByText("Carregando o motor de análise… 40%")` with the loader invoked by `appMachine`; `e2e/engine.spec.ts:4-6` `waitForRequest(/stockfish-19\.0\.1-mt\.wasm$/)` after only `page.goto("/")` | ✅ PASS |
-| EVAL-06 | Loader exposes integer percent 0–100 from the progress port | `src/domains/evaluation/model/progress.test.ts:14` `toPercent(fraction)).toBe(percent)` (0.999→99, 1.2→100, NaN→0); `src/domains/evaluation/engine/EngineClient.test.ts:69` `received).toEqual([{ percent: 0.4, loaded: 40, total: 100 }])`; `src/domains/evaluation/machines/engineLoaderMachine.test.ts:39` `percent).toBe(40)`. **Missing**: no test asserts the loader's `context.percent` after a real port message; `src/domains/evaluation/machines/loadEngine.test.ts:45` posts `0.42` but only asserts `ready`. Mutant M12 (`engineLoaderMachine.ts:46` raw fraction instead of `toPercent`) survives | ❌ GAP |
+| EVAL-06 | Loader exposes integer percent 0–100 from the progress port | `src/domains/evaluation/model/progress.test.ts:14` `toPercent(fraction)).toBe(percent)` (0.999→99, 1.2→100, NaN→0); `src/domains/evaluation/engine/EngineClient.test.ts:69` `received).toEqual([{ percent: 0.4, loaded: 40, total: 100 }])`; `src/domains/evaluation/machines/engineLoaderMachine.test.ts:39` `percent).toBe(40)`; real port → loader: `src/domains/evaluation/machines/loadEngine.test.ts:85-86` `value).toBe("loading")`, `context.percent).toBe(42)` after posting `{ percent: 0.429 }` (M12 killed) | ✅ PASS |
 | EVAL-07 | After `uciok`, Threads set, `readyok` → `ready` with `EngineClient` | `src/domains/evaluation/engine/EngineClient.test.ts:59` `commands).toEqual(["uci", "setoption name Threads value 7", "isready"])`; `src/domains/evaluation/machines/engineLoaderMachine.test.ts:45-46` `value).toBe("ready")`, `engine).toBe(fakeEngine)`; `src/domains/evaluation/machines/loadEngine.test.ts:47-49` `ready`, `engine).not.toBeNull()`, `worker.terminated).toBe(false)` | ✅ PASS |
-| EVAL-08 | Worker error or no `uciok` within **120 s** → `failed` | `src/domains/evaluation/engine/EngineClient.test.ts:75` `rejects.toThrow("O motor não respondeu a tempo")` (with `timeoutMs: 20`); `:85` `rejects.toThrow("Falha no worker do motor")`; `src/domains/evaluation/machines/loadEngine.test.ts:67` `value).toBe("failed")`. **Missing**: the 120 s value (`EngineClient.ts:26`) is never asserted; mutant M16 (120 s → 10 s) survives | ❌ GAP |
-| EVAL-09 | Retry from `failed` terminates old worker, new download from 0% | `src/domains/evaluation/machines/engineLoaderMachine.test.ts:60-64` `stopped).toBe(1)`, `value).toBe("loading")`, `percent).toBe(0)`, `started).toBe(2)`; `src/domains/evaluation/machines/loadEngine.test.ts:68` `worker.terminated).toBe(true)`. **Missing**: "the user asks to retry" is never exercised through the UI; `src/app/App.test.tsx:84` only checks the button exists, and `src/app/EngineIndicator.tsx:19` is uncovered. Mutant M17 (`onRetry={() => {}}`) survives | ❌ GAP |
+| EVAL-08 | Worker error or no `uciok` within **120 s** → `failed` | `src/domains/evaluation/engine/EngineClient.test.ts:75` `rejects.toThrow("O motor não respondeu a tempo")` (with `timeoutMs: 20`); `:85` `rejects.toThrow("Falha no worker do motor")`; `src/domains/evaluation/machines/loadEngine.test.ts:67` `value).toBe("failed")`; 120 s default with fake timers: `loadEngine.test.ts:96-100` after `119_999` ms `value).toBe("loading")`, after +1 ms `value).toBe("failed")` and `worker.terminated).toBe(true)` (M16 killed) | ✅ PASS |
+| EVAL-09 | Retry from `failed` terminates old worker, new download from 0% | `src/domains/evaluation/machines/engineLoaderMachine.test.ts:60-64` `stopped).toBe(1)`, `value).toBe("loading")`, `percent).toBe(0)`, `started).toBe(2)`; `src/domains/evaluation/machines/loadEngine.test.ts:68` `worker.terminated).toBe(true)`. Through the app: `src/app/App.test.tsx:103-106` click "Tentar de novo" → `getByText("Carregando o motor de análise… 0%")`, button `not.toBeInTheDocument()`, `starts).toBe(2)` (M17 killed; `EngineIndicator.tsx` now 100% lines) | ✅ PASS |
 | EVAL-10 | Texts "Carregando o motor de análise… N%", "Motor pronto", "Não foi possível carregar o motor" + "Tentar de novo"; `aria-live="polite"` | `src/domains/evaluation/components/EngineStatus.test.tsx:9` `getByText("Carregando o motor de análise… 40%")`; `:14` `getByText("Motor pronto")`; `:20-22` failure text + `getByRole("button", { name: "Tentar de novo" })` + `onRetry).toHaveBeenCalledOnce()`; `:27` `toHaveAttribute("aria-live", "polite")` | ✅ PASS |
 | EVAL-11 | Real browser with isolation reaches "Motor pronto" with the mt build | `e2e/engine.spec.ts:4` mt `.wasm` request; `:7` `crossOriginIsolated).toBe(true)`; `:8` `getByText("Motor pronto")).toBeVisible({ timeout: 90_000 })` — passed in 1.2 s | ✅ PASS |
 | EVAL-12 | Sends `position fen <fen>` + `go movetime 200`; resolves depth, score, bestMove, pv from last `info` + `bestmove` | `src/domains/evaluation/engine/EngineClient.test.ts:100` `commands.slice(3)).toEqual([\`position fen ${START_FEN}\`, "go movetime 200"])`; `:101-107` `toEqual({ fen, depth: 14, score: { kind: "cp", value: 31 }, bestMove: "e2e4", pv: ["e2e4","e7e5","g1f3"] })` (last of two `info` lines) | ✅ PASS |
@@ -49,7 +49,7 @@ Paths are relative to `apps/web/`.
 | EVAL-19 | `info` without `score` ignored | `src/domains/evaluation/model/uci.test.ts:35-36` `parseInfoLine(line)).toBeNull()` for `info string …`, `info … currmove …`, `wdl` | ✅ PASS |
 | EVAL-20 | `lowerbound`/`upperbound` score ignored | `src/domains/evaluation/model/uci.test.ts:43` `toBeNull()` for both bounds | ✅ PASS |
 
-**Status**: ❌ Gaps present (EVAL-06, EVAL-08, EVAL-09; tests only). No spec-precision gaps: every AC states an exact value or state.
+**Status**: ✅ All 20 ACs covered with discriminating evidence (round 1 gaps EVAL-06, EVAL-08, EVAL-09 closed by `9137084`). No spec-precision gaps: every AC states an exact value or state.
 
 ---
 
@@ -70,21 +70,23 @@ Scratch: `git worktree add <scratchpad>/f2-sensor HEAD`, `pnpm install --frozen-
 | M9 | `domains/evaluation/machines/engineLoaderMachine.ts:57` | loader cleanup terminates a ready engine | ✅ Killed |
 | M10 | `domains/evaluation/machines/engineLoaderMachine.ts:89` | `RETRY` accepted while loading | ✅ Killed |
 | M11 | `domains/evaluation/model/progress.ts:6` | percent not floored | ✅ Killed |
-| M12 | `domains/evaluation/machines/engineLoaderMachine.ts:46` | loader forwards the raw fraction (`progress.percent`) instead of `toPercent(...)` | ❌ Survived → Fix 1 |
+| M12 | `domains/evaluation/machines/engineLoaderMachine.ts:46` | loader forwards the raw fraction (`progress.percent`) instead of `toPercent(...)` | ✅ Killed (round 2; survived round 1) |
 | M13 | `domains/evaluation/components/EngineStatus.tsx:14` | "Motor pronto" → "Motor carregado" | ✅ Killed |
 | M14 | `domains/evaluation/components/EngineStatus.tsx:12` | `aria-live="off"` | ✅ Killed |
 | M15 | `app/appMachine.ts:17` | root does not invoke the loader | ✅ Killed |
-| M16 | `domains/evaluation/engine/EngineClient.ts:26` | start timeout 120 s → 10 s | ❌ Survived → Fix 2 |
-| M17 | `app/EngineIndicator.tsx:19` | "Tentar de novo" does nothing in the app (`onRetry={() => {}}`) | ❌ Survived → Fix 3 |
+| M16 | `domains/evaluation/engine/EngineClient.ts:26` | start timeout 120 s → 10 s | ✅ Killed (round 2; survived round 1) |
+| M17 | `app/EngineIndicator.tsx:19` | "Tentar de novo" does nothing in the app (`onRetry={() => {}}`) | ✅ Killed (round 2; survived round 1) |
 | M18 | `domains/evaluation/engine/EngineClient.ts:71` | `setoption name Threads value 1` regardless of build | ✅ Killed |
 | M19 | `domains/evaluation/machines/engineLoaderMachine.ts:76` | retry keeps the old percent | ✅ Killed |
 | M20 | `domains/evaluation/model/searchPlan.ts:7` | `<` → `<=` (deeper search at depth 12) | ✅ Killed |
-| M21 | `domains/evaluation/machines/engineLoaderMachine.ts:53` | failed start does not call `engine.terminate()` | ➖ Survived, equivalent: leaving `loading` stops the actor and its cleanup (`:56-59`, `ready === false`) terminates the worker, so observable behavior is unchanged |
+| M21 | `domains/evaluation/machines/engineLoaderMachine.ts:53` | failed start does not call `engine.terminate()` | ➖ Survived in both rounds, equivalent: leaving `loading` stops the actor and its cleanup (`:56-59`, `ready === false`) terminates the worker, so observable behavior is unchanged |
 
 **Sensor depth**: lightweight+ (21 manual mutants; e2e not re-run per mutant because every survivor is outside what `e2e/engine.spec.ts` asserts)
-**Result**: 17/20 non-equivalent mutants killed - ❌ FAIL
+**Result**: 20/20 non-equivalent mutants killed - ✅ PASS (round 1: 17/20)
 
-**Isolation**: real worktree `git status --porcelain` captured before (empty) and after `git worktree remove --force` (empty) — identical. No `git stash` used.
+**Round 2**: fresh scratch `git worktree add <scratchpad>/f2-sensor2 9137084`; re-ran M12, M16, M17 (each: 1 failed / 151 passed of 152) and M21 (still survives, equivalent). Scratch removed.
+
+**Isolation**: in both rounds the real worktree `git status --porcelain` was captured before (empty) and after `git worktree remove --force` (empty) — identical. No `git stash` used.
 
 ---
 
@@ -96,8 +98,8 @@ Scratch: `git worktree add <scratchpad>/f2-sensor HEAD`, `pnpm install --frozen-
 | Surgical changes | ✅ (only evaluation domain, app wiring, copy script, Makefile, overview.md) |
 | No scope creep | ✅ (no tablebase, no lite builds, no cache headers) |
 | Matches patterns | ✅ (XState `fromCallback` + `provide`, tests next to code, `index.ts` entry) |
-| Spec-anchored outcome check | ❌ EVAL-06, EVAL-08, EVAL-09 lack discriminating assertions |
-| Per-layer coverage: `model/` 100% lines; app 99.64% lines | ✅ (`EngineIndicator.tsx:19` uncovered) |
+| Spec-anchored outcome check | ✅ (round 1 gaps closed) |
+| Per-layer coverage: `model/` 100% lines; app 100% lines | ✅ |
 | Every test maps to an AC/edge/Done-when | ✅ (`loadEngine.test.ts` maps to EVAL-07/08; "ignora RETRY enquanto carrega" guards EVAL-09 transitions) |
 | Documented guidelines: `docs/engineering/quality.md`, `docs/architecture/code-structure.md` | ✅ (RTL by role/text, no network, pure model, DDD layout) |
 
@@ -120,16 +122,17 @@ Observations (not blocking, no AC):
 ## Gate Check
 
 - **Gate command**: `make check && make test-e2e` (full, from tasks.md)
-- **Result**: `make check` passed — Biome, `tsc --noEmit`, mypy, Vitest 149 passed / 0 failed / 0 skipped (coverage 99.66% stmts, 92.93% branches, 99.64% lines), pytest 9 passed (94.29%). `make test-e2e` 5 passed / 0 failed (`engine.spec.ts` 1.2 s). Ports 4173/8000 free before and after.
+- **Result (round 2, `9137084`)**: `make check` exit 0 — Biome, `tsc --noEmit`, mypy, Vitest 152 passed / 0 failed / 0 skipped (coverage 100% stmts, 92.93% branches, 100% lines), pytest 9 passed. `make test-e2e` 5 passed / 0 failed (`engine.spec.ts` 1.2 s). Ports 4173/8000 free before and after.
+- **Result (round 1, `18c36b9`)**: `make check` passed with Vitest 149; `make test-e2e` 5 passed.
 - **Test count before feature** (`6f6e9eb`, Vitest): 93
-- **Test count after feature**: 149
-- **Delta**: +56 Vitest tests, +1 Playwright test
+- **Test count after feature**: 152
+- **Delta**: +59 Vitest tests, +1 Playwright test
 - **Skipped tests**: none
 - **Failures**: none
 
 ---
 
-## Fix Plans
+## Fix Plans (round 1 — all implemented in `9137084`, verified in round 2)
 
 ### Fix 1: Loader percent from the real progress port is not asserted (EVAL-06, M12)
 
@@ -159,24 +162,24 @@ Observations (not blocking, no AC):
 | Requirement | Previous Status | New Status |
 | ----------- | --------------- | ---------- |
 | EVAL-01 … EVAL-05 | Implementing | ✅ Verified |
-| EVAL-06 | Implementing | ❌ Needs Fix (test) |
+| EVAL-06 | Implementing | ✅ Verified (round 2) |
 | EVAL-07 | Implementing | ✅ Verified |
-| EVAL-08 | Implementing | ❌ Needs Fix (test) |
-| EVAL-09 | Implementing | ❌ Needs Fix (test) |
+| EVAL-08 | Implementing | ✅ Verified (round 2) |
+| EVAL-09 | Implementing | ✅ Verified (round 2) |
 | EVAL-10 … EVAL-20 | Implementing | ✅ Verified |
 
 ---
 
 ## Summary
 
-**Overall**: ❌ Not Ready
+**Overall**: ✅ Ready
 
-**Spec-anchored check**: 17/20 ACs matched with discriminating evidence; 3 gaps (EVAL-06, EVAL-08, EVAL-09); 0 spec-precision gaps
-**Sensor**: 17/20 non-equivalent mutants killed (1 equivalent)
-**Gate**: `make check` 149 Vitest + 9 pytest passed; `make test-e2e` 5 passed
+**Spec-anchored check**: 20/20 ACs matched with discriminating evidence; 0 spec-precision gaps
+**Sensor**: 20/20 non-equivalent mutants killed (1 equivalent)
+**Gate**: `make check` 152 Vitest + 9 pytest passed; `make test-e2e` 5 passed
 
 **What works**: build choice, UCI parsing and orientation, deeper search, `(none)` handling, serialized evaluation, terminate, loader states and cleanup, status texts and `aria-live`, real multi-thread engine reaching "Motor pronto" in Chromium with isolation.
 
-**Issues found**: three tests missing (Fixes 1–3). No application-code defect found.
+**Issues found**: round 1 found three missing tests (Fixes 1–3), now added in `9137084`. No application-code defect found.
 
-**Next steps**: implement Fixes 1–3 as test-only commits, then re-verify (round 2 of max 3).
+**Next steps**: open the pull request. Consider the non-blocking `EngineClient.ts:51-53` observation when F4 consumes the client.
