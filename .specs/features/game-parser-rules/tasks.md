@@ -54,7 +54,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] GAME-22 mapping table tested both ways
+- [x] GAME-22 mapping table tested both ways
 
 **Tests**: unit
 **Gate**: quick
