@@ -159,7 +159,7 @@ T5 → T6 → T7
 
 **Done when**:
 
-- [ ] `make setup && make check` pass; a lint error makes `make check` fail
+- [x] `make setup && make check` pass; a lint error makes `make check` fail
 
 **Tests**: none (command run)
 **Gate**: full
