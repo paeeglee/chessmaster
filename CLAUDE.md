@@ -156,8 +156,13 @@ for that screen and must be followed.
 
 - When you add an app, a dependency, a tool or a setup step, update the matching
   targets in the root `Makefile` and this table.
-- Today only `setup` (`.env` copy), `design` and `help` exist. The other targets
-  are the contract: create them when the apps are scaffolded.
+- Every aggregate target has per-app variants (`setup-web`, `setup-api`,
+  `lint-web`, `test-api`, …); `make help` lists them all.
+- Recipes that run Node load the version in `.nvmrc` through nvm when it is
+  installed. Node 26 ships without corepack, so `make setup` installs the pnpm
+  version pinned in `packageManager` with npm when `pnpm` is missing.
+- `make test-e2e` builds the web app, serves it with `vite preview` on `4173`
+  (isolation headers on) and starts the API on `8000` for the proxy tests.
 
 ## Language conventions
 

@@ -97,3 +97,5 @@ apps/api/
   próprio, o que mantém provedor e modelo trocáveis (D4).
 - `api/` traduz HTTP em chamadas de casos de uso. Nada de regra de negócio nos
   routers.
+- Os testes do código de `shared/` (configuração, rota de saúde, exportação do
+  OpenAPI) ficam em `apps/api/tests/`; os de cada domínio ficam no `tests/` dele.

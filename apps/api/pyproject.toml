@@ -1,0 +1,49 @@
+[project]
+name = "game-analyzer"
+version = "0.1.0"
+description = "Camada de IA do Analisador de partidas (motor 5)"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "fastapi>=0.165.0",
+    "pydantic-settings>=2.16.3",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.2,<0.12"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.2",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.6",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "B", "SIM", "I"]
+
+[tool.mypy]
+strict = true
+python_version = "3.14"
+plugins = ["pydantic.mypy"]
+files = ["src", "tests"]
+
+[tool.pytest]
+testpaths = ["tests"]
+addopts = [
+    "--strict-markers",
+    "-m", "not llm",
+    "--cov=game_analyzer",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80",
+]
+markers = [
+    "llm: testes que chamam um provedor de IA de verdade (rode com -m llm)",
+]

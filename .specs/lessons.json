@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 6,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "ac_gap::make the lint gate fail on warnings so rules the project forbids such as explicit any cannot pass make check",
+      "text": "Make the lint gate fail on warnings so rules the project forbids, such as explicit any, cannot pass make check",
+      "signal": "ac_gap",
+      "scope": "tooling",
+      "status": "candidate",
+      "features": [
+        "scaffold"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SCAF-16 / sensor T1 / apps/web/package.json:14 (tooling)"
+      ],
+      "created": "2026-11-23T13:38:51Z",
+      "last_seen": "2026-11-23T13:38:51Z"
+    },
+    {
+      "id": "L-002",
+      "key": "surviving_mutant::cover every server mode the spec names with an automated test instead of a manual check",
+      "text": "Cover every server mode the spec names with an automated test instead of a manual check",
+      "signal": "surviving_mutant",
+      "scope": "web-config",
+      "status": "candidate",
+      "features": [
+        "scaffold"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M11 / apps/web/vite.config.ts:18 (SCAF-01) (web-config)"
+      ],
+      "created": "2026-11-23T13:38:51Z",
+      "last_seen": "2026-11-23T13:38:51Z"
+    },
+    {
+      "id": "L-003",
+      "key": "surviving_mutant::to prove a component makes no network call record msw request events and assert none after awaiting a tick",
+      "text": "To prove a component makes no network call, record MSW request events and assert none after awaiting a tick",
+      "signal": "surviving_mutant",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "scaffold"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M10 / apps/web/src/app/App.test.tsx:27-32 (SCAF-26) (web-tests)"
+      ],
+      "created": "2026-11-23T13:38:51Z",
+      "last_seen": "2026-11-23T13:38:51Z"
+    },
+    {
+      "id": "L-004",
+      "key": "spec_precision_gap::name exactly which targets need per app variants instead of saying every aggregate target",
+      "text": "Name exactly which targets need per-app variants instead of saying every aggregate target",
+      "signal": "spec_precision_gap",
+      "scope": "makefile",
+      "status": "candidate",
+      "features": [
+        "scaffold"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SCAF-24 / Makefile:99-110 (makefile)"
+      ],
+      "created": "2026-11-23T13:38:51Z",
+      "last_seen": "2026-11-23T13:38:51Z"
+    },
+    {
+      "id": "L-005",
+      "key": "spec_precision_gap::state which literal kinds the no literal tokens rule covers and test each kind not only colors",
+      "text": "State which literal kinds the no-literal-tokens rule covers and test each kind, not only colors",
+      "signal": "spec_precision_gap",
+      "scope": "web-theme",
+      "status": "candidate",
+      "features": [
+        "scaffold"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "SCAF-06 / apps/web/src/app/App.test.tsx:41 (web-theme)"
+      ],
+      "created": "2026-11-23T13:38:51Z",
+      "last_seen": "2026-11-23T13:38:51Z"
+    }
+  ]
+}
