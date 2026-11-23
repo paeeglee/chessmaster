@@ -114,8 +114,8 @@ T5 → T6 → T7
 
 **Done when**:
 
-- [ ] e2e asserts both headers and `crossOriginIsolated === true` on preview
-- [ ] dev server headers checked manually
+- [x] e2e asserts both headers and `crossOriginIsolated === true` on preview
+- [x] dev server headers checked manually
 
 **Tests**: e2e
 **Gate**: e2e
