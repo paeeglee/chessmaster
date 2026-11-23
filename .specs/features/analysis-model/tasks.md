@@ -54,7 +54,7 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Helpers tested on hand-made positions
+- [x] Helpers tested on hand-made positions
 
 **Tests**: unit
 **Gate**: quick

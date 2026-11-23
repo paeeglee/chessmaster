@@ -7,6 +7,14 @@ export {
   listPieces,
   summarizeMaterial,
 } from "./model/describe";
+export {
+  type CapturedPiece,
+  type CaptureLine,
+  defendersOf,
+  isAttackedBy,
+  playCaptureLine,
+  uciToSan,
+} from "./model/lines";
 export { toPortugueseSan } from "./model/notation";
 export { MAX_PASTE_BYTES, parseGameText } from "./model/parseGameText";
 export { replayGame } from "./model/replay";
