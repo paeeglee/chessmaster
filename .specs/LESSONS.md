@@ -8,7 +8,11 @@
 
 Corroborated across multiple features. Safe to apply as guidance.
 
-_none_
+### L-010 - Click every user action the spec names through the wired app, not only in the presentational component
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `web-tests` · harmful: 0
+- features: evaluation-engine, game-input-screen
+- evidence: M17 / apps/web/src/app/EngineIndicator.tsx:19 (EVAL-09) (web-tests) (+1 more)
+- last seen: 2026-11-23T14:21:46Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
@@ -68,11 +72,17 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M16 / apps/web/src/domains/evaluation/engine/EngineClient.ts:26 (EVAL-08) (web-tests)
 - last seen: 2026-11-23T13:54:31Z
 
-### L-010 - Click every user action the spec names through the wired app, not only in the presentational component
+### L-011 - When state must survive a round trip, assert every field of it after the return, not a subset
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-machines` · harmful: 0
+- features: game-input-screen
+- evidence: M19 / apps/web/src/domains/game-input/machines/gameInputMachine.ts:27 (IN-23) (web-machines)
+- last seen: 2026-11-23T14:21:46Z
+
+### L-012 - For a formula the spec defines, pick test inputs where dropping any single term changes the expected output
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
-- features: evaluation-engine
-- evidence: M17 / apps/web/src/app/EngineIndicator.tsx:19 (EVAL-09) (web-tests)
-- last seen: 2026-11-23T13:54:31Z
+- features: game-input-screen
+- evidence: M20 / apps/web/src/domains/game-input/model/estimate.ts:10 (IN-24) (web-tests)
+- last seen: 2026-11-23T14:21:46Z
 
 ## Quarantined (failed when applied - ignore)
 

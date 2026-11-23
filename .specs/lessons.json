@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 11,
+  "next_id": 13,
   "lessons": [
     {
       "id": "L-001",
@@ -173,17 +173,55 @@
       "text": "Click every user action the spec names through the wired app, not only in the presentational component",
       "signal": "surviving_mutant",
       "scope": "web-tests",
+      "status": "confirmed",
+      "features": [
+        "evaluation-engine",
+        "game-input-screen"
+      ],
+      "recurrence": 2,
+      "harmful": 0,
+      "evidence": [
+        "M17 / apps/web/src/app/EngineIndicator.tsx:19 (EVAL-09) (web-tests)",
+        "M14 / apps/web/src/domains/game-input/components/GameField.tsx:49 (IN-12) (web-tests)"
+      ],
+      "created": "2026-11-23T13:54:31Z",
+      "last_seen": "2026-11-23T14:21:46Z"
+    },
+    {
+      "id": "L-011",
+      "key": "surviving_mutant::when state must survive a round trip assert every field of it after the return not a subset",
+      "text": "When state must survive a round trip, assert every field of it after the return, not a subset",
+      "signal": "surviving_mutant",
+      "scope": "web-machines",
       "status": "candidate",
       "features": [
-        "evaluation-engine"
+        "game-input-screen"
       ],
       "recurrence": 1,
       "harmful": 0,
       "evidence": [
-        "M17 / apps/web/src/app/EngineIndicator.tsx:19 (EVAL-09) (web-tests)"
+        "M19 / apps/web/src/domains/game-input/machines/gameInputMachine.ts:27 (IN-23) (web-machines)"
       ],
-      "created": "2026-11-23T13:54:31Z",
-      "last_seen": "2026-11-23T13:54:31Z"
+      "created": "2026-11-23T14:21:46Z",
+      "last_seen": "2026-11-23T14:21:46Z"
+    },
+    {
+      "id": "L-012",
+      "key": "surviving_mutant::for a formula the spec defines pick test inputs where dropping any single term changes the expected output",
+      "text": "For a formula the spec defines, pick test inputs where dropping any single term changes the expected output",
+      "signal": "surviving_mutant",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "game-input-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M20 / apps/web/src/domains/game-input/model/estimate.ts:10 (IN-24) (web-tests)"
+      ],
+      "created": "2026-11-23T14:21:46Z",
+      "last_seen": "2026-11-23T14:21:46Z"
     }
   ]
 }
