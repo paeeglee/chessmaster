@@ -260,7 +260,7 @@ describe("tela Colar: começar a análise", () => {
     await userEvent.click(screen.getByRole("button", { name: "Plano" }));
     await userEvent.selectOptions(screen.getByLabelText("Seu nível"), "Intermediário");
     await userEvent.click(screen.getByRole("button", { name: "Analisar partida →" }));
-    expect(screen.getByRole("heading", { name: "Analisando sua partida" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Analisando sua partida…" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Cancelar análise" }));
     expect(screen.getByLabelText("Partida")).toHaveValue(referenceGameHtml);
     expect(screen.getByRole("button", { name: "Pretas" })).toHaveAttribute("aria-pressed", "true");

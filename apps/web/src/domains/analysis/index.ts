@@ -1,3 +1,4 @@
+export { AnalyzingScreen } from "./components/AnalyzingScreen";
 // Ponto de entrada público do domínio `analysis`.
 export {
   type AnalysisContext,

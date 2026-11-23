@@ -28,6 +28,8 @@ export default defineConfig({
       name: "api",
       command: "uv run uvicorn game_analyzer.main:app --port 8000",
       cwd: "../api",
+      // Textos da IA por template: os testes não chamam um provedor de verdade.
+      env: { AI_PROVIDER: "fake" },
       url: "http://localhost:8000/api/health",
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,

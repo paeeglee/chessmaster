@@ -123,7 +123,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Component tests by role/text
+- [x] Component tests by role/text
 
 **Tests**: unit
 **Gate**: quick
