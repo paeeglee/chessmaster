@@ -101,7 +101,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Transitions and parent events tested with createActor
+- [x] Transitions and parent events tested with createActor
 
 **Tests**: unit
 **Gate**: quick
