@@ -57,7 +57,7 @@ T1 → T2 → T3 → T4 → T5
 
 **Done when**:
 
-- [ ] Board renders orientation, marks and label; descriptions tested
+- [x] Board renders orientation, marks and label; descriptions tested
 
 **Tests**: unit
 **Gate**: quick

@@ -20,8 +20,12 @@ describe("fronteira do domínio game", () => {
   it("expõe os motores 1 e 2 pelo index.ts (GAME-23)", () => {
     expect(Object.keys(game).sort()).toEqual([
       "MAX_PASTE_BYTES",
+      "describePieces",
+      "formatMoveLabel",
+      "listPieces",
       "parseGameText",
       "replayGame",
+      "summarizeMaterial",
       "toPortugueseSan",
     ]);
   });
