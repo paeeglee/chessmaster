@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { fromCallback, fromPromise } from "xstate";
 import { App } from "../../../app/App";
 import { appMachine } from "../../../app/appMachine";
+import { analysisMachine } from "../../analysis";
 import { type EngineClient, engineLoaderMachine } from "../../evaluation";
 import referenceGameHtml from "../../game/fixtures/reference-game.chesscom.html?raw";
 import { gameInputMachine } from "../machines/gameInputMachine";
@@ -23,6 +24,10 @@ function renderApp(readClipboard: () => Promise<string> = async () => "") {
             engine.send = sendBack;
           }),
         },
+      }),
+      // A análise de verdade é testada no domínio analysis; aqui ela só fica parada.
+      analysis: analysisMachine.provide({
+        actors: { evaluatePositions: fromCallback(() => {}) },
       }),
       gameInput: gameInputMachine.provide({
         actors: { readClipboard: fromPromise(readClipboard) },
@@ -255,7 +260,7 @@ describe("tela Colar: começar a análise", () => {
     await userEvent.click(screen.getByRole("button", { name: "Plano" }));
     await userEvent.selectOptions(screen.getByLabelText("Seu nível"), "Intermediário");
     await userEvent.click(screen.getByRole("button", { name: "Analisar partida →" }));
-    expect(screen.getByRole("heading", { name: "Analisando sua partida" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Analisando sua partida…" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Cancelar análise" }));
     expect(screen.getByLabelText("Partida")).toHaveValue(referenceGameHtml);
     expect(screen.getByRole("button", { name: "Pretas" })).toHaveAttribute("aria-pressed", "true");

@@ -370,4 +370,51 @@ describe("classifyMove com posições feitas à mão", () => {
       wonPiece: { type: "r", square: "d4" },
     });
   });
+
+  it("conta a captura que aconteceu na partida quando a variante do motor não a mostra", () => {
+    // O cavalo de e4, sem defensor, está atacado pela torre de e8. O rei se move; a
+    // variante do motor sugere outro lance, mas na partida a torre tomou o cavalo.
+    const fen = "4r1k1/8/8/8/4N3/8/8/6K1 w - - 0 1";
+    const after = "4r1k1/8/8/8/4N3/8/7K/8 b - - 1 1";
+    const input = {
+      ply: pieceMove(fen, "g1", "h2", after, "k"),
+      before: evaluation(fen, "e4f2", ["e4f2", "g8f8"]),
+      after: evaluation(after, "g8f8", ["g8f8", "e4f2"]),
+      playerColor: "w" as const,
+    };
+    expect(classifyMove(input).kind).toBe("none");
+    expect(classifyMove({ ...input, continuation: ["e8e4", "h2g3"] })).toMatchObject({
+      kind: "mistake",
+      loss: 3,
+      lostPiece: { type: "n", square: "e4" },
+    });
+  });
+
+  it("não marca o lance quando a perda da partida tinha recaptura (motor confirma)", () => {
+    // O cavalo de e4 está defendido pelo peão de d3. Rh2 é um lance tranquilo; a torre
+    // toma o cavalo e o peão pode retomar: a variante do motor depois da resposta mostra
+    // a recaptura, então não há perda.
+    const fen = "4r1k1/8/8/8/4N3/3P4/8/6K1 w - - 0 1";
+    const after = "4r1k1/8/8/8/4N3/3P4/7K/8 b - - 1 1";
+    const verdict = classifyMove({
+      ply: pieceMove(fen, "g1", "h2", after, "k"),
+      before: evaluation(fen, "e4c3", ["e4c3", "g8f8"]),
+      after: evaluation(after, "g8f8", ["g8f8"]),
+      playerColor: "w",
+      continuation: ["e8e4", "d3e4", "g8f8"],
+    });
+    expect(verdict.kind).toBe("none");
+  });
+});
+
+describe("classifyGame e a resposta real do adversário", () => {
+  it("usa a resposta da partida mais a variante do motor depois dela", () => {
+    const altered = evaluations.map((evaluation, index) =>
+      index === 44 ? { ...evaluation, pv: ["f2e3"] } : evaluation,
+    );
+    const verdicts = classifyGame(reference, altered, "b");
+    expect(verdicts[43]).toMatchObject({ kind: "mistake", moveLabel: "22...Ta7" });
+    // Sem a resposta real (última avaliação ausente), só a variante do motor conta.
+    expect(classifyGame(reference, altered.slice(0, 45), "b")[43]?.kind).toBe("none");
+  });
 });

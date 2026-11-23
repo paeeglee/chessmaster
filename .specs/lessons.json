@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 28,
+  "next_id": 37,
   "lessons": [
     {
       "id": "L-001",
@@ -492,6 +492,168 @@
       ],
       "created": "2026-11-23T17:09:52Z",
       "last_seen": "2026-11-23T17:09:52Z"
+    },
+    {
+      "id": "L-028",
+      "key": "surviving_mutant::expose visual board state such as square marks through an attribute and assert it since tests cannot see css only highlights",
+      "text": "Expose visual board state such as square marks through an attribute and assert it, since tests cannot see CSS-only highlights",
+      "signal": "surviving_mutant",
+      "scope": "web-ui",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md M29 AnalyzingScreen.tsx:28 (web-ui)"
+      ],
+      "created": "2026-11-23T17:23:33Z",
+      "last_seen": "2026-11-23T17:23:33Z"
+    },
+    {
+      "id": "L-029",
+      "key": "surviving_mutant::test numeric thresholds at the exact boundary value with synthetic data not only with the reference game",
+      "text": "Test numeric thresholds at the exact boundary value with synthetic data, not only with the reference game",
+      "signal": "surviving_mutant",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md M17 contract.ts:28 (domain-model)"
+      ],
+      "created": "2026-11-23T17:23:33Z",
+      "last_seen": "2026-11-23T17:23:33Z"
+    },
+    {
+      "id": "L-030",
+      "key": "ac_gap::derive every label shown with a board from the same ply index the board renders",
+      "text": "Derive every label shown with a board from the same ply index the board renders",
+      "signal": "ac_gap",
+      "scope": "web-ui",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "AS-11 AnalyzingScreen.tsx:22-28,97-99 (web-ui)"
+      ],
+      "created": "2026-11-23T17:23:33Z",
+      "last_seen": "2026-11-23T17:23:33Z"
+    },
+    {
+      "id": "L-031",
+      "key": "spec_precision_gap::when a spec narrows a prd list record each dropped prd item as an explicit decision in the spec",
+      "text": "When a spec narrows a PRD list, record each dropped PRD item as an explicit decision in the spec",
+      "signal": "spec_precision_gap",
+      "scope": "specs",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "AS-14 vs general.md 7.2; step_02 stage times (specs)"
+      ],
+      "created": "2026-11-23T17:23:33Z",
+      "last_seen": "2026-11-23T17:23:33Z"
+    },
+    {
+      "id": "L-032",
+      "key": "ac_gap::probe a changed domain rule with a counterexample that should stay neutral before accepting a fix that only makes the reference fixture pass",
+      "text": "Probe a changed domain rule with a counterexample that should stay neutral before accepting a fix that only makes the reference fixture pass",
+      "signal": "ac_gap",
+      "scope": "domain-model",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 2 N1 classify.ts:78-83 probe (domain-model)"
+      ],
+      "created": "2026-11-23T21:51:10Z",
+      "last_seen": "2026-11-23T21:51:10Z"
+    },
+    {
+      "id": "L-033",
+      "key": "surviving_mutant::make fakes reproduce the protocol race a fix targets otherwise the fix is untested",
+      "text": "Make fakes reproduce the protocol race a fix targets, otherwise the fix is untested",
+      "signal": "surviving_mutant",
+      "scope": "engine",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 2 R06 EngineClient.ts:106 (engine)"
+      ],
+      "created": "2026-11-23T21:51:10Z",
+      "last_seen": "2026-11-23T21:51:10Z"
+    },
+    {
+      "id": "L-034",
+      "key": "surviving_mutant::test every call site that wires a new parameter not only the pure function that consumes it",
+      "text": "Test every call site that wires a new parameter, not only the pure function that consumes it",
+      "signal": "surviving_mutant",
+      "scope": "machines",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 2 R09 R10 R11 analysisMachine.ts:112-114 (machines)"
+      ],
+      "created": "2026-11-23T21:51:10Z",
+      "last_seen": "2026-11-23T21:51:10Z"
+    },
+    {
+      "id": "L-035",
+      "key": "surviving_mutant::test the final flush step of an incremental pipeline separately from the per item step",
+      "text": "Test the final flush step of an incremental pipeline separately from the per-item step",
+      "signal": "surviving_mutant",
+      "scope": "machines",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 3 T05 analysisMachine.ts:115-123 (machines)"
+      ],
+      "created": "2026-11-23T22:09:40Z",
+      "last_seen": "2026-11-23T22:09:40Z"
+    },
+    {
+      "id": "L-036",
+      "key": "gate_fail::isolate e2e tests that run a time boxed cpu bound engine from parallel workers or assert only results that are stable under load",
+      "text": "Isolate e2e tests that run a time-boxed CPU-bound engine from parallel workers, or assert only results that are stable under load",
+      "signal": "gate_fail",
+      "scope": "e2e",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "validation.md round 3 E1 e2e/analysis.spec.ts:25 playwright.config.ts:10 (e2e)"
+      ],
+      "created": "2026-11-23T22:09:40Z",
+      "last_seen": "2026-11-23T22:09:40Z"
     }
   ]
 }

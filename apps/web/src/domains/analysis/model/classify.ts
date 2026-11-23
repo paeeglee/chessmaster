@@ -23,6 +23,13 @@ type ClassifyInput = {
   /** Avaliação da posição depois do lance. */
   after: PositionEvaluation;
   playerColor: PlayerColor;
+  /**
+   * A resposta que o adversário deu de fato na partida (UCI) seguida da variante do
+   * motor na posição depois dela. Com várias threads, a variante do motor pode não
+   * começar pela captura; se o adversário capturou na partida, a perda conta, e as
+   * recapturas seguem confirmadas pelo motor.
+   */
+  continuation?: readonly string[];
 };
 
 function opposite(color: PlayerColor): PlayerColor {
@@ -60,9 +67,21 @@ function mistakeTypeOf(ply: Ply, lostPiece: PieceOnSquare | null): MistakeType {
  * material depois da sequência de capturas calculada pelo motor para o lance jogado
  * e para o melhor lance.
  */
-export function classifyMove({ ply, before, after, playerColor }: ClassifyInput): MoveVerdict {
+export function classifyMove({
+  ply,
+  before,
+  after,
+  playerColor,
+  continuation = [],
+}: ClassifyInput): MoveVerdict {
   const mover = ply.color;
-  const played = playCaptureLine(ply.fenBefore, uciOf(ply), after.pv);
+  // A pior das duas linhas para quem jogou: a do motor ou a que aconteceu na partida.
+  const engineLine = playCaptureLine(ply.fenBefore, uciOf(ply), after.pv);
+  const gameLine = playCaptureLine(ply.fenBefore, uciOf(ply), continuation);
+  const played =
+    materialBalance(gameLine.fen, mover) < materialBalance(engineLine.fen, mover)
+      ? gameLine
+      : engineLine;
   const best = playCaptureLine(ply.fenBefore, before.bestMove, before.pv.slice(1));
   const materialBefore = materialBalance(ply.fenBefore, mover);
   const playedMaterial = materialBalance(played.fen, mover);
@@ -105,18 +124,41 @@ export function classifyMove({ ply, before, after, playerColor }: ClassifyInput)
   return { kind: "none", ply: ply.index, color: mover };
 }
 
-/** Classifica todos os lances; `evaluations[i]` é a posição antes do meio-lance i + 1. */
+/**
+ * Classifica o meio-lance `index` com as avaliações em volta dele. `evaluations[i]` é
+ * a posição antes do meio-lance i + 1. Usado no resumo e durante a análise, para os
+ * dois darem o mesmo resultado.
+ */
+export function classifyPly(
+  game: Game,
+  evaluations: readonly PositionEvaluation[],
+  index: number,
+  playerColor: PlayerColor,
+): MoveVerdict | null {
+  const ply = game.plies[index - 1];
+  const before = evaluations[index - 1];
+  const after = evaluations[index];
+  if (!ply || !before || !after) {
+    return null;
+  }
+  const reply = game.plies[index];
+  const afterReply = evaluations[index + 1];
+  const continuation = reply && afterReply ? [uciOf(reply), ...afterReply.pv] : [];
+  return classifyMove({ ply, before, after, playerColor, continuation });
+}
+
+/** Classifica todos os lances da partida. */
 export function classifyGame(
   game: Game,
   evaluations: readonly PositionEvaluation[],
   playerColor: PlayerColor,
 ): MoveVerdict[] {
-  return game.plies.map((ply) => {
-    const before = evaluations[ply.index - 1];
-    const after = evaluations[ply.index];
-    if (!before || !after) {
-      return { kind: "none", ply: ply.index, color: ply.color };
-    }
-    return classifyMove({ ply, before, after, playerColor });
-  });
+  return game.plies.map(
+    (ply) =>
+      classifyPly(game, evaluations, ply.index, playerColor) ?? {
+        kind: "none",
+        ply: ply.index,
+        color: ply.color,
+      },
+  );
 }

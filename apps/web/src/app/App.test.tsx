@@ -3,8 +3,11 @@ import { join } from "node:path";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import { fromCallback } from "xstate";
+import { fromCallback, fromPromise } from "xstate";
+import { type AnalysisSummary, analysisMachine } from "../domains/analysis";
 import { engineLoaderMachine } from "../domains/evaluation";
+import type { GameExplanation } from "../domains/explanation";
+import type { AnalysisRequest } from "../domains/game-input";
 import { server } from "../shared/lib/testing/server";
 import { App } from "./App";
 import { appMachine } from "./appMachine";
@@ -104,5 +107,38 @@ describe("App", () => {
     expect(screen.getByText("Carregando o motor de análise… 0%")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Tentar de novo" })).not.toBeInTheDocument();
     expect(starts).toBe(2);
+  });
+
+  it("abre o resultado com o aviso quando a IA falhou (step_02, falha na IA)", async () => {
+    const logic = appMachine.provide({
+      actors: {
+        engineLoader: engineLoaderMachine.provide({
+          actors: {
+            loadEngine: fromCallback(({ sendBack }) => {
+              sendBack({ type: "ENGINE.READY", engine: {} as never });
+            }),
+          },
+        }),
+        analysis: analysisMachine.provide({
+          actors: {
+            evaluatePositions: fromCallback(({ sendBack }) => {
+              sendBack({ type: "EVALUATION.DONE" });
+            }),
+            explainGame: fromPromise<
+              GameExplanation,
+              { request: AnalysisRequest; summary: AnalysisSummary }
+            >(async () => {
+              throw new Error("503");
+            }),
+          },
+        }),
+      },
+    });
+    render(<App logic={logic} />);
+    await userEvent.type(screen.getByLabelText("Partida"), "1.e4 e5 2.Nf3 Nc6");
+    await userEvent.click(screen.getByRole("button", { name: "Brancas" }));
+    await userEvent.click(screen.getByRole("button", { name: "Analisar partida →" }));
+    expect(await screen.findByText("A explicação não pôde ser gerada.")).toBeInTheDocument();
+    expect(screen.getByText("Nenhuma perda de material importante.")).toBeInTheDocument();
   });
 });

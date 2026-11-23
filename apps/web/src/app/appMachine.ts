@@ -1,5 +1,6 @@
 import { assign, setup } from "xstate";
-import { engineLoaderMachine } from "../domains/evaluation";
+import { type AnalysisResult, analysisMachine } from "../domains/analysis";
+import { type EngineClient, engineLoaderMachine } from "../domains/evaluation";
 import {
   type AnalysisRequest,
   DEFAULT_PRIORITIES,
@@ -13,9 +14,22 @@ export type AppContext = {
   /** O que o jogador preencheu na tela Colar; volta intacto ao cancelar a análise. */
   draft: GameInputDraft;
   request: AnalysisRequest | null;
+  /** O motor pronto, guardado ao começar a análise. */
+  engine: EngineClient | null;
+  result: AnalysisResult | null;
 };
 
-export type AppEvent = GameInputParentEvent | { type: "ANALYSIS.CANCELLED" };
+export type AppEvent =
+  | GameInputParentEvent
+  | { type: "ANALYSIS.CANCELLED" }
+  | { type: "REVIEW.NEW_GAME" };
+
+type EngineChild = { getSnapshot(): { value: unknown; context: { engine: EngineClient | null } } };
+
+function readyEngine(engineChild: EngineChild | undefined): EngineClient | null {
+  const snapshot = engineChild?.getSnapshot();
+  return snapshot?.value === "ready" ? snapshot.context.engine : null;
+}
 
 // Máquina raiz do fluxo: decide a tela atual e carrega os dados entre as telas.
 // O carregador do motor é invocado na raiz para começar o download assim que a
@@ -24,14 +38,20 @@ export const appMachine = setup({
   types: {
     context: {} as AppContext,
     events: {} as AppEvent,
-    children: {} as { engine: "engineLoader"; gameInput: "gameInput" },
+    children: {} as { engine: "engineLoader"; gameInput: "gameInput"; analysis: "analysis" },
   },
-  actors: { engineLoader: engineLoaderMachine, gameInput: gameInputMachine },
+  actors: {
+    engineLoader: engineLoaderMachine,
+    gameInput: gameInputMachine,
+    analysis: analysisMachine,
+  },
 }).createMachine({
   id: "app",
   context: () => ({
     draft: { text: "", playerColor: null, level: initialLevel(), priorities: DEFAULT_PRIORITIES },
     request: null,
+    engine: null,
+    result: null,
   }),
   invoke: { id: "engine", src: "engineLoader" },
   initial: "gameInput",
@@ -48,15 +68,43 @@ export const appMachine = setup({
         },
         "ANALYSIS.REQUESTED": {
           target: "analyzing",
-          actions: assign({ request: ({ event }) => event.request }),
+          actions: assign({
+            request: ({ event }) => event.request,
+            engine: ({ self }) => readyEngine(self.getSnapshot().children.engine),
+          }),
         },
       },
     },
     analyzing: {
+      invoke: {
+        id: "analysis",
+        src: "analysis",
+        input: ({ context }) => ({
+          request: context.request as AnalysisRequest,
+          engine: context.engine as EngineClient,
+        }),
+        onDone: {
+          target: "review",
+          actions: assign({ result: ({ event }) => event.output }),
+        },
+      },
       on: {
         "ANALYSIS.CANCELLED": {
           target: "gameInput",
           actions: assign({ request: null }),
+        },
+      },
+    },
+    review: {
+      on: {
+        // R-13: nova análise com o campo vazio; nível e prioridades continuam.
+        "REVIEW.NEW_GAME": {
+          target: "gameInput",
+          actions: assign({
+            draft: ({ context }) => ({ ...context.draft, text: "", playerColor: null }),
+            request: null,
+            result: null,
+          }),
         },
       },
     },
