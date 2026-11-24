@@ -46,7 +46,13 @@ divergirem, o PRD vale.
   `package.json`. Ela fica atrás do ponto de entrada do domínio `game`: os outros
   domínios nunca importam `chess.js` direto. O Leitor (motor 1) é nosso: ele lê o
   HTML do Chess.com e a lista simples de lances (notação inglesa ou portuguesa) e
-  entrega os lances em SAN inglês ao `chess.js`.
+  entrega os lances em SAN inglês ao `chess.js`. Do Chess.com, ele aceita os dois
+  layouts da lista de lances: a lista ao lado do tabuleiro (`<wc-move-list>`, lances
+  em `.node-highlight-content` dentro dos nós `.main-line-ply`; variantes, tempos e
+  ícones de classificação são ignorados) e a lista horizontal da aba de aberturas
+  (`<wc-horizontal-move-list>`, lances em `.move-text`). As figurinhas de peça
+  (`data-figurine`) viram a letra inglesa. Os dois formatos têm fixtures em
+  `apps/web/src/domains/game/fixtures/`.
 - **A interface nunca trava:** os motores sempre rodam em Web Workers.
 - **IA trocável (D4):** padrão OpenAI GPT-5.1 com saída estruturada (JSON Schema).
   Provedor e modelo vêm de configuração, sem mudar telas nem motores. Uma camada
