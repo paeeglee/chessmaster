@@ -19,9 +19,10 @@ export default defineConfig({
     strictPort: true,
     headers: crossOriginIsolationHeaders,
     // Mesma origem no desenvolvimento: o frontend chama /api/... e o Vite repassa ao
-    // FastAPI. O preview herda este proxy.
+    // FastAPI. O preview herda este proxy. Os testes Playwright apontam para um api
+    // próprio (API_PROXY_TARGET), para nunca usar o `make dev` com a IA de verdade.
     proxy: {
-      "/api": "http://localhost:8000",
+      "/api": process.env.API_PROXY_TARGET ?? "http://localhost:8000",
     },
   },
   preview: {

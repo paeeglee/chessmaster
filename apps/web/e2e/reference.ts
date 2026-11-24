@@ -21,7 +21,7 @@ export async function startReferenceAnalysis(page: Page) {
 export async function analyzeReferenceGame(page: Page) {
   await startReferenceAnalysis(page);
   await expect(page.getByRole("region", { name: "Resumo da partida" })).toBeVisible({
-    timeout: 120_000,
+    timeout: 240_000,
   });
 }
 

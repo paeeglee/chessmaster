@@ -18,7 +18,7 @@ Responder em poucos segundos à pergunta "o que aconteceu nesta partida?" e leva
 1. **Veredito em uma frase**: a manchete da IA.
 2. **Padrões**: o que se repetiu.
 3. **Números de apoio**: momentos, melhor lance, vantagem máxima e o final.
-4. **Exploração**: tabuleiro, gráfico e lista de lances.
+4. **Exploração**: tabuleiro com barra de avaliação, revisão lance a lance, gráfico e lista de lances.
 5. **Ação**: momentos-chave com "Treinar", o hábito sugerido e as perguntas à IA.
 
 ## 3. Estrutura da tela
@@ -33,9 +33,10 @@ Responder em poucos segundos à pergunta "o que aconteceu nesta partida?" e leva
    - maior vantagem;
    - lances até o mate no final (quando houver).
 4. **Coluna esquerda:**
-   - **Tabuleiro**: posição do momento selecionado, vista pelo lado do jogador; controles de início, anterior, próximo, fim e girar; legenda das marcações (peça atacada em vermelho, lance sugerido em verde).
+   - **Tabuleiro**: posição do momento selecionado, vista pelo lado do jogador; controles de início, anterior, próximo, fim e girar; legenda das marcações (peça atacada em vermelho, lance sugerido em verde). Ao lado, a **barra de avaliação** do motor para a posição mostrada (ponto de vista das brancas).
+   - **Revisão do lance** (painel do treinador, estilo Game Review do Chess.com): para o lance da posição mostrada (ou o erro, quando o tabuleiro está antes de um momento-chave), a classificação, de quem é o lance, "Melhor era …" com o porquê, o que o lance deixou descoberto ou deixou passar, a linha do motor com "Ver a linha do motor" e a explicação da IA, pedida só quando o lance é aberto.
    - **Gráfico "Vantagem de material"**: curva ao longo dos lances, com os momentos-chave marcados por círculos numerados e clicáveis.
-   - **Lista de lances**: em colunas, com os lances do jogador anotados (`?`, `??`, `!`) e o lance selecionado destacado.
+   - **Lista de lances**: em colunas, com os lances do jogador anotados (`?`, `??`, `!`), o ícone da classificação de cada lance (dos dois lados) e o lance selecionado destacado.
 5. **Coluna direita:**
    - **Momentos-chave:** lista em ordem cronológica; um item fica expandido por vez, com explicação, melhor lance, variação de vantagem, "Treinar este momento" e "Ver a linha no tabuleiro".
    - **"O que você fez bem":** de 1 a 3 itens.
@@ -60,6 +61,10 @@ Responder em poucos segundos à pergunta "o que aconteceu nesta partida?" e leva
 | R-11 | Pergunte à IA: as respostas usam o mesmo contrato da análise; perguntas fora da partida recebem um aviso educado | Obrigatório |
 | R-12 | O rodapé mostra quais motores rodaram e se algum falhou | Obrigatório |
 | R-13 | "Analisar outra partida" volta à tela Colar com o campo vazio; como não há salvamento, pedir confirmação antes de descartar a análise atual | Obrigatório |
+| R-14 | Revisão lance a lance: todo lance (dos dois lados) recebe uma classificação do motor na escala do Chess.com: Melhor, Excelente, Bom, Imprecisão, Erro, Capivarada e Perdeu a chance (regras em 7.1 do PRD geral) | Obrigatório |
+| R-15 | O painel "Revisão do lance" mostra, para o lance selecionado: classificação, de quem é o lance, o melhor lance e o porquê (xeque, mate em N, material ganho, peça salva), o que ficou descoberto, o que continuou atacado e o material deixado de ganhar | Obrigatório |
+| R-16 | A explicação da IA de cada lance é pedida só quando o jogador abre o lance, fica guardada na sessão e, se falhar, o painel mantém os fatos dos motores e oferece "Tentar de novo" | Obrigatório |
+| R-17 | A barra de avaliação mostra a avaliação do motor da posição mostrada, do ponto de vista das brancas (limite de ±10, mate como "M N") | Obrigatório |
 
 ## 5. Regras de conteúdo (para a IA)
 Os textos vêm da camada de IA trocável (GPT-5.1 por padrão, D4 do PRD geral), sempre no JSON Schema do contrato.
@@ -91,6 +96,8 @@ Os textos vêm da camada de IA trocável (GPT-5.1 por padrão, D4 do PRD geral),
 - **Dado** que clico no círculo "43" do gráfico, **quando** o clique acontece, **então** o tabuleiro vai para a posição anterior a 43...Te6, o momento 4 se expande e o lance fica destacado na lista.
 - **Dado** que faço uma pergunta sobre outro assunto, **quando** envio, **então** a IA responde que só fala desta partida e sugere perguntas.
 - **Dado** que a IA falhou, **quando** a tela abre, **então** vejo tabuleiro, gráfico e lista anotada pelos motores, além do aviso de falha.
+- **Dado** a partida de referência, **quando** o Resultado abre, **então** o painel "Revisão do lance" mostra 22...Ta7 como Erro (ou Capivarada), "Melhor era 22...Bd4+", que o bispo em a1 continuou atacado e sem defesa, e a explicação da IA desse lance.
+- **Dado** que escolho 12...Bxa1 na lista, **quando** o clique acontece, **então** o painel mostra "Melhor" e "Este foi o lance do motor.".
 
 ## 8. Acessibilidade
 - O tabuleiro funciona por teclado e cada casa tem rótulo ("a1, bispo preto, atacado").

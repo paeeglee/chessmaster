@@ -45,3 +45,10 @@ Se um conceito novo aparecer, adicione-o aqui antes de usá-lo no código.
 | Tentativa | attempt | Um lance tentado pelo jogador no treino. |
 | Dica | hint | Ajuda em níveis: padrão, peça, solução. |
 | Refutação | refutation | Resposta do adversário que mostra por que o lance falha. |
+| Revisão lance a lance | move review | Classificação e fatos de cada lance da partida, com o painel do treinador (F9). |
+| Classificação do lance | move quality | Melhor, Excelente, Bom, Imprecisão, Erro, Capivarada ou Perdeu a chance, pela perda de chance de vitória. |
+| Chance de vitória | win chance | Probabilidade (0 a 100) de vencer com a avaliação do motor, pela fórmula do Lichess; base da classificação do lance. |
+| Painel do treinador / Revisão do lance | coach panel | Painel da tela Resultado que revisa o lance selecionado. |
+| Barra de avaliação | evaluation bar | Barra ao lado do tabuleiro com a avaliação do motor da posição mostrada. |
+| Peça descoberta / en prise | en prise piece | Peça atacada sem defesa, ou atacada por uma peça mais barata. |
+| Linha do motor | engine line | Sequência de lances que o motor calculou a partir do melhor lance. |

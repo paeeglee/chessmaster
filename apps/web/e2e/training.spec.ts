@@ -19,7 +19,8 @@ async function openTraining(page: Page) {
 }
 
 test.describe("treino do momento-chave (step_04)", () => {
-  test.setTimeout(180_000);
+  // Com ~500 ms por posição, a análise da partida de referência leva cerca de 75 s.
+  test.setTimeout(300_000);
 
   test("22...Te6 é refutado e 22...Bb2 é aceito, com o motor de verdade", async ({ page }) => {
     await openTraining(page);

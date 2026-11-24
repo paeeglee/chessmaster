@@ -100,28 +100,28 @@ The app only highlights moves that lose 2+ points of material (D3). It does not 
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| MR-01 | Classify | Design | Pending |
-| MR-02 | Classify | Design | Pending |
-| MR-03 | Classify | Design | Pending |
-| MR-04 | Classify | Design | Pending |
-| MR-05 | Facts | Design | Pending |
-| MR-06 | Facts | Design | Pending |
-| MR-07 | Facts | Design | Pending |
-| MR-08 | Facts | Design | Pending |
-| MR-09 | Coach panel | Design | Pending |
-| MR-10 | Coach panel | Design | Pending |
-| MR-11 | Coach panel | Design | Pending |
-| MR-12 | Coach panel | Design | Pending |
-| MR-13 | AI on demand | Design | Pending |
-| MR-14 | AI on demand | Design | Pending |
-| MR-15 | AI on demand | Design | Pending |
-| MR-16 | AI on demand | Design | Pending |
-| MR-17 | Engine | Design | Pending |
-| MR-18 | Edge | Design | Pending |
-| MR-19 | Edge | Design | Pending |
-| MR-20 | Classify | Design | Pending |
+| MR-01 | Classify | Tasks | Done |
+| MR-02 | Classify | Tasks | Done |
+| MR-03 | Classify | Tasks | Done |
+| MR-04 | Classify | Tasks | Done |
+| MR-05 | Facts | Tasks | Done |
+| MR-06 | Facts | Tasks | Done |
+| MR-07 | Facts | Tasks | Done |
+| MR-08 | Facts | Tasks | Done |
+| MR-09 | Coach panel | Tasks | Done |
+| MR-10 | Coach panel | Tasks | Done |
+| MR-11 | Coach panel | Tasks | Done |
+| MR-12 | Coach panel | Tasks | Done |
+| MR-13 | AI on demand | Tasks | Done |
+| MR-14 | AI on demand | Tasks | Done |
+| MR-15 | AI on demand | Tasks | Done |
+| MR-16 | AI on demand | Tasks | Done |
+| MR-17 | Engine | Tasks | Done |
+| MR-18 | Edge | Tasks | Done |
+| MR-19 | Edge | Tasks | Done |
+| MR-20 | Classify | Tasks | Done |
 
-**Coverage:** 20 total, 0 mapped to tasks, 20 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 20 total, 20 mapped to tasks (T1–T8), 0 unmapped
 
 ---
 

@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/move-review/design.md`
-**Status**: In Progress
+**Status**: Done
 
 ---
 
@@ -211,7 +211,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `make check && make test-e2e` pass
+- [x] `make check && make test-e2e` pass
 
 **Tests**: e2e
 **Gate**: full
