@@ -3,6 +3,7 @@ import { Board } from "../../../shared/ui/Board";
 import { describePieces } from "../../game";
 import type { ReviewContext, ReviewEvent } from "../machines/reviewMachine";
 import { boardMarks, positionCaption, positionFen, sideToMoveLabel } from "../model/review";
+import { EvalBar } from "./EvalBar";
 
 const CONTROL = "h-11 rounded-md border border-line bg-surface";
 
@@ -52,14 +53,17 @@ export function BoardPanel({ context, send }: BoardPanelProps) {
         </span>
         <span className="text-ink-muted text-sm">{sideToMoveLabel(game, position)}</span>
       </div>
-      <Board
-        fen={fen}
-        orientation={orientation}
-        marks={marks}
-        coordinates
-        label={`Posição: ${describePieces(fen)}`}
-        className="w-full"
-      />
+      <div className="flex gap-2">
+        <EvalBar score={result.evaluations[position]?.score ?? null} orientation={orientation} />
+        <Board
+          fen={fen}
+          orientation={orientation}
+          marks={marks}
+          coordinates
+          label={`Posição: ${describePieces(fen)}`}
+          className="min-w-0 flex-1"
+        />
+      </div>
       <div className="flex flex-wrap gap-2">
         <button
           type="button"

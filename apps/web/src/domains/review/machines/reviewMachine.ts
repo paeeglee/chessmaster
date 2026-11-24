@@ -61,7 +61,8 @@ export type ReviewEvent =
   | { type: "NEW_GAME.CANCEL" }
   | { type: "NEW_GAME.CONFIRM" }
   | { type: "TRAINING.START"; ply: number }
-  | { type: "COACH.RETRY"; ply: number };
+  | { type: "COACH.RETRY"; ply: number }
+  | { type: "COACH.SHOW_BEST_LINE"; ply: number };
 
 /** Eventos que a tela Resultado manda para a máquina raiz. */
 export type ReviewParentEvent =
@@ -179,6 +180,17 @@ export const reviewMachine = setup({
       states: {
         browsing: {
           on: {
+            // MR-10: a linha do melhor lance, a partir da posição antes do lance revisado.
+            // A posição do tabuleiro não muda, para o painel seguir no mesmo lance.
+            "COACH.SHOW_BEST_LINE": {
+              target: "playingLine",
+              actions: assign(({ context, event }) => {
+                const before = event.ply - 1;
+                const fen = positionFen(context.result.request.game, before);
+                const pv = context.result.evaluations[before]?.pv ?? [];
+                return { line: { fens: positionsAlongLine(fen, pv, LINE_PLIES), step: 0 } };
+              }),
+            },
             "MOMENT.SHOW_LINE": {
               target: "playingLine",
               actions: assign(({ context, event }) => {

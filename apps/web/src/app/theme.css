@@ -25,6 +25,17 @@
   --color-brand-divider: #dcebea;
   --color-on-ink-muted: #c9ced6;
   --color-on-ink-soft: #d7dbe1;
+  /* Classificação dos lances na revisão lance a lance (F9), nas cores do Chess.com. */
+  --color-quality-best: #81b64c;
+  --color-quality-excellent: #96bc4b;
+  --color-quality-good: #95b776;
+  --color-quality-inaccuracy: #e6a800;
+  --color-quality-mistake: #ffa459;
+  --color-quality-blunder: #fa412d;
+  --color-quality-miss: #ff7769;
+  /* Barra de avaliação: lado das brancas e das pretas. */
+  --color-eval-white: #f4f2ec;
+  --color-eval-black: #403d39;
   /* Caixa de dica do treino (step_04). */
   --color-hint: #173d78;
   --color-hint-soft: #e6eefb;
