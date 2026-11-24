@@ -86,16 +86,17 @@ describe("analyzeAvailability", () => {
 });
 
 describe("estimateSeconds (IN-24)", () => {
-  it("usa 30 s antes de haver partida", () => {
-    expect(estimateSeconds(null)).toBe(30);
+  it("usa 75 s antes de haver partida (72 lances a 500 ms)", () => {
+    expect(estimateSeconds(null)).toBe(75);
   });
 
-  it("calcula ~200 ms por posição, arredondando a 5 s", () => {
-    expect(estimateSeconds(144)).toBe(30);
-    expect(estimateSeconds(300)).toBe(60);
+  it("calcula ~500 ms por posição, arredondando a 5 s", () => {
+    // 144 meios-lances = 145 posições = 72,5 s → 75 s.
+    expect(estimateSeconds(144)).toBe(75);
+    expect(estimateSeconds(300)).toBe(150);
     expect(estimateSeconds(4)).toBe(5);
-    // 37 meios-lances = 38 posições = 7,6 s → 10 s (sem o +1 seriam 7,4 s → 5 s).
-    expect(estimateSeconds(37)).toBe(10);
+    // 14 meios-lances = 15 posições = 7,5 s → 10 s (sem o +1 seriam 7 s → 5 s).
+    expect(estimateSeconds(14)).toBe(10);
   });
 });
 

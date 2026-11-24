@@ -57,7 +57,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Estimate test follows 500 ms
+- [x] Estimate test follows 500 ms
 
 **Tests**: unit
 **Gate**: quick

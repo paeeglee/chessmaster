@@ -271,7 +271,7 @@ describe("tela Colar: começar a análise", () => {
   it("mostra a estimativa e o aviso de privacidade (IN-24)", () => {
     renderApp();
     expect(
-      screen.getByText("Leva cerca de 30 segundos. A partida fica só neste navegador."),
+      screen.getByText("Leva cerca de 75 segundos. A partida fica só neste navegador."),
     ).toBeInTheDocument();
     paste("1.f3 e5 2.g4 Qh4#");
     expect(

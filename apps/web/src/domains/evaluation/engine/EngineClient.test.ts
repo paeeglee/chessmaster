@@ -87,9 +87,9 @@ describe("EngineClient.start", () => {
 });
 
 describe("EngineClient.evaluate", () => {
-  it("busca 200 ms e devolve a última info e o bestmove (EVAL-12)", async () => {
+  it("busca 500 ms e devolve a última info e o bestmove (EVAL-12)", async () => {
     const { client, worker } = engineWith((command, reply) => {
-      if (command === "go movetime 200") {
+      if (command === "go movetime 500") {
         reply("info depth 13 seldepth 18 score cp 20 nodes 1 pv d2d4 d7d5");
         reply("info depth 14 seldepth 19 score cp 31 nodes 2 pv e2e4 e7e5 g1f3");
         reply("bestmove e2e4 ponder e7e5");
@@ -97,7 +97,7 @@ describe("EngineClient.evaluate", () => {
     });
     await client.start({ threads: 1 });
     const evaluation = await client.evaluate(START_FEN);
-    expect(worker.commands.slice(3)).toEqual([`position fen ${START_FEN}`, "go movetime 200"]);
+    expect(worker.commands.slice(3)).toEqual([`position fen ${START_FEN}`, "go movetime 500"]);
     expect(evaluation).toEqual({
       fen: START_FEN,
       depth: 14,
@@ -109,7 +109,7 @@ describe("EngineClient.evaluate", () => {
 
   it("busca até a profundidade 12 quando o tempo não bastou (EVAL-13)", async () => {
     const { client, worker } = engineWith((command, reply) => {
-      if (command === "go movetime 200") {
+      if (command === "go movetime 500") {
         reply("info depth 9 score cp 10 pv d2d4");
         reply("bestmove d2d4");
       }
@@ -122,7 +122,7 @@ describe("EngineClient.evaluate", () => {
     const evaluation = await client.evaluate(START_FEN);
     expect(worker.commands.slice(3)).toEqual([
       `position fen ${START_FEN}`,
-      "go movetime 200",
+      "go movetime 500",
       "go depth 12",
     ]);
     expect(evaluation).toMatchObject({
@@ -134,7 +134,7 @@ describe("EngineClient.evaluate", () => {
 
   it("devolve a pontuação do ponto de vista das brancas (EVAL-14)", async () => {
     const { client } = engineWith((command, reply) => {
-      if (command === "go movetime 200") {
+      if (command === "go movetime 500") {
         reply("info depth 15 score cp 35 pv e7e5");
         reply("bestmove e7e5");
       }
@@ -145,7 +145,7 @@ describe("EngineClient.evaluate", () => {
 
   it("devolve bestMove nulo numa posição sem lances (EVAL-15)", async () => {
     const { client, worker } = engineWith((command, reply) => {
-      if (command === "go movetime 200") {
+      if (command === "go movetime 500") {
         reply("info depth 0 score mate 0");
         reply("bestmove (none)");
       }
@@ -165,7 +165,7 @@ describe("EngineClient.evaluate", () => {
   it("roda as avaliações uma por vez, na ordem pedida (EVAL-16)", async () => {
     let searches = 0;
     const { client, worker } = engineWith((command, reply) => {
-      if (command === "go movetime 200") {
+      if (command === "go movetime 500") {
         searches += 1;
         const current = searches;
         setTimeout(
@@ -186,9 +186,9 @@ describe("EngineClient.evaluate", () => {
     expect(second.score).toEqual({ kind: "cp", value: -2 });
     expect(worker.commands.slice(3)).toEqual([
       `position fen ${START_FEN}`,
-      "go movetime 200",
+      "go movetime 500",
       `position fen ${AFTER_E4}`,
-      "go movetime 200",
+      "go movetime 500",
     ]);
   });
 
@@ -208,7 +208,7 @@ describe("EngineClient.evaluate", () => {
     const { client, worker } = engineWith((command, reply) => {
       // A busca interrompida termina com o seu bestmove, como no Stockfish.
       if (command === "stop") reply("bestmove h2h3");
-      if (command === "go movetime 200" && answer) {
+      if (command === "go movetime 500" && answer) {
         reply("info depth 20 score cp 5 pv e2e4");
         reply("bestmove e2e4");
       }
@@ -247,7 +247,7 @@ describe("EngineClient.evaluate", () => {
         }, 5);
       }
       // A primeira busca é a cancelada: ela só termina com o bestmove do stop.
-      if (command === "go movetime 200" && ++searches > 1) {
+      if (command === "go movetime 500" && ++searches > 1) {
         setTimeout(() => {
           reply("info depth 20 score cp 5 pv e2e4");
           reply("bestmove e2e4");
@@ -276,7 +276,7 @@ describe("EngineClient.evaluate", () => {
           reply("bestmove h2h3");
         }, 3);
       }
-      if (command === "go movetime 200" && ++searches > 1) {
+      if (command === "go movetime 500" && ++searches > 1) {
         setTimeout(() => {
           reply("info depth 20 score cp 5 pv e2e4");
           reply("bestmove e2e4");
@@ -301,7 +301,7 @@ describe("EngineClient.evaluate", () => {
       const worker = new FakeWorker((command, reply) => {
         if (command === "uci") reply("uciok");
         if (command === "isready") reply("readyok");
-        if (command === "go movetime 200" && ++searches > 1) {
+        if (command === "go movetime 500" && ++searches > 1) {
           reply("info depth 20 score cp 5 pv e2e4");
           reply("bestmove e2e4");
         }
@@ -332,7 +332,7 @@ describe("EngineClient.evaluate", () => {
     vi.useFakeTimers();
     try {
       const { client, worker } = engineWith((command, reply) => {
-        if (command === "go movetime 200") {
+        if (command === "go movetime 500") {
           reply("info depth 20 score cp 5 pv e2e4");
           reply("bestmove e2e4");
         }
@@ -350,7 +350,7 @@ describe("EngineClient.evaluate", () => {
         "stop",
         "isready",
         `position fen ${START_FEN}`,
-        "go movetime 200",
+        "go movetime 500",
       ]);
     } finally {
       vi.useRealTimers();

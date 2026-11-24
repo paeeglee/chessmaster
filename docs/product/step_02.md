@@ -33,7 +33,7 @@ Transformar a espera em parte da experiência. O jogador vê que cada etapa faz 
 |---|---|---|
 | A-01 | Rodar os motores em Web Worker; a interface nunca trava | Obrigatório |
 | A-02 | Cada etapa tem um estado visível: aguardando, em andamento, concluída ou com falha | Obrigatório |
-| A-03 | A etapa 3 roda o Stockfish completo (WebAssembly) em várias threads, com cerca de 200 ms por posição e profundidade mínima de 12 (D1 da visão geral). Sem isolamento de origem, usa a versão de uma thread. Mostra o progresso real (lances processados ÷ total) e uma estimativa de tempo restante, atualizada a cada lance | Obrigatório |
+| A-03 | A etapa 3 roda o Stockfish completo (WebAssembly) em várias threads, com cerca de 500 ms por posição e profundidade mínima de 12 (D1 da visão geral). Sem isolamento de origem, usa a versão de uma thread. Mostra o progresso real (lances processados ÷ total) e uma estimativa de tempo restante, atualizada a cada lance | Obrigatório |
 | A-04 | O tabuleiro acompanha o lance avaliado, sem animação longa (no máximo 150 ms por lance) | Desejável |
 | A-05 | "Já encontrado" lista os momentos assim que o motor os confirma, em ordem cronológica, com no máximo 6 itens visíveis | Desejável |
 | A-06 | A tabela de finais roda por trás, sem etapa na tela, só se houver posições cobertas por ela | Obrigatório |

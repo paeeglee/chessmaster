@@ -33,7 +33,7 @@ divergirem, o PRD vale.
   compilado para WebAssembly, rodando num Web Worker com
   `navigator.hardwareConcurrency - 1` threads. Tem cerca de 94 MB, começa a baixar
   quando a página carrega, mostra o progresso sem bloquear o jogador e fica no cache
-  do navegador. Cerca de 200 ms por posição, profundidade mínima 12.
+  do navegador. Cerca de 500 ms por posição (era 200 ms até 2026-11-24), profundidade mínima 12.
 - **Isolamento de origem:** todas as páginas são servidas com
   `Cross-Origin-Opener-Policy: same-origin` e
   `Cross-Origin-Embedder-Policy: require-corp`, para habilitar o
@@ -71,7 +71,7 @@ divergirem, o PRD vale.
   começar pela captura. Por isso cada meio-lance é classificado quando a posição
   depois da resposta já foi avaliada (`classifyPly`, usado no resumo e durante a
   análise).
-- **Lances limítrofes:** a busca de 200 ms com várias threads não é determinística.
+- **Lances limítrofes:** a busca por tempo (hoje 500 ms) com várias threads não é determinística.
   Quando o melhor lance e uma alternativa saem quase iguais para o motor, a linha do
   melhor lance pode mudar de uma rodada para outra e um momento-chave limítrofe pode
   aparecer ou não. Na partida de referência isso acontece com 27...Tb7 (cerca de 1 em

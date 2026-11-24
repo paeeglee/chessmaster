@@ -88,8 +88,8 @@ describe("pontuação do ponto de vista das brancas (EVAL-14)", () => {
 });
 
 describe("plano de busca (D1)", () => {
-  it("usa 200 ms por posição e profundidade mínima 12", () => {
-    expect(MOVETIME_MS).toBe(200);
+  it("usa 500 ms por posição e profundidade mínima 12", () => {
+    expect(MOVETIME_MS).toBe(500);
     expect(MIN_DEPTH).toBe(12);
   });
 
