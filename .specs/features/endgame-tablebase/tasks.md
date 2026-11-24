@@ -55,7 +55,7 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Max DTM: KQK 10 moves, KRK 16 moves; known mates and stalemates
+- [x] Max DTM: KQK 10 moves, KRK 16 moves; known mates and stalemates
 
 **Tests**: unit
 **Gate**: quick
