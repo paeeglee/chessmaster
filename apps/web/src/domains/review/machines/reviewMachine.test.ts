@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createActor, createMachine, fromPromise, waitFor } from "xstate";
 import type { GameExplanation, QuestionAnswer } from "../../explanation";
 import { referenceResult } from "../fixtures/referenceResult";
-import { LINE_STEP_MS, reviewMachine } from "./reviewMachine";
+import { LINE_STEP_MS, type MoveExplainInput, reviewMachine } from "./reviewMachine";
 
 const explanation: GameExplanation = {
   verdict: "Vitória.",
@@ -17,6 +17,7 @@ function start(
     aiFailed?: boolean;
     answer?: () => Promise<QuestionAnswer>;
     explain?: () => Promise<GameExplanation>;
+    explainMove?: (input: MoveExplainInput) => Promise<{ text: string }>;
   } = {},
 ) {
   const machine = reviewMachine.provide({
@@ -25,6 +26,11 @@ function start(
         options.answer ?? (async () => ({ answer: "Sim.", in_scope: true })),
       ),
       explainGame: fromPromise(options.explain ?? (async () => explanation)),
+      explainMove: fromPromise<{ text: string }, MoveExplainInput>(({ input }) =>
+        options.explainMove
+          ? options.explainMove(input)
+          : Promise.resolve({ text: `Lance ${input.ply}.` }),
+      ),
     },
   });
   return createActor(machine, {
@@ -193,5 +199,91 @@ describe("reviewMachine: eventos para a máquina raiz (RV-12, RV-19)", () => {
     const { review, received } = startInsideParent();
     review.send({ type: "TRAINING.START", ply: 86 });
     expect(received).toEqual([JSON.stringify({ type: "TRAINING.REQUESTED", ply: 86 })]);
+  });
+});
+
+describe("reviewMachine: painel do treinador (MR-13, MR-15, MR-16)", () => {
+  it("pede a explicação do lance revisado ao abrir: o erro 22...Ta7 (meio-lance 44)", async () => {
+    const calls: number[] = [];
+    const actor = start({
+      explainMove: async ({ ply }) => {
+        calls.push(ply);
+        return { text: `Lance ${ply}.` };
+      },
+    });
+    expect(actor.getSnapshot().context.coach[44]).toEqual({ status: "loading", text: null });
+    await waitFor(actor, (snapshot) => snapshot.context.coach[44]?.status === "ready");
+    expect(actor.getSnapshot().context.coach[44]).toEqual({ status: "ready", text: "Lance 44." });
+    expect(calls).toEqual([44]);
+  });
+
+  it("guarda cada lance e não pede de novo ao voltar (MR-15)", async () => {
+    const calls: number[] = [];
+    const actor = start({
+      explainMove: async ({ ply }) => {
+        calls.push(ply);
+        return { text: `Lance ${ply}.` };
+      },
+    });
+    await waitFor(actor, (snapshot) => snapshot.context.coach[44]?.status === "ready");
+    actor.send({ type: "POSITION.SELECT", position: 10 });
+    await waitFor(actor, (snapshot) => snapshot.context.coach[10]?.status === "ready");
+    actor.send({ type: "POSITION.SELECT", position: 43 });
+    actor.send({ type: "POSITION.SELECT", position: 10 });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(calls).toEqual([44, 10]);
+  });
+
+  it("um lance por vez: trocar de lance durante a espera pede o novo depois", async () => {
+    let release: () => void = () => {};
+    const calls: number[] = [];
+    const actor = start({
+      explainMove: ({ ply }) => {
+        calls.push(ply);
+        return ply === 44
+          ? new Promise((resolve) => {
+              release = () => resolve({ text: "Lance 44." });
+            })
+          : Promise.resolve({ text: `Lance ${ply}.` });
+      },
+    });
+    actor.send({ type: "POSITION.SELECT", position: 20 });
+    expect(calls).toEqual([44]);
+    release();
+    await waitFor(actor, (snapshot) => snapshot.context.coach[20]?.status === "ready");
+    expect(actor.getSnapshot().context.coach[44]).toEqual({ status: "ready", text: "Lance 44." });
+    expect(calls).toEqual([44, 20]);
+  });
+
+  it("marca a falha e tenta de novo com COACH.RETRY (MR-16)", async () => {
+    let fail = true;
+    const actor = start({
+      explainMove: async ({ ply }) => {
+        if (fail) throw new Error("503");
+        return { text: `Lance ${ply}.` };
+      },
+    });
+    await waitFor(actor, (snapshot) => snapshot.context.coach[44]?.status === "failed");
+    // Falhou: não pede sozinho de novo.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(actor.getSnapshot().context.coach[44]?.status).toBe("failed");
+    fail = false;
+    actor.send({ type: "COACH.RETRY", ply: 44 });
+    await waitFor(actor, (snapshot) => snapshot.context.coach[44]?.status === "ready");
+  });
+
+  it("na posição inicial não pede nada (MR-12)", async () => {
+    const calls: number[] = [];
+    const actor = start({
+      explainMove: async ({ ply }) => {
+        calls.push(ply);
+        return { text: "x" };
+      },
+    });
+    await waitFor(actor, (snapshot) => snapshot.context.coach[44]?.status === "ready");
+    actor.send({ type: "POSITION.FIRST" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(calls).toEqual([44]);
+    expect(actor.getSnapshot().context.coach[0]).toBeUndefined();
   });
 });

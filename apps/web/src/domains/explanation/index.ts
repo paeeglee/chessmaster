@@ -5,7 +5,10 @@ export {
   ExplanationError,
   type GameContract,
   type GameExplanation,
+  type MoveContract,
+  type MoveExplanation,
   type QuestionAnswer,
   type QuestionRequest,
   requestExplanation,
+  requestMoveExplanation,
 } from "./client/explanationClient";

@@ -2,9 +2,14 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { createActor, createMachine, fromPromise } from "xstate";
-import type { GameExplanation, QuestionAnswer } from "../../explanation";
+import type { GameExplanation, MoveExplanation, QuestionAnswer } from "../../explanation";
 import { referenceResult } from "../fixtures/referenceResult";
-import { type AskInput, type ExplainInput, reviewMachine } from "../machines/reviewMachine";
+import {
+  type AskInput,
+  type ExplainInput,
+  type MoveExplainInput,
+  reviewMachine,
+} from "../machines/reviewMachine";
 import { ReviewScreen } from "./ReviewScreen";
 
 const explanation: GameExplanation = {
@@ -25,6 +30,7 @@ type Options = {
   withExplanation?: boolean;
   answer?: () => Promise<QuestionAnswer>;
   explain?: () => Promise<GameExplanation>;
+  explainMove?: (args: { input: MoveExplainInput }) => Promise<MoveExplanation>;
   /** Ajusta o resultado do fixture antes de abrir a tela. */
   adjust?: (result: ReturnType<typeof referenceResult>) => ReturnType<typeof referenceResult>;
 };
@@ -38,6 +44,10 @@ function renderReview(options: Options = {}) {
       ),
       explainGame: fromPromise<GameExplanation, ExplainInput>(
         options.explain ?? (async () => explanation),
+      ),
+      explainMove: fromPromise<MoveExplanation, MoveExplainInput>(
+        options.explainMove ??
+          (async ({ input }) => ({ text: `Explicação do lance ${input.ply}.` })),
       ),
     },
   });

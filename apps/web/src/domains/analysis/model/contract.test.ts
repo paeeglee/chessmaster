@@ -4,7 +4,7 @@ import { parseGameText, replayGame } from "../../game";
 import referenceGameHtml from "../../game/fixtures/reference-game.chesscom.html?raw";
 import type { AnalysisRequest } from "../../game-input";
 import referenceEvaluations from "../fixtures/reference-game.evaluations.json";
-import { buildContract } from "./contract";
+import { buildContract, buildMoveContract } from "./contract";
 import { summarizeAnalysis } from "./summary";
 
 function referenceRequest(playerColor: "w" | "b" = "b"): AnalysisRequest {
@@ -113,5 +113,71 @@ describe("buildContract (AS-14, AS-15)", () => {
       materialTimeline: [0, 1, 2, 3, ...summary.materialTimeline.slice(4)],
     });
     expect(contract.advantage_started_at).toEqual({ ply: 2, label: "1...d5" });
+  });
+});
+
+describe("buildMoveContract (MR-13)", () => {
+  const request = referenceRequest("b");
+  const summary = summarizeAnalysis(
+    request.game,
+    referenceEvaluations as PositionEvaluation[],
+    request.playerColor,
+  );
+
+  it("monta o contrato de 22...Ta7 com os fatos da revisão", () => {
+    const review = summary.moveReviews[43];
+    if (!review) throw new Error("sem revisão");
+    const contract = buildMoveContract(request, review);
+    expect(contract).toMatchObject({
+      level: "beginner",
+      player_color: "b",
+      mover: "player",
+      move_label: "22...Ta7",
+      move_san: "Ta7",
+      quality: "mistake",
+      best_move_label: "22...Bd4+",
+      still_en_prise: [{ type: "b", square: "a1" }],
+      best_reasons: { check: true, mate_in: null, saves: [{ type: "b", square: "a1" }] },
+    });
+    expect(contract.best_line[0]).toBe("Bd4+");
+    // Sem posições nem avaliações: só fatos.
+    expect(Object.keys(contract)).not.toEqual(
+      expect.arrayContaining([expect.stringMatching(/^(fen|score|evaluation)/)]),
+    );
+    expect(Object.keys(contract).sort()).toEqual(
+      [
+        "best_line",
+        "best_move_label",
+        "best_reasons",
+        "level",
+        "missed_material",
+        "move_label",
+        "move_san",
+        "mover",
+        "player_color",
+        "quality",
+        "still_en_prise",
+        "undefended",
+      ].sort(),
+    );
+  });
+
+  it("marca o lance do adversário e tira o número do lance das brancas", () => {
+    const review = summary.moveReviews[44];
+    if (!review) throw new Error("sem revisão");
+    const contract = buildMoveContract(request, review);
+    expect(contract.mover).toBe("opponent");
+    expect(contract.move_label).toBe("23.Txa1");
+    expect(contract.move_san).toBe("Txa1");
+  });
+
+  it("sem melhor lance, manda razões nulas", () => {
+    const review = summary.moveReviews[0];
+    if (!review) throw new Error("sem revisão");
+    const contract = buildMoveContract(request, {
+      ...review,
+      facts: { ...review.facts, bestMoveLabel: null, bestLine: [], bestReasons: null },
+    });
+    expect(contract).toMatchObject({ best_move_label: null, best_line: [], best_reasons: null });
   });
 });

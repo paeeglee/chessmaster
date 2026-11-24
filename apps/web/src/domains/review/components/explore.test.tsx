@@ -3,9 +3,14 @@ import userEvent from "@testing-library/user-event";
 import { useActor } from "@xstate/react";
 import { describe, expect, it } from "vitest";
 import { fromPromise } from "xstate";
-import type { GameExplanation, QuestionAnswer } from "../../explanation";
+import type { GameExplanation, MoveExplanation, QuestionAnswer } from "../../explanation";
 import { referenceResult } from "../fixtures/referenceResult";
-import { type AskInput, type ExplainInput, reviewMachine } from "../machines/reviewMachine";
+import {
+  type AskInput,
+  type ExplainInput,
+  type MoveExplainInput,
+  reviewMachine,
+} from "../machines/reviewMachine";
 import { BoardPanel } from "./BoardPanel";
 import { MaterialChart } from "./MaterialChart";
 import { MoveList } from "./MoveList";
@@ -19,6 +24,9 @@ const logic = reviewMachine.provide({
     explainGame: fromPromise<GameExplanation, ExplainInput>(async () => {
       throw new Error("sem IA");
     }),
+    explainMove: fromPromise<MoveExplanation, MoveExplainInput>(async ({ input }) => ({
+      text: `Lance ${input.ply}.`,
+    })),
   },
 });
 

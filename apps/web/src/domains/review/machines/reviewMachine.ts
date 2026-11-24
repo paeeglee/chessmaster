@@ -1,13 +1,15 @@
 import { assign, fromPromise, sendParent, setup } from "xstate";
-import { type AnalysisResult, buildContract } from "../../analysis";
+import { type AnalysisResult, buildContract, buildMoveContract } from "../../analysis";
 import {
   askQuestion,
   type GameExplanation,
+  type MoveExplanation,
   type QuestionAnswer,
   requestExplanation,
+  requestMoveExplanation,
 } from "../../explanation";
 import { positionsAlongLine } from "../../game";
-import { initialPosition, positionFen } from "../model/review";
+import { initialPosition, positionFen, reviewedPly } from "../model/review";
 
 /** R-09: a linha do motor anda até 6 meios-lances, um a cada 600 ms. */
 export const LINE_PLIES = 6;
@@ -23,6 +25,13 @@ export type Question = {
 };
 
 export type AskInput = { result: AnalysisResult; question: string };
+export type MoveExplainInput = { result: AnalysisResult; ply: number };
+
+/** Texto do treinador para um lance (MR-13..MR-16), guardado por meio-lance. */
+export type CoachEntry =
+  | { status: "loading"; text: null }
+  | { status: "ready"; text: string }
+  | { status: "failed"; text: null };
 export type ExplainInput = { result: AnalysisResult };
 
 export type ReviewContext = {
@@ -33,6 +42,8 @@ export type ReviewContext = {
   expandedPly: number | null;
   line: { fens: string[]; step: number } | null;
   questions: Question[];
+  /** MR-15: explicações dos lances já pedidas nesta sessão. */
+  coach: Record<number, CoachEntry>;
 };
 
 export type ReviewEvent =
@@ -49,7 +60,8 @@ export type ReviewEvent =
   | { type: "NEW_GAME.REQUEST" }
   | { type: "NEW_GAME.CANCEL" }
   | { type: "NEW_GAME.CONFIRM" }
-  | { type: "TRAINING.START"; ply: number };
+  | { type: "TRAINING.START"; ply: number }
+  | { type: "COACH.RETRY"; ply: number };
 
 /** Eventos que a tela Resultado manda para a máquina raiz. */
 export type ReviewParentEvent =
@@ -58,6 +70,12 @@ export type ReviewParentEvent =
 
 function lastPosition(context: ReviewContext): number {
   return context.result.request.game.plies.length;
+}
+
+/** O meio-lance cuja explicação está carregando (o jogador pode ter mudado de lance). */
+function loadingPly(context: ReviewContext, entry: CoachEntry): Record<number, CoachEntry> {
+  const ply = Object.entries(context.coach).find(([, value]) => value.status === "loading")?.[0];
+  return ply === undefined ? {} : { [Number(ply)]: entry };
 }
 
 function clampPosition(context: ReviewContext, position: number): number {
@@ -80,6 +98,18 @@ export const reviewMachine = setup({
     explainGame: fromPromise<GameExplanation, ExplainInput>(({ input }) =>
       requestExplanation(buildContract(input.result.request, input.result)),
     ),
+    explainMove: fromPromise<MoveExplanation, MoveExplainInput>(({ input }) => {
+      const review = input.result.moveReviews[input.ply - 1];
+      if (!review) throw new Error(`Sem revisão do meio-lance ${input.ply}`);
+      return requestMoveExplanation(buildMoveContract(input.result.request, review));
+    }),
+  },
+  guards: {
+    // MR-13/MR-15: pede só a primeira vez que o lance é revisado.
+    needsCoachText: ({ context }) => {
+      const ply = reviewedPly(context.result, context.position);
+      return ply > 0 && context.coach[ply] === undefined;
+    },
   },
   actions: {
     goTo: assign((_, params: { position: number }) => ({ position: params.position, line: null })),
@@ -94,6 +124,7 @@ export const reviewMachine = setup({
     expandedPly: input.keyMoments[0]?.ply ?? null,
     line: null,
     questions: [],
+    coach: {},
   }),
   type: "parallel",
   states: {
@@ -179,6 +210,61 @@ export const reviewMachine = setup({
               },
               { target: "browsing" },
             ],
+          },
+        },
+      },
+    },
+    coach: {
+      initial: "idle",
+      on: {
+        // MR-16: "Tentar de novo" esquece a falha; a espera pede de novo.
+        "COACH.RETRY": {
+          actions: assign({
+            coach: ({ context, event }) => {
+              const { [event.ply]: _failed, ...rest } = context.coach;
+              return rest;
+            },
+          }),
+        },
+      },
+      states: {
+        idle: {
+          always: {
+            guard: "needsCoachText",
+            target: "loading",
+          },
+        },
+        loading: {
+          entry: assign({
+            coach: ({ context }) => ({
+              ...context.coach,
+              [reviewedPly(context.result, context.position)]: { status: "loading", text: null },
+            }),
+          }),
+          invoke: {
+            src: "explainMove",
+            input: ({ context }) => ({
+              result: context.result,
+              ply: reviewedPly(context.result, context.position),
+            }),
+            onDone: {
+              target: "idle",
+              actions: assign({
+                coach: ({ context, event }) => ({
+                  ...context.coach,
+                  ...loadingPly(context, { status: "ready", text: event.output.text }),
+                }),
+              }),
+            },
+            onError: {
+              target: "idle",
+              actions: assign({
+                coach: ({ context }) => ({
+                  ...context.coach,
+                  ...loadingPly(context, { status: "failed", text: null }),
+                }),
+              }),
+            },
           },
         },
       },

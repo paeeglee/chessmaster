@@ -13,7 +13,7 @@ export {
   classifyPly,
   KEY_MOMENT_THRESHOLD,
 } from "./model/classify";
-export { ADVANTAGE_THRESHOLD, buildContract } from "./model/contract";
+export { ADVANTAGE_THRESHOLD, buildContract, buildMoveContract } from "./model/contract";
 export {
   type Finding,
   type FindingTag,

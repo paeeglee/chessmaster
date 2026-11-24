@@ -167,7 +167,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Request on first selection, cache hit, failure + retry tested
+- [x] Request on first selection, cache hit, failure + retry tested
 
 **Tests**: unit
 **Gate**: quick
