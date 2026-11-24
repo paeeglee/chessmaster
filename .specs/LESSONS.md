@@ -312,17 +312,23 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md round 2 N05 (TrainingScreen.tsx:146) (web-tests) (web-tests)
 - last seen: 2026-11-24T03:16:27Z
 
-### L-045 - When an accessible label describes a transient visual state, assert the label both while the state is on and after it ends
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-a11y` · harmful: 0
-- features: training-screen
-- evidence: validation.md round 2 N02 (TrainingScreen.tsx:144) (web-a11y)
-- last seen: 2026-11-24T03:06:26Z
+### L-051 - Pin sliding-piece blocker logic with a probe where the own king shields the line; extreme-value checks like max DTM do not exercise it
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `evaluation/tablebase` · harmful: 0
+- features: endgame-tablebase
+- evidence: apps/web/src/domains/evaluation/model/tablebase/generate.ts:99 (mutant 6) (evaluation/tablebase)
+- last seen: 2026-11-24T03:37:56Z
 
-### L-046 - When Portuguese text agrees in gender with a piece name, test both a masculine and a feminine piece
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
-- features: training-screen
-- evidence: validation.md round 2 N05 (TrainingScreen.tsx:146) (web-tests)
-- last seen: 2026-11-24T03:06:26Z
+### L-052 - When a machine gains a new state, add a component test that renders the screen in that state, including its headline and failure label
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `analysis/components` · harmful: 0
+- features: endgame-tablebase
+- evidence: apps/web/src/domains/analysis/components/AnalyzingScreen.tsx:75 (mutant 22) (analysis/components)
+- last seen: 2026-11-24T03:37:56Z
+
+### L-053 - Spec every status a UI indicator can show, including the failure state, not only the used and not-needed cases
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `review/footer` · harmful: 0
+- features: endgame-tablebase
+- evidence: TB-08 vs apps/web/src/domains/review/components/ReviewSidebar.tsx:141 (review/footer)
+- last seen: 2026-11-24T03:37:56Z
 
 ## Quarantined (failed when applied - ignore)
 
