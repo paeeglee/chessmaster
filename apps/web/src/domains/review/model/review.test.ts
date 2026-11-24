@@ -44,6 +44,27 @@ describe("statCards (RV-02)", () => {
     expect(cards[2]?.label).toBe("sua maior vantagem (pontos de material)");
     // Maior vantagem da partida de referência: +10 (depois de 32...Txe4).
     expect(cards[2]?.value).toBe("+10");
+    expect(cards).toHaveLength(3);
+  });
+
+  it("o 4º cartão só aparece quando o jogador deu o mate no final da tabela (TB-07)", () => {
+    const endgame = {
+      kind: "KQK" as const,
+      position: 10,
+      strongColor: "b" as const,
+      playerIsStrong: true,
+      winner: "b" as const,
+      optimalMoves: null,
+      movesToMate: 1,
+    };
+    expect(statCards({ ...result, endgame })[3]).toEqual({
+      value: "1 lance",
+      label: "para o mate de dama no final",
+    });
+    expect(statCards({ ...result, endgame: { ...endgame, playerIsStrong: false } })).toHaveLength(
+      3,
+    );
+    expect(statCards({ ...result, endgame: { ...endgame, movesToMate: null } })).toHaveLength(3);
   });
 });
 

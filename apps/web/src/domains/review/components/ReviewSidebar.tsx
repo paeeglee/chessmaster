@@ -134,8 +134,14 @@ export function EnginesFooter({ context }: Pick<Props, "context">) {
       <span className="font-bold text-ink">Motores usados</span>
       <span>✓ Regras</span>
       <span>✓ Avaliação</span>
-      {/* A tabela de finais (motor 4) ainda não existe; não mostrar como usada. */}
-      <span>– Tabela de finais (ainda não disponível)</span>
+      {/* TB-08: a tabela de finais só aparece como usada quando a partida chegou a ela. */}
+      <span>
+        {context.result.endgameStatus === "done"
+          ? "✓ Tabela de finais"
+          : context.result.endgameStatus === "failed"
+            ? "✕ Tabela de finais: falhou"
+            : "– Tabela de finais (não necessária)"}
+      </span>
       <span>{aiFailed ? "✕ IA: falhou" : "✓ IA: só explica, não calcula"}</span>
     </footer>
   );

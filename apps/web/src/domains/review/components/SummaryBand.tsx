@@ -68,6 +68,7 @@ export function SummaryBand({ result, retrying, onRetry }: SummaryBandProps) {
               {card.value}
             </span>
             <span className="text-ink-muted text-sm">{card.label}</span>
+            {card.caption && <span className="text-ink-muted text-xs">{card.caption}</span>}
           </div>
         ))}
       </div>

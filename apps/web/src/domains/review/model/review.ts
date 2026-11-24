@@ -36,7 +36,7 @@ export function formatAdvantage(value: number): string {
   return value > 0 ? `+${value}` : `${value}`;
 }
 
-export type StatCard = { value: string; label: string };
+export type StatCard = { value: string; label: string; caption?: string };
 
 /** Cartões de números (step_03 §3): só fatos dos motores. */
 export function statCards(result: AnalysisResult): StatCard[] {
@@ -52,6 +52,17 @@ export function statCards(result: AnalysisResult): StatCard[] {
     value: formatAdvantage(Math.max(0, ...result.materialTimeline)),
     label: "sua maior vantagem (pontos de material)",
   });
+  // TB-07: com a tabela de finais, quantos lances o jogador levou até o mate.
+  const endgame = result.endgame;
+  if (endgame?.playerIsStrong && endgame.movesToMate !== null) {
+    cards.push({
+      value: `${endgame.movesToMate} ${endgame.movesToMate === 1 ? "lance" : "lances"}`,
+      label: `para o mate de ${endgame.kind === "KQK" ? "dama" : "torre"} no final`,
+      ...(endgame.optimalMoves !== null
+        ? { caption: `o mais rápido era ${endgame.optimalMoves}` }
+        : {}),
+    });
+  }
   return cards;
 }
 
