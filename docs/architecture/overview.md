@@ -126,9 +126,11 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   retroanálise na primeira consulta (cerca de 1 s; o mate mais longo é de 10 lances
   em KQK e 16 em KRK) e devolve o resultado exato e a distância até o mate. O
   resultado ganha `endgame` (lances que o jogador levou até o mate e o ideal) e
-  `endgameStatus`; sem esse final, a etapa 4 fica "não necessária" e o worker nem é
-  criado. Se a tabela falhar, a análise segue sem ela. A tela Resultado mostra o 4º
-  cartão ("N lances para o mate de torre no final") e o status no rodapé.
+  `endgameStatus`; sem esse final, o worker nem é criado. Se a tabela falhar, a
+  análise segue sem ela. A tabela não tem etapa própria na tela Analisando (decisão
+  de 2026-11-24): enquanto ela consulta, a tela segue na etapa do motor de avaliação.
+  A tela Resultado mostra o 4º cartão ("N lances para o mate de torre no final") e o
+  status no rodapé.
 - **Resultado (F7):** no estado `review`, o `appMachine` invoca o `reviewMachine`
   (domínio `review`) com o `AnalysisResult`. Ele tem regiões paralelas: `board`
   (posição mostrada, orientação, momento aberto e a linha do motor andando a cada
@@ -156,7 +158,7 @@ máquinas deixam esses estados e transições explícitos e testáveis.
     novo), que começa ao abrir a página (D1);
   - tela Colar (vazio, reconhecida, formato não reconhecido, lance ilegal) e as
     condições do botão "Analisar partida";
-  - pipeline da análise (as cinco etapas, cada uma aguardando, em andamento,
+  - pipeline da análise (as etapas, cada uma aguardando, em andamento,
     concluída ou com falha; cancelamento; resultado parcial);
   - sessão de treino (tentativas, níveis de dica, solução, próximo momento).
 - **Como escrever:** cada máquina é criada com `setup({ types, actions, guards,

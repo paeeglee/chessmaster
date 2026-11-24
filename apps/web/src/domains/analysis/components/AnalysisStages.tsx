@@ -38,7 +38,7 @@ function StageMarker({ index, status }: { index: number; status: StageStatus }) 
   );
 }
 
-/** Lista ordenada das cinco etapas da análise (step_02, A-02). */
+/** Lista ordenada das etapas da análise (step_02, A-02). */
 export function AnalysisStages({ stages }: { stages: Stage[] }) {
   return (
     <ol className="m-0 flex list-none flex-col gap-[18px] p-0">

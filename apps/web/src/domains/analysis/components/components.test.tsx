@@ -20,7 +20,7 @@ const STAGES: Stage[] = [
 ];
 
 describe("AnalysisStages (AS-09, AS-10)", () => {
-  it("lista as cinco etapas em ordem, com o estado de cada uma", () => {
+  it("lista as etapas em ordem, com o estado de cada uma", () => {
     render(<AnalysisStages stages={STAGES} />);
     const items = within(screen.getByRole("list")).getAllByRole("listitem");
     expect(items.map((item) => item.textContent)).toEqual([

@@ -17,12 +17,13 @@ Transformar a espera em parte da experiência. O jogador vê que cada etapa faz 
 ## 2. Estrutura da tela
 1. **Cabeçalho e indicador de passos**, com "Analisar" como passo atual.
 2. **Tabuleiro "Repassando a partida"**, à esquerda: acompanha o lance que o motor de avaliação está processando e mostra "Lance N de M" e o último lance jogado.
-3. **Etapas da análise**, à direita: uma lista ordenada dos cinco motores, cada um com estado, descrição curta e tempo:
+3. **Etapas da análise**, à direita: uma lista ordenada de quatro etapas, cada uma com estado, descrição curta e tempo:
    1. Leitura dos lances
    2. Motor de regras
    3. Motor de avaliação (com barra de progresso, "lance N de M" e tempo restante)
-   4. Tabela de finais
-   5. Explicação da IA
+   4. Explicação da IA
+
+   A tabela de finais (motor 4) não tem etapa própria nesta tela (decisão de 2026-11-24): ela roda por trás, logo depois do motor de avaliação, e o resultado dela aparece só na tela Resultado.
 4. **"Já encontrado"**: os achados aparecem à medida que o motor avança, com uma tag de tipo (Bom, Erro, Adversário).
 5. **Ação secundária:** "Cancelar análise".
 
@@ -35,8 +36,8 @@ Transformar a espera em parte da experiência. O jogador vê que cada etapa faz 
 | A-03 | A etapa 3 roda o Stockfish completo (WebAssembly) em várias threads, com cerca de 200 ms por posição e profundidade mínima de 12 (D1 da visão geral). Sem isolamento de origem, usa a versão de uma thread. Mostra o progresso real (lances processados ÷ total) e uma estimativa de tempo restante, atualizada a cada lance | Obrigatório |
 | A-04 | O tabuleiro acompanha o lance avaliado, sem animação longa (no máximo 150 ms por lance) | Desejável |
 | A-05 | "Já encontrado" lista os momentos assim que o motor os confirma, em ordem cronológica, com no máximo 6 itens visíveis | Desejável |
-| A-06 | A etapa 4 roda só se houver posições cobertas pela tabela; se não houver, aparece como "não necessária" | Obrigatório |
-| A-07 | A etapa 5 só começa depois das etapas 2 a 4 e recebe apenas o JSON estruturado (contrato 7.2 do PRD geral). A chamada passa pela camada de IA trocável, com GPT-5.1 por padrão (D4) | Obrigatório |
+| A-06 | A tabela de finais roda por trás, sem etapa na tela, só se houver posições cobertas por ela | Obrigatório |
+| A-07 | A etapa da IA só começa depois do motor de regras, do motor de avaliação e da tabela de finais e recebe apenas o JSON estruturado (contrato 7.2 do PRD geral). A chamada passa pela camada de IA trocável, com GPT-5.1 por padrão (D4) | Obrigatório |
 | A-08 | Ao concluir, vai para o Resultado automaticamente, sem clique extra | Obrigatório |
 | A-09 | "Cancelar análise" interrompe os workers e volta à tela Colar com o texto preservado | Obrigatório |
 | A-10 | Se a análise passar de 60 s, oferecer "Ver resultado parcial" com uma profundidade menor | Desejável |
