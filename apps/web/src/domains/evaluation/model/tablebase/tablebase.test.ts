@@ -66,6 +66,15 @@ describe("probe (TB-02, TB-03)", () => {
     expect(result).toMatchObject({ winner: "w", dtmPlies: 2, mateInMoves: 1 });
   });
 
+  it("o rei forte bloqueia a própria torre (vitória legal, não ilegal)", () => {
+    // Te6, Re5, Re2: o rei branco fica entre a torre e o rei preto; não há xeque.
+    expect(probe(krk, "8/8/4R3/4K3/8/8/4k3/8 w - - 0 1")).toMatchObject({ winner: "w" });
+    // Com as pretas a jogar, e2 (na linha da torre, atrás do rei branco) é escape: não é mate.
+    const blocked = probe(krk, "8/8/4R3/4K3/8/4k3/8/8 b - - 0 1");
+    expect(blocked).not.toBeNull();
+    expect(blocked?.dtmPlies).not.toBe(0);
+  });
+
   it("funciona com as pretas como lado forte", () => {
     expect(probe(krk, "K7/8/1k6/8/8/8/8/7r b - - 0 1")).toMatchObject({
       strongColor: "b",

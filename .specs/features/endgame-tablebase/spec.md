@@ -50,7 +50,7 @@ general.md lists engine 4, "Tabela de finais": the exact result and distance to 
 ### P1: Result screen ⭐ MVP
 
 1. WHEN `endgame` exists, the player is the strong side and the game ended in mate THEN the 4th stat card SHALL show "{N} lances" / "para o mate de {dama|torre} no final" and "o mais rápido era {M}". <!-- TB-07 -->
-2. The footer SHALL show "✓ Tabela de finais" when the tablebase was used and "– Tabela de finais (não necessária)" otherwise. <!-- TB-08 -->
+2. The footer SHALL show "✓ Tabela de finais" when the tablebase was used, "✕ Tabela de finais: falhou" when it failed (step_03 R-12) and "– Tabela de finais (não necessária)" otherwise. <!-- TB-08 -->
 
 ---
 
@@ -78,17 +78,17 @@ general.md lists engine 4, "Tabela de finais": the exact result and distance to 
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| TB-01 | Tablebase | Design | Pending |
-| TB-02 | Tablebase | Design | Pending |
-| TB-03 | Tablebase | Design | Pending |
-| TB-04 | Stage 4 | Design | Pending |
-| TB-05 | Stage 4 | Design | Pending |
-| TB-06 | Stage 4 | Design | Pending |
-| TB-07 | Result | Design | Pending |
-| TB-08 | Result | Design | Pending |
-| TB-09 | Edge | Design | Pending |
+| TB-01 | Tablebase | Tasks | Done |
+| TB-02 | Tablebase | Tasks | Done |
+| TB-03 | Tablebase | Tasks | Done |
+| TB-04 | Stage 4 | Tasks | Done |
+| TB-05 | Stage 4 | Tasks | Done |
+| TB-06 | Stage 4 | Tasks | Done |
+| TB-07 | Result | Tasks | Done |
+| TB-08 | Result | Tasks | Done |
+| TB-09 | Edge | Tasks | Done |
 
-**Coverage:** 9 total, 0 mapped to tasks, 9 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 9 total, 9 mapped to tasks (T1–T3), 0 unmapped
 
 ---
 

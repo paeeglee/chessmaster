@@ -17,8 +17,7 @@ graph TD
 
 | File | Responsibility |
 | ---- | -------------- |
-| `evaluation/model/tablebase/board.ts` | 0..63 squares, king/rook/queen attacks with blockers |
-| `evaluation/model/tablebase/generate.ts` | Retrograde analysis: index = ((strongKing·64 + piece)·64 + weakKing)·2 + side; Int16 DTM in plies (−1 unknown/draw); un-moves for both sides; counters of non-losing defender moves |
+| `evaluation/model/tablebase/generate.ts` | Squares 0..63, king/rook/queen attacks with blockers, and the retrograde analysis: index = ((strongKing·64 + piece)·64 + weakKing)·2 + side; Int16 DTM in plies (−1 unknown/draw); un-moves for both sides; counters of non-losing defender moves |
 | `evaluation/model/tablebase/probe.ts` | FEN → material kind, normalised squares and side → `{ result, dtmPlies, strongColor }` or null |
 | `evaluation/workers/tablebase.worker.ts` + `evaluation/engine/tablebaseClient.ts` | Generates and caches tables per kind; `probe(fen)` over postMessage |
 | `analysis/model/endgame.ts` | First KQK/KRK position, moves actually played until mate, summary object |

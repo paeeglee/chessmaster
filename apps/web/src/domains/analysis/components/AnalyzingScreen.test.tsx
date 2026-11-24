@@ -2,13 +2,14 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { createActor, fromCallback, fromPromise } from "xstate";
-import type { EngineClient, PositionEvaluation } from "../../evaluation";
+import type { EngineClient, PositionEvaluation, ProbeResult } from "../../evaluation";
 import type { GameExplanation } from "../../explanation";
 import { parseGameText, replayGame } from "../../game";
 import referenceGameHtml from "../../game/fixtures/reference-game.chesscom.html?raw";
 import type { AnalysisRequest } from "../../game-input";
+import { krkGame } from "../fixtures/krkGame";
 import referenceEvaluations from "../fixtures/reference-game.evaluations.json";
-import { analysisMachine } from "../machines/analysisMachine";
+import { analysisMachine, type ProbeInput } from "../machines/analysisMachine";
 import type { AnalysisSummary } from "../model/summary";
 import { AnalyzingScreen } from "./AnalyzingScreen";
 
@@ -159,5 +160,57 @@ describe("AnalyzingScreen", () => {
     render(<AnalyzingScreen analysisRef={actor} onCancel={onCancel} />);
     await userEvent.click(screen.getByRole("button", { name: "Cancelar análise" }));
     expect(onCancel).toHaveBeenCalledOnce();
+  });
+});
+
+describe("AnalyzingScreen: etapa 4, tabela de finais (TB-04..TB-06)", () => {
+  function plain(fen: string): PositionEvaluation {
+    return { fen, depth: 18, score: { kind: "cp", value: 0 }, bestMove: null, pv: [] };
+  }
+
+  it("mostra a etapa em andamento e depois a falha, sem travar a análise", async () => {
+    let reject: (error: Error) => void = () => {};
+    const game = krkGame();
+    const machine = analysisMachine.provide({
+      actors: {
+        evaluatePositions: fromCallback(({ sendBack }) => {
+          for (const fen of [game.initialFen, ...game.plies.map((ply) => ply.fenAfter)]) {
+            sendBack({ type: "POSITION.EVALUATED", evaluation: plain(fen) });
+          }
+          sendBack({ type: "EVALUATION.DONE" });
+        }),
+        probeEndgame: fromPromise<ProbeResult | null, ProbeInput>(
+          () =>
+            new Promise((_, rejectProbe) => {
+              reject = rejectProbe;
+            }),
+        ),
+        explainGame: fromPromise<
+          GameExplanation,
+          { request: AnalysisRequest; summary: AnalysisSummary }
+        >(() => new Promise<GameExplanation>(() => {})),
+      },
+    });
+    const actor = createActor(machine, {
+      input: {
+        request: { game, playerColor: "w", level: "beginner", priorities: [] },
+        engine: {} as EngineClient,
+      },
+    }).start();
+    render(<AnalyzingScreen analysisRef={actor} onCancel={() => {}} />);
+    expect(screen.getByText("Etapa 4 de 5: tabela de finais.")).toBeInTheDocument();
+    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — em andamento");
+    await act(async () => reject(new Error("worker caiu")));
+    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — falhou");
+    expect(stage("Explicação da IA")).toHaveTextContent("Explicação da IA — em andamento");
+  });
+
+  it("sem final com tabela, a etapa fica não necessária", async () => {
+    const { actor, control, evaluateUpTo } = startAnalysis();
+    render(<AnalyzingScreen analysisRef={actor} onCancel={() => {}} />);
+    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — aguardando");
+    await evaluateUpTo(evaluations.length);
+    await act(async () => control.send({ type: "EVALUATION.DONE" }));
+    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — não necessária");
   });
 });
