@@ -2,9 +2,61 @@
 
 **Date**: 2026-11-24
 **Spec**: `.specs/features/move-review/spec.md`
-**Diff range**: `origin/main..HEAD` (00374b7..68a4d82, 9 commits, 62 files)
+**Diff range**: `origin/main..HEAD` (00374b7..aab3e22). Round 1 covered 00374b7..68a4d82; round 2 adds aab3e22.
 **Verifier**: independent sub-agent (author ≠ verifier)
-**Verdict**: FAIL ❌ (4 surviving non-equivalent mutants, one of them hiding a real MR-11 defect; all gates green)
+**Verdict (latest, round 2)**: FAIL ❌. G1–G5 from round 1 are fixed and all gates are green. One real surviving mutant remains (N12: the evaluation bar can read the wrong position and no test notices). M8 also still survives, but it is practically equivalent.
+
+---
+
+## Round 2 (aab3e22)
+
+### Fixes from round 1
+
+| Gap | Fix verified | Evidence |
+| --- | ------------ | -------- |
+| G1 mate 0 | ✅ `winChance(score, color, sideToMove)`; `reviewMoves`, `whiteShare` and `evaluationLabel` read the side to move from the FEN | `apps/web/src/domains/analysis/model/moveQuality.test.ts:25` (four mate-0 cases); `apps/web/src/domains/review/model/coach.test.ts:98-103` (`whiteShare` 100/0, labels "1-0"/"0-1"); `apps/web/src/domains/analysis/model/moveReview.test.ts:120` (scholar's mate without termination → `winAfter: 100`) |
+| G2 Melhor vs "Melhor era" | ✅ Melhor only for the engine move; zero loss is Excelente. MR-02 and general.md 7.1 updated | `apps/web/src/domains/analysis/model/moveQuality.test.ts:51` `expect(quality(0)).toBe("excellent")` |
+| G3 e2e isolation | ✅ config guard test | `apps/web/src/shared/lib/testing/e2eIsolation.test.ts:18-23,29,34` |
+| G4 unlabeled move | ✅ | `apps/api/src/game_analyzer/domains/explanation/tests/test_move_explanations.py:74` `"lance Tb7 não está no contrato"` |
+| G5 wording / dead code | ✅ spec success criterion reworded; king filter and moved-piece clause removed | spec.md Success Criteria; `apps/web/src/domains/game/model/lines.ts:123`, `apps/web/src/domains/analysis/model/moveFacts.ts:116` |
+
+### Gates (round 2)
+
+- `make check`: ✅ Vitest **501 passed** (44 files, 96.66% statements); pytest **99 passed**; Biome, tsc, mypy and Ruff clean.
+- `make test-e2e`: ✅ **18 passed** (6.9 min), own API on 8100, preview on 4173, `make dev` on 8000 untouched.
+- Test count is 600 (528 before the feature, +72). None were removed.
+
+### Discrimination sensor (round 2)
+
+This run used a fresh scratch worktree at aab3e22 and ran the full suites. M11 and M16 were dropped because their code is gone, M3 and M5 were re-targeted at the new code, and N1–N12 are new faults. The scratch worktree is removed and the real worktree porcelain matches the baseline (clean).
+
+| # | File:line | Mutation | Result |
+| - | --------- | -------- | ------ |
+| M1–M7, M9, M10, M12–M15, M17–M29 | as round 1 | same faults | ✅ all 25 killed (M27, M28 and M29 are now killed) |
+| M8 | `apps/web/src/domains/analysis/model/moveReview.ts:61` | checkmate override removed | ⚪ Survived, practically equivalent: Stockfish always reports `mate 0` in a mated position, which now resolves to 100 on its own. MR-18 ("result decides") is still not pinned against a disagreeing evaluation |
+| N1 | `apps/web/src/domains/analysis/model/moveQuality.ts:46` | mate-0 winner inverted | ✅ Killed |
+| N2 | `moveQuality.ts:45` | mate-0 branch disabled | ✅ Killed |
+| N3 | `apps/web/src/domains/analysis/model/moveReview.ts:63` | after-move side to move dropped | ✅ Killed |
+| N4 | `moveQuality.ts:57` | `sideToMoveOf` always "w" | ✅ Killed |
+| N5 | `apps/web/src/domains/review/model/coach.ts:102` | "1-0"/"0-1" swapped | ✅ Killed |
+| N6 | `coach.ts:115` | bar ignores side to move | ✅ Killed |
+| N7 | `moveQuality.ts:75` | zero-loss move back to Melhor | ✅ Killed |
+| N8 | `apps/web/playwright.config.ts:45` | web server reuse on | ✅ Killed |
+| N9 | `playwright.config.ts:54` | e2e API with real provider | ✅ Killed |
+| N10 | `apps/web/vite.config.ts:25` | proxy ignores `API_PROXY_TARGET` | ✅ Killed |
+| N11 | `apps/web/src/domains/analysis/model/moveFacts.ts:117` | `saves` inverted | ✅ Killed |
+| N12 | `apps/web/src/domains/review/components/BoardPanel.tsx:57` | eval bar reads `evaluations[position + 1]` | ❌ Survived |
+
+**Result**: 37/39 killed. 1 practically equivalent (M8), 1 real survivor (N12): FAIL ❌.
+
+### Ranked gaps (round 2)
+
+1. **R2-G1 · MR-11: the bar is not tied to the shown position (Minor, fix before PASS).** `apps/web/src/domains/review/components/ReviewScreen.test.tsx:427` only checks the label's shape. At the default position (43), both 43 and 44 clamp to "−10,0", so even a value check there would not catch the off-by-one. **Fix:** click "Início" and assert `getByRole("img", { name: "Avaliação do motor: +0,4 para as brancas" })`. That is position 0 (cp 37); the off-by-one would show "+0,1" (cp 14).
+2. **R2-G2 · MR-18 "result decides" is not pinned (Cosmetic).** **Fix:** in `moveReview.test.ts`, keep `termination: "checkmate"`, give the final position `{ kind: "cp", value: 0 }`, and expect `winAfter: 100`. That kills M8.
+
+---
+
+## Round 1 (68a4d82), kept for history
 
 ---
 
@@ -157,7 +209,7 @@ UI: no mockup exists for the coach panel. The panel reuses the step_03 tokens (`
 
 ## Summary
 
-**Overall**: ❌ Not ready. Fix G1 to G4 and re-verify (iteration 1 of 3).
+**Overall (round 1)**: ❌ Not ready. Fix G1 to G4 and re-verify (iteration 1 of 3). **Round 2**: G1–G5 fixed; R2-G1 open (iteration 2 of 3).
 **Spec-anchored check**: 18/20 MR + 4/4 R matched, 2 needing fixes, 1 spec-precision gap.
 **Sensor**: 23/27 non-equivalent killed (2 equivalent).
 **Gate**: make check (494 + 98) ✅, make test-e2e 18/18 ✅.

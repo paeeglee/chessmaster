@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 58,
+  "next_id": 59,
   "lessons": [
     {
       "id": "L-001",
@@ -1032,6 +1032,24 @@
       ],
       "created": "2026-11-24T13:23:29Z",
       "last_seen": "2026-11-24T13:23:29Z"
+    },
+    {
+      "id": "L-058",
+      "key": "surviving_mutant::when a ui shows a value indexed by the current position assert the exact value at a position whose neighbours differ not just the label format",
+      "text": "When a UI shows a value indexed by the current position, assert the exact value at a position whose neighbours differ, not just the label format.",
+      "signal": "surviving_mutant",
+      "scope": "review/components",
+      "status": "candidate",
+      "features": [
+        "move-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N12 apps/web/src/domains/review/components/BoardPanel.tsx:57 (review/components)"
+      ],
+      "created": "2026-11-24T15:35:48Z",
+      "last_seen": "2026-11-24T15:35:48Z"
     }
   ]
 }

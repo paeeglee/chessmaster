@@ -354,6 +354,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M27 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:149 (api verification)
 - last seen: 2026-11-24T13:23:29Z
 
+### L-058 - When a UI shows a value indexed by the current position, assert the exact value at a position whose neighbours differ, not just the label format.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `review/components` · harmful: 0
+- features: move-review
+- evidence: N12 apps/web/src/domains/review/components/BoardPanel.tsx:57 (review/components)
+- last seen: 2026-11-24T15:35:48Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
