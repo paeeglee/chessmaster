@@ -30,6 +30,13 @@ export {
   selectStrengths,
 } from "./model/keyMoments";
 export { materialBalance, materialTimeline, PIECE_VALUES } from "./model/material";
+export type { BestMoveReasons, MoveFacts } from "./model/moveFacts";
+export {
+  MOVE_QUALITY_LABEL,
+  type MoveQuality,
+  winChance,
+} from "./model/moveQuality";
+export { type MoveReview, reviewMoves } from "./model/moveReview";
 export { type AnalysisProgress, analysisProgress } from "./model/progress";
 export { type AnalysisSummary, summarizeAnalysis } from "./model/summary";
 export type {

@@ -114,7 +114,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8
 **Where**: `apps/web/src/domains/analysis/model/moveReview.ts`
 **Depends on**: T3
 **Reuses**: summarizeAnalysis
-**Requirement**: MR-01, MR-05
+**Requirement**: MR-01, MR-05, MR-20
 
 **Tools**:
 
@@ -123,7 +123,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Reference fixture: one review per ply
+- [x] Reference fixture: one review per ply
 
 **Tests**: unit
 **Gate**: quick

@@ -3,6 +3,7 @@ import type { Game, PlayerColor } from "../../game";
 import { classifyGame } from "./classify";
 import { groupPatterns, selectKeyMoments, selectStrengths } from "./keyMoments";
 import { materialTimeline } from "./material";
+import { type MoveReview, reviewMoves } from "./moveReview";
 import type { MistakeVerdict, MoveVerdict, Pattern, StrengthVerdict } from "./types";
 
 /** Tudo o que os motores concluíram sobre a partida (sem os textos da IA). */
@@ -14,6 +15,8 @@ export type AnalysisSummary = {
   strengths: StrengthVerdict[];
   patterns: Pattern[];
   materialTimeline: number[];
+  /** F9: revisão de cada meio-lance (classificação e fatos). */
+  moveReviews: MoveReview[];
 };
 
 export function summarizeAnalysis(
@@ -33,5 +36,6 @@ export function summarizeAnalysis(
     strengths: selectStrengths(verdicts),
     patterns: groupPatterns(keyMoments),
     materialTimeline: materialTimeline(game, playerColor),
+    moveReviews: reviewMoves(game, evaluations, verdicts),
   };
 }
