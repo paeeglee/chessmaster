@@ -68,9 +68,9 @@ export function GameField({
           Onde copio isso no Chess.com?
         </summary>
         <p className="mt-2 mb-0">
-          Abra a partida no Chess.com, clique com o botão direito na lista de lances, escolha
-          "Inspecionar" e copie o elemento. Também funciona colar a lista de lances (1.d4 d5 2.Cc3
-          …).
+          Abra a partida no Chess.com, clique com o botão direito na lista de lances ao lado do
+          tabuleiro, escolha "Inspecionar" e, no elemento da lista, use "Copiar → Copiar elemento".
+          Também funciona colar a lista de lances (1.d4 d5 2.Cc3 …).
         </p>
       </details>
     </section>

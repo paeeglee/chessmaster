@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import moveListHtml from "../fixtures/move-list.chesscom.html?raw";
 import referenceGameHtml from "../fixtures/reference-game.chesscom.html?raw";
 import { MAX_PASTE_BYTES, parseGameText } from "./parseGameText";
+import { replayGame } from "./replay";
 import type { ParsedGame } from "./types";
 
 function parsed(text: string): ParsedGame {
@@ -10,6 +12,37 @@ function parsed(text: string): ParsedGame {
   }
   return outcome.game;
 }
+
+describe("parseGameText com a lista de lances nova do Chess.com (<wc-move-list>)", () => {
+  it("lê os lances, as figurinhas, o roque e o resultado", () => {
+    const game = parsed(moveListHtml);
+    expect(game.format).toBe("chesscom-html");
+    expect(game.notation).toBe("en");
+    expect(game.sanMoves).toHaveLength(62);
+    expect(game.sanMoves.slice(0, 4)).toEqual(["e4", "e5", "Nf3", "Nf6"]);
+    expect(game.sanMoves.slice(10, 12)).toEqual(["Nxe5", "Qxd1"]);
+    expect(game.sanMoves[23]).toBe("O-O-O");
+    expect(game.sanMoves.at(-1)).toBe("Nxb4");
+    expect(game.result).toBe("0-1");
+  });
+
+  it("ignora tempos, ícones de classificação e variantes fora da linha principal", () => {
+    const withVariation = moveListHtml.replace(
+      '<div class="main-line-row move-list-row result-row">',
+      '<div class="node white-move"><span class="node-highlight-content">Qh5</span></div>' +
+        '<div class="main-line-row move-list-row result-row">',
+    );
+    const game = parsed(withVariation);
+    expect(game.sanMoves).toHaveLength(62);
+    expect(game.sanMoves).not.toContain("Qh5");
+    expect(game.sanMoves.join(" ")).not.toMatch(/\d+\.\ds/);
+  });
+
+  it("a partida inteira é legal no motor de regras", () => {
+    const replayed = replayGame(parsed(moveListHtml));
+    expect(replayed.kind).toBe("legal");
+  });
+});
 
 describe("parseGameText com o HTML do Chess.com", () => {
   it("lê a partida de referência (GAME-01)", () => {
