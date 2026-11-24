@@ -101,7 +101,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] 22...Ta7: best 22...Bd4+, bishop a1 left undefended, reasons check + saves piece
+- [x] 22...Ta7: best 22...Bd4+, bishop a1 left undefended, reasons check + saves piece
 
 **Tests**: unit
 **Gate**: quick

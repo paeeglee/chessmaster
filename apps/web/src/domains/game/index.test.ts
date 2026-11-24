@@ -22,6 +22,7 @@ describe("fronteira do domínio game", () => {
       "MAX_PASTE_BYTES",
       "defendersOf",
       "describePieces",
+      "enPrisePieces",
       "formatMoveLabel",
       "isAttackedBy",
       "legalDestinations",

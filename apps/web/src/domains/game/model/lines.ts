@@ -96,3 +96,38 @@ export function positionsAlongLine(
   }
   return positions;
 }
+
+const EXCHANGE_VALUES: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 100 };
+
+export type EnPrisePiece = { square: string; piece: PieceSymbol };
+
+/**
+ * Peças de `color` (sem o rei) que o adversário pode ganhar agora: atacadas e sem
+ * defesa, ou atacadas por uma peça mais barata. O rei só conta como atacante de peças
+ * sem defesa. Não considera cravadas (aproximação usada na revisão lance a lance).
+ */
+export function enPrisePieces(fen: string, color: "w" | "b"): EnPrisePiece[] {
+  const chess = new Chess(fen);
+  const opponent = color === "w" ? "b" : "w";
+  const result: EnPrisePiece[] = [];
+  for (const row of chess.board()) {
+    for (const cell of row) {
+      if (!cell || cell.color !== color || cell.type === "k") continue;
+      const square = cell.square;
+      const attackers = chess.attackers(square, opponent as Color);
+      if (attackers.length === 0) continue;
+      const defended = chess.attackers(square, color as Color).length > 0;
+      const attackerValues = attackers
+        .map((from) => chess.get(from as Square)?.type)
+        .filter((type): type is PieceSymbol => type !== undefined)
+        .filter((type) => !defended || type !== "k")
+        .map((type) => EXCHANGE_VALUES[type] ?? 0);
+      if (attackerValues.length === 0) continue;
+      const cheapest = Math.min(...attackerValues);
+      if (!defended || cheapest < (EXCHANGE_VALUES[cell.type] ?? 0)) {
+        result.push({ square, piece: cell.type });
+      }
+    }
+  }
+  return result;
+}
