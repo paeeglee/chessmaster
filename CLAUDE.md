@@ -162,7 +162,8 @@ for that screen and must be followed.
   installed. Node 26 ships without corepack, so `make setup` installs the pnpm
   version pinned in `packageManager` with npm when `pnpm` is missing.
 - `make test-e2e` builds the web app, serves it with `vite preview` on `4173`
-  (isolation headers on) and starts the API on `8000` for the proxy tests.
+  (isolation headers on) and starts its own API on `8100` with `AI_PROVIDER=fake`
+  (never reusing the `make dev` API on `8000`), so it can run while `make dev` is up.
 
 ## Language conventions
 

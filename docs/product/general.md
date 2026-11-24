@@ -40,7 +40,7 @@ As metas abaixo são hipóteses iniciais e precisam ser validadas com usuários.
 | Objetivo | Métrica | Meta inicial (hipótese) |
 |---|---|---|
 | O jogador consegue colar e analisar sem ajuda | % de colagens que chegam ao Resultado | ≥ 85% |
-| A análise é rápida o bastante | Tempo entre "Analisar" e o Resultado, para 70 lances | ≤ 30 s no p50 |
+| A análise é rápida o bastante | Tempo entre "Analisar" e o Resultado, para 70 lances | ≤ 75 s no p50 (era ≤ 30 s; mudou com a revisão lance a lance, 2026-11-24) |
 | A explicação é entendida | "Entendi por que errei" (pergunta de 1 clique no Resultado) | ≥ 70% de "sim" |
 | O jogador pratica | % de análises em que o jogador abre o Treino | ≥ 40% |
 | Confiança | Erros de avaliação reportados pelo jogador | Acompanhar; meta a definir |
@@ -53,6 +53,7 @@ As metas abaixo são hipóteses iniciais e precisam ser validadas com usuários.
 - Avaliação de cada posição por um motor.
 - Tabela de finais exata para posições com poucas peças.
 - Resumo da partida, gráfico de vantagem, lista de lances anotada, momentos-chave, "o que você fez bem" e hábito sugerido.
+- Revisão lance a lance (estilo Game Review do Chess.com): classificação de cada lance, painel do treinador com o melhor lance e o porquê, o que ficou descoberto e a explicação da IA sob demanda.
 - Exercício "encontre o lance" para cada momento-chave.
 - Perguntas livres à IA sobre a partida analisada.
 - Uso em computador (desktop).
@@ -95,6 +96,8 @@ Colar a partida ──► Analisando ──► Resultado ──► Treinar momen
 O motor de avaliação classifica cada lance. A IA só redige os textos.
 - **Material perdido**: o saldo de material do jogador cai em relação ao melhor lance, e a queda se confirma na sequência calculada pelo motor.
 - **Momento-chave**: um lance do jogador que perde **2 pontos de material ou mais**, com a perda confirmada pelo motor (decisão D3). O MVP mostra no máximo 5 momentos, em ordem cronológica.
+- **Classificação de cada lance** (revisão lance a lance, decisão de 2026-11-24): a perda de chance de vitória de quem jogou, calculada a partir da avaliação do motor antes e depois do lance (fórmula do Lichess), define a classe na escala do Chess.com: **Melhor** (só o lance do motor), **Excelente** (< 2 pontos percentuais, inclusive outro lance sem perda), **Bom** (< 5), **Imprecisão** (< 10), **Erro** (< 20), **Capivarada** (≥ 20) e **Perdeu a chance** (o adversário acabou de errar, perdendo 10 ou mais, e o lance devolve 10 ou mais). **Piso de material:** um lance que perde 2 pontos de material ou mais pela regra do momento-chave é no mínimo Erro, e Capivarada a partir de 5, porque com vantagem grande a chance de vitória quase não muda quando uma peça cai.
+- **Fatos de cada lance**, do motor de regras e da variante do motor: o melhor lance e sua linha; as peças que o lance deixou descobertas (atacadas sem defesa, ou atacadas por peça mais barata); as que já estavam assim e continuaram; o material que o melhor lance ganharia a mais; e o porquê do melhor lance (xeque, mate em N, material ganho, peça salva).
 - **Tipo de erro** (deterministicamente, sempre que possível):
   - *Peça atacada*: a peça perdida já estava atacada antes do lance do jogador.
   - *Defensor saiu*: o lance moveu a única peça que protegia a peça perdida.
@@ -107,6 +110,8 @@ A IA recebe um JSON fechado. Ela só pode afirmar o que está nesse JSON e o que
 - o resultado e a cor do jogador.
 
 Uma verificação automática compara lances e números citados no texto com o JSON e bloqueia ou corrige divergências.
+
+Na revisão lance a lance, cada lance tem um contrato próprio, menor, enviado só quando o jogador abre o lance: o lance, de quem é, a classificação, o melhor lance com sua linha, as peças descobertas ou que continuaram atacadas, o material deixado de ganhar e os motivos do melhor lance. A mesma verificação vale para esse texto.
 
 ## 8. Requisitos não funcionais
 
@@ -141,7 +146,7 @@ Uma verificação automática compara lances e números citados no texto com o J
 
 | # | Tema | Decisão |
 |---|---|---|
-| D1 | Motor de avaliação | **Stockfish, versão completa (rede NNUE completa), compilado para WebAssembly e rodando em várias threads** num Web Worker do navegador. É o motor livre mais forte e funciona sem servidor, o que mantém a partida no computador do jogador. **Multi-thread:** o motor usa `navigator.hardwareConcurrency − 1` threads, deixando um núcleo livre para a interface. Isso exige que a página seja *cross-origin isolated*: o servidor envia os cabeçalhos `Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp`, que liberam o `SharedArrayBuffer`. Se o navegador não estiver isolado, o sistema usa a versão completa de uma thread, com o mesmo resultado e mais lentidão. **Tamanho e carregamento:** a versão completa tem cerca de 94 MB. O download começa **assim que a página é carregada**, sem esperar a partida ser colada, e o arquivo fica no cache do navegador para as visitas seguintes. Durante o download, um indicador mostra que o motor está sendo carregado, com a porcentagem, **sem bloquear o jogador**: ele pode colar a partida e fazer as escolhas normalmente. O botão "Analisar partida" também verifica o estado do download: só fica habilitado com o motor pronto, além da partida válida e da cor selecionada. Enquanto isso, mostra "Carregando o motor… N%". Se o download falhar, o indicador mostra o erro e oferece "Tentar de novo". **Configuração:** tempo fixo de cerca de 200 ms por posição, com profundidade mínima de 12, mantendo a meta de até 30 s para 72 lances (145 posições). Com várias threads, o motor chega mais fundo no mesmo tempo; o tempo por posição deve ser recalibrado depois de medir. **Licença:** GPL-3.0. O motor fica como arquivo separado, que conversa com o app só por mensagens UCI, e o código-fonte do motor é publicado junto. Validar esse arranjo com o jurídico antes do lançamento. |
+| D1 | Motor de avaliação | **Stockfish, versão completa (rede NNUE completa), compilado para WebAssembly e rodando em várias threads** num Web Worker do navegador. É o motor livre mais forte e funciona sem servidor, o que mantém a partida no computador do jogador. **Multi-thread:** o motor usa `navigator.hardwareConcurrency − 1` threads, deixando um núcleo livre para a interface. Isso exige que a página seja *cross-origin isolated*: o servidor envia os cabeçalhos `Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp`, que liberam o `SharedArrayBuffer`. Se o navegador não estiver isolado, o sistema usa a versão completa de uma thread, com o mesmo resultado e mais lentidão. **Tamanho e carregamento:** a versão completa tem cerca de 94 MB. O download começa **assim que a página é carregada**, sem esperar a partida ser colada, e o arquivo fica no cache do navegador para as visitas seguintes. Durante o download, um indicador mostra que o motor está sendo carregado, com a porcentagem, **sem bloquear o jogador**: ele pode colar a partida e fazer as escolhas normalmente. O botão "Analisar partida" também verifica o estado do download: só fica habilitado com o motor pronto, além da partida válida e da cor selecionada. Enquanto isso, mostra "Carregando o motor… N%". Se o download falhar, o indicador mostra o erro e oferece "Tentar de novo". **Configuração:** tempo fixo de cerca de 500 ms por posição, com profundidade mínima de 12, o que dá cerca de 75 s para 72 lances (145 posições). Era 200 ms (meta de 30 s); subiu em 2026-11-24 para a revisão lance a lance classificar cada lance com avaliações mais estáveis. Com várias threads, o motor chega mais fundo no mesmo tempo; o tempo por posição deve ser recalibrado depois de medir. **Licença:** GPL-3.0. O motor fica como arquivo separado, que conversa com o app só por mensagens UCI, e o código-fonte do motor é publicado junto. Validar esse arranjo com o jurídico antes do lançamento. |
 | D2 | Salvar partidas | **Não há** "Salvar em Minhas partidas" no MVP. A análise existe só enquanto a página está aberta. O botão sai do design da tela Resultado. |
 | D3 | Limiar de momento-chave | Perda de **2 pontos de material ou mais**, confirmada pelo motor (proposta aprovada). |
 | D4 | Provedor e modelo de IA | **Padrão: OpenAI, modelo GPT-5.1**, seguindo o padrão da API: saída estruturada com JSON Schema para os textos da análise e o mesmo contrato da seção 7.2 nas perguntas livres. **Provedor e modelo precisam ser trocáveis** por configuração, sem mudar o restante do sistema (ver 8 e 9). |

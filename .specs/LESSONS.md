@@ -330,6 +330,36 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: TB-08 vs apps/web/src/domains/review/components/ReviewSidebar.tsx:141 (review/footer)
 - last seen: 2026-11-24T03:37:56Z
 
+### L-054 - When an engine score has an ambiguous sentinel (mate 0), test terminal overrides with a fixture where the other side wins, or the override hides the bug.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `analysis/model` · harmful: 0
+- features: move-review
+- evidence: M8 apps/web/src/domains/analysis/model/moveReview.ts:55 (analysis/model)
+- last seen: 2026-11-24T13:23:29Z
+
+### L-055 - When a label can be reached by two rules (engine move or zero loss), make every UI sentence key on the same rule as the label and pin it with a test.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `review/model` · harmful: 0
+- features: move-review
+- evidence: G2 apps/web/src/domains/review/model/coach.ts:61 (review/model)
+- last seen: 2026-11-24T13:23:29Z
+
+### L-056 - Guard test-infrastructure isolation (ports, server reuse, fake providers) with a cheap unit test on the config, since e2e passes either way when nothing else is running.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `e2e config` · harmful: 0
+- features: move-review
+- evidence: M28/M29 apps/web/playwright.config.ts:56 (e2e config)
+- last seen: 2026-11-24T13:23:29Z
+
+### L-057 - Each new allowed-facts builder needs its own rejection tests for both labeled and unlabeled moves, not only reuse of the shared verifier tests.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `api verification` · harmful: 0
+- features: move-review
+- evidence: M27 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:149 (api verification)
+- last seen: 2026-11-24T13:23:29Z
+
+### L-058 - When a UI shows a value indexed by the current position, assert the exact value at a position whose neighbours differ, not just the label format.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `review/components` · harmful: 0
+- features: move-review
+- evidence: N12 apps/web/src/domains/review/components/BoardPanel.tsx:57 (review/components)
+- last seen: 2026-11-24T15:35:48Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

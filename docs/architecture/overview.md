@@ -33,7 +33,7 @@ divergirem, o PRD vale.
   compilado para WebAssembly, rodando num Web Worker com
   `navigator.hardwareConcurrency - 1` threads. Tem cerca de 94 MB, começa a baixar
   quando a página carrega, mostra o progresso sem bloquear o jogador e fica no cache
-  do navegador. Cerca de 200 ms por posição, profundidade mínima 12.
+  do navegador. Cerca de 500 ms por posição (era 200 ms até 2026-11-24), profundidade mínima 12.
 - **Isolamento de origem:** todas as páginas são servidas com
   `Cross-Origin-Opener-Policy: same-origin` e
   `Cross-Origin-Embedder-Policy: require-corp`, para habilitar o
@@ -71,7 +71,7 @@ divergirem, o PRD vale.
   começar pela captura. Por isso cada meio-lance é classificado quando a posição
   depois da resposta já foi avaliada (`classifyPly`, usado no resumo e durante a
   análise).
-- **Lances limítrofes:** a busca de 200 ms com várias threads não é determinística.
+- **Lances limítrofes:** a busca por tempo (hoje 500 ms) com várias threads não é determinística.
   Quando o melhor lance e uma alternativa saem quase iguais para o motor, a linha do
   melhor lance pode mudar de uma rodada para outra e um momento-chave limítrofe pode
   aparecer ou não. Na partida de referência isso acontece com 27...Tb7 (cerca de 1 em
@@ -139,6 +139,18 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   `newGame` (confirmação de "Analisar outra partida"). "Treinar" manda
   `TRAINING.REQUESTED` com o meio-lance do momento; "Analisar outra partida" manda
   `REVIEW.NEW_GAME`, que volta à tela Colar com o campo vazio e o nível mantido.
+- **Revisão lance a lance (F9):** ao resumir a análise, `reviewMoves` (domínio
+  `analysis`) classifica cada meio-lance pela perda de chance de vitória
+  (`moveQuality.ts`, com o piso de material do D3) e calcula os fatos do lance
+  (`moveFacts.ts`: melhor lance e linha, peças en prise com `enPrisePieces` do domínio
+  `game`, material deixado de ganhar, motivos do melhor lance). O resultado ganha
+  `moveReviews`. No Resultado, o `reviewMachine` tem a região `coach`: quando o lance
+  revisado (`reviewedPly`) ainda não tem texto, o ator `explainMove` chama
+  `POST /api/move-explanations` com o contrato do lance (`buildMoveContract`), um lance
+  por vez, e guarda o resultado por meio-lance; `COACH.RETRY` pede de novo depois de
+  uma falha. `COACH.SHOW_BEST_LINE` anima a linha do melhor lance sem mudar o lance
+  revisado. No backend, o caso de uso `ExplainMove` usa o prompt `explain_move.v1.md` e a
+  verificação `verify_move_explanation`.
 - **Treino (F8):** no estado `training`, o `appMachine` invoca o `trainingMachine`
   (domínio `training`) com o resultado, o meio-lance do momento escolhido e o motor
   guardado na análise. Estados: `playing` (clique na peça e no destino; os destinos
@@ -202,7 +214,10 @@ máquinas deixam esses estados e transições explícitos e testáveis.
 - **Rotas:** todas sob o prefixo `/api`. Sem versionamento na URL no MVP.
 - **Portas de desenvolvimento:** frontend (Vite) em `5173`, backend (FastAPI) em
   `8000`. O `vite preview` (usado nos testes Playwright) roda em `4173`, com os
-  mesmos cabeçalhos de isolamento e o mesmo proxy de `/api`.
+  mesmos cabeçalhos de isolamento. Nos testes, o proxy de `/api` aponta para um
+  backend próprio na porta `8100`, sempre com `AI_PROVIDER=fake` e nunca reaproveitado
+  (variável `API_PROXY_TARGET` lida pelo `vite.config.ts`). Assim o `make test-e2e`
+  pode rodar com o `make dev` ligado sem chamar a IA de verdade.
 - **OpenAPI e documentação:** o schema fica em `/api/openapi.json` e o Swagger UI
   em `/api/docs`.
 - **Mesma origem no desenvolvimento:** o Vite faz proxy de `/api` para o backend.

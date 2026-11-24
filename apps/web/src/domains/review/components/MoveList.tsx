@@ -1,5 +1,7 @@
+import { MOVE_QUALITY_LABEL, type MoveQuality } from "../../analysis";
 import type { ReviewContext, ReviewEvent } from "../machines/reviewMachine";
-import { type MoveCell, type MoveTone, moveRows } from "../model/review";
+import { QUALITY_BACKGROUND, QUALITY_SYMBOL } from "../model/coach";
+import { type MoveCell, type MoveTone, moveRows, reviewedPly } from "../model/review";
 
 const TONE: Record<MoveTone, string> = {
   mistake: "bg-danger-soft font-bold text-danger",
@@ -12,20 +14,38 @@ type MoveListProps = {
   send: (event: ReviewEvent) => void;
 };
 
+/** MR-09: ícone da classificação do lance, com o nome para leitores de tela. */
+function QualityIcon({ quality }: { quality: MoveQuality | undefined }) {
+  if (!quality) return <span aria-hidden="true" className="inline-block size-4 shrink-0" />;
+  return (
+    <span
+      role="img"
+      aria-label={MOVE_QUALITY_LABEL[quality]}
+      title={MOVE_QUALITY_LABEL[quality]}
+      className={`inline-flex size-4 shrink-0 items-center justify-center rounded-full font-bold text-[9px] text-white leading-none ${QUALITY_BACKGROUND[quality]}`}
+    >
+      {QUALITY_SYMBOL[quality]}
+    </span>
+  );
+}
+
 function Move({
   cell,
+  quality,
   selected,
   onSelect,
   className,
 }: {
   cell: MoveCell | null;
+  quality: MoveQuality | undefined;
   selected: boolean;
   onSelect: (ply: number) => void;
   className: string;
 }) {
   if (!cell) return <span className={className} />;
   return (
-    <span className={className}>
+    <span className={`inline-flex items-center gap-1 ${className}`}>
+      <QualityIcon quality={quality} />
       <button
         type="button"
         aria-current={selected ? "true" : undefined}
@@ -51,7 +71,9 @@ export function MoveList({ context, send }: MoveListProps) {
     else send({ type: "POSITION.SELECT", position: ply });
   };
   // Antes de um momento-chave, o destaque fica no lance errado; senão, no último jogado.
-  const highlighted = momentPlies.has(position + 1) ? position + 1 : position;
+  const highlighted = reviewedPly(result, position);
+  const qualityOf = (cell: MoveCell | null) =>
+    cell ? result.moveReviews[cell.ply - 1]?.quality : undefined;
   const isSelected = (cell: MoveCell | null) => cell !== null && cell.ply === highlighted;
 
   return (
@@ -69,12 +91,14 @@ export function MoveList({ context, send }: MoveListProps) {
             <span className="min-w-7 text-ink-muted">{row.number}.</span>
             <Move
               cell={row.white}
+              quality={qualityOf(row.white)}
               selected={isSelected(row.white)}
               onSelect={select}
-              className="min-w-[54px]"
+              className="min-w-[76px]"
             />
             <Move
               cell={row.black}
+              quality={qualityOf(row.black)}
               selected={isSelected(row.black)}
               onSelect={select}
               className=""

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { defendersOf, isAttackedBy, playCaptureLine, positionsAlongLine, uciToSan } from "./lines";
+import {
+  defendersOf,
+  enPrisePieces,
+  isAttackedBy,
+  playCaptureLine,
+  positionsAlongLine,
+  uciToSan,
+} from "./lines";
 
 // Bispo branco em c4 atacado pelo peão d5; cavalo preto em f6 defendido por g7 e d8.
 const POSITION = "rnbqkb1r/ppp2ppp/5n2/3p4/2B5/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4";
@@ -77,5 +84,30 @@ describe("positionsAlongLine", () => {
 
   it("para no primeiro lance ilegal", () => {
     expect(positionsAlongLine(POSITION, ["c4d5", "a1a8"], 6)).toHaveLength(1);
+  });
+});
+
+describe("enPrisePieces", () => {
+  it("lista peça atacada sem defesa", () => {
+    // Bispo preto em a1 atacado pela torre de h1, sem defensor (22...Ta7 da referência).
+    const fen = "r3r3/5kpp/p1p2n2/8/1Pp1pPbP/P5N1/3B1KP1/b6R b - - 3 22";
+    expect(enPrisePieces(fen, "b")).toEqual([{ square: "a1", piece: "b" }]);
+  });
+
+  it("lista peça defendida atacada por peça mais barata", () => {
+    // Dama branca em d4 defendida pelo cavalo de f3, atacada pelo peão de e5.
+    const fen = "4k3/8/8/4p3/3Q4/5N2/8/4K3 w - - 0 1";
+    expect(enPrisePieces(fen, "w")).toEqual([{ square: "d4", piece: "q" }]);
+  });
+
+  it("não lista peça defendida atacada por peça igual ou mais cara, nem só pelo rei", () => {
+    // Torre em d4 defendida por c3, atacada pela torre de d8: troca igual.
+    expect(enPrisePieces("3rk3/8/8/8/3R4/2P5/8/4K3 w - - 0 1", "w")).toEqual([]);
+    // Cavalo em e2 defendido pelo rei, atacado só pelo rei preto? Rei não ataca peça defendida.
+    expect(enPrisePieces("8/8/8/8/8/3k4/4N3/4K3 w - - 0 1", "w")).toEqual([]);
+    // Sem defesa, o rei pode tomar.
+    expect(enPrisePieces("8/8/8/8/8/3k4/4N3/7K w - - 0 1", "w")).toEqual([
+      { square: "e2", piece: "n" },
+    ]);
   });
 });

@@ -11,6 +11,8 @@ export {
   type CapturedPiece,
   type CaptureLine,
   defendersOf,
+  type EnPrisePiece,
+  enPrisePieces,
   isAttackedBy,
   playCaptureLine,
   positionsAlongLine,

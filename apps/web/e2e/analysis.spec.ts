@@ -2,7 +2,8 @@ import { expect, test } from "@playwright/test";
 import { referenceGame, STABLE_MOMENTS, startReferenceAnalysis } from "./reference";
 
 test.describe("análise da partida (step_02)", () => {
-  test.setTimeout(180_000);
+  // Com ~500 ms por posição, a análise da partida de referência leva cerca de 75 s.
+  test.setTimeout(300_000);
 
   test("analisa a partida de referência e abre o resultado com os momentos-chave", async ({
     page,
@@ -11,10 +12,10 @@ test.describe("análise da partida (step_02)", () => {
     await expect(page.getByRole("progressbar", { name: "Motor de avaliação" })).toBeVisible();
     // O primeiro achado aparece em "Já encontrado" antes do fim da análise (A-05).
     const findings = page.getByRole("region", { name: "Já encontrado" });
-    await expect(findings.getByText("22...Ta7?")).toBeVisible({ timeout: 60_000 });
+    await expect(findings.getByText("22...Ta7?")).toBeVisible({ timeout: 120_000 });
     await expect(page.getByRole("heading", { name: "Analisando sua partida…" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Resumo da partida" })).toBeVisible({
-      timeout: 120_000,
+      timeout: 240_000,
     });
     const moments = page.getByRole("region", { name: "Momentos-chave" }).getByRole("listitem");
     // Com o motor de verdade (200 ms, várias threads), o 27...Tb7 é limítrofe: em
@@ -58,9 +59,9 @@ test.describe("análise da partida (step_02)", () => {
     await page.getByRole("button", { name: "Analisar partida →" }).click();
     await expect(page.getByRole("heading", { name: "Analisando sua partida…" })).toBeVisible();
     const findings = page.getByRole("region", { name: "Já encontrado" });
-    await expect(findings.getByText("22...Ta7?")).toBeVisible({ timeout: 60_000 });
+    await expect(findings.getByText("22...Ta7?")).toBeVisible({ timeout: 120_000 });
     await expect(page.getByRole("region", { name: "Resumo da partida" })).toBeVisible({
-      timeout: 120_000,
+      timeout: 240_000,
     });
   });
 });

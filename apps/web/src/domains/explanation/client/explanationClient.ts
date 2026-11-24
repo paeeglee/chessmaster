@@ -4,6 +4,8 @@ export type GameContract = components["schemas"]["GameContract"];
 export type GameExplanation = components["schemas"]["GameExplanation"];
 export type QuestionAnswer = components["schemas"]["QuestionAnswer"];
 export type QuestionRequest = components["schemas"]["QuestionRequest"];
+export type MoveContract = components["schemas"]["MoveContract"];
+export type MoveExplanation = components["schemas"]["MoveExplanation"];
 
 /** Erro da camada de IA, com o `detail` que o backend devolveu (ex.: "ai_unavailable"). */
 export class ExplanationError extends Error {
@@ -40,4 +42,9 @@ export function requestExplanation(contract: GameContract): Promise<GameExplanat
 /** POST /api/questions: "Pergunte à IA" sobre a partida analisada. */
 export function askQuestion(request: QuestionRequest): Promise<QuestionAnswer> {
   return postJson("/api/questions", request);
+}
+
+/** POST /api/move-explanations: texto do painel do treinador para um lance (F9). */
+export function requestMoveExplanation(contract: MoveContract): Promise<MoveExplanation> {
+  return postJson("/api/move-explanations", contract);
 }

@@ -2,9 +2,15 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { createActor, createMachine, fromPromise } from "xstate";
-import type { GameExplanation, QuestionAnswer } from "../../explanation";
+import type { GameExplanation, MoveExplanation, QuestionAnswer } from "../../explanation";
 import { referenceResult } from "../fixtures/referenceResult";
-import { type AskInput, type ExplainInput, reviewMachine } from "../machines/reviewMachine";
+import {
+  type AskInput,
+  type ExplainInput,
+  type MoveExplainInput,
+  reviewMachine,
+} from "../machines/reviewMachine";
+import { evaluationLabel } from "../model/coach";
 import { ReviewScreen } from "./ReviewScreen";
 
 const explanation: GameExplanation = {
@@ -25,6 +31,7 @@ type Options = {
   withExplanation?: boolean;
   answer?: () => Promise<QuestionAnswer>;
   explain?: () => Promise<GameExplanation>;
+  explainMove?: (args: { input: MoveExplainInput }) => Promise<MoveExplanation>;
   /** Ajusta o resultado do fixture antes de abrir a tela. */
   adjust?: (result: ReturnType<typeof referenceResult>) => ReturnType<typeof referenceResult>;
 };
@@ -38,6 +45,10 @@ function renderReview(options: Options = {}) {
       ),
       explainGame: fromPromise<GameExplanation, ExplainInput>(
         options.explain ?? (async () => explanation),
+      ),
+      explainMove: fromPromise<MoveExplanation, MoveExplainInput>(
+        options.explainMove ??
+          (async ({ input }) => ({ text: `Explicação do lance ${input.ply}.` })),
       ),
     },
   });
@@ -234,7 +245,11 @@ describe("momentos-chave (RV-11, RV-12, RV-13)", () => {
   it("mostra a linha do motor no tabuleiro", async () => {
     renderReview();
     await userEvent.click(screen.getByRole("button", { name: "Ver a linha no tabuleiro" }));
-    expect(screen.getByText(/Depois de 22\.\.\.Ta7|Linha do motor/)).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("region", { name: "Tabuleiro da partida" })).getByText(
+        /Depois de 22\.\.\.Ta7|Linha do motor/,
+      ),
+    ).toBeInTheDocument();
   });
 });
 
@@ -337,5 +352,99 @@ describe("rodapé e nova análise (RV-18, RV-19)", () => {
     await userEvent.click(screen.getByRole("button", { name: "Analisar outra partida" }));
     await userEvent.click(screen.getByRole("button", { name: "Descartar e analisar outra" }));
     expect(received).toEqual(["REVIEW.NEW_GAME"]);
+  });
+});
+
+describe("revisão lance a lance (F9)", () => {
+  it("abre o painel no erro 22...Ta7, com o melhor lance e a explicação da IA (MR-10, MR-13)", async () => {
+    renderReview();
+    const panel = screen.getByRole("region", { name: "Revisão do lance" });
+    expect(within(panel).getByText("22...Ta7 · Erro")).toBeInTheDocument();
+    expect(within(panel).getByText("Seu lance")).toBeInTheDocument();
+    expect(
+      within(panel).getByText("Melhor era 22...Bd4+: dá xeque e salva o bispo em a1."),
+    ).toBeInTheDocument();
+    expect(
+      within(panel).getByText("Continuou atacado e sem defesa: o bispo em a1."),
+    ).toBeInTheDocument();
+    expect(await within(panel).findByText("Explicação do lance 44.")).toBeInTheDocument();
+    expect(within(panel).getByRole("status")).toHaveTextContent("Explicação do lance 44.");
+  });
+
+  it("acompanha o lance escolhido na lista (MR-10)", async () => {
+    renderReview();
+    const moves = screen.getByRole("region", { name: "Lances" });
+    await userEvent.click(within(moves).getByRole("button", { name: "Bxa1!" }));
+    const panel = screen.getByRole("region", { name: "Revisão do lance" });
+    expect(within(panel).getByText("12...Bxa1 · Melhor")).toBeInTheDocument();
+    expect(within(panel).getByText("Este foi o lance do motor.")).toBeInTheDocument();
+    expect(await within(panel).findByText("Explicação do lance 24.")).toBeInTheDocument();
+  });
+
+  it("mostra a falha da IA e tenta de novo (MR-16)", async () => {
+    let fail = true;
+    renderReview({
+      explainMove: async ({ input }) => {
+        if (fail) throw new Error("503");
+        return { text: `Explicação do lance ${input.ply}.` };
+      },
+    });
+    const panel = screen.getByRole("region", { name: "Revisão do lance" });
+    expect(await within(panel).findByText("Explicação indisponível.")).toBeInTheDocument();
+    // Os fatos dos motores continuam.
+    expect(within(panel).getByText(/^Melhor era 22\.\.\.Bd4\+/)).toBeInTheDocument();
+    fail = false;
+    await userEvent.click(within(panel).getByRole("button", { name: "Tentar de novo" }));
+    expect(await within(panel).findByText("Explicação do lance 44.")).toBeInTheDocument();
+  });
+
+  it("anima a linha do melhor lance sem trocar o lance revisado", async () => {
+    renderReview();
+    const panel = screen.getByRole("region", { name: "Revisão do lance" });
+    expect(within(panel).getByText(/^Bd4\+/)).toBeInTheDocument();
+    await userEvent.click(within(panel).getByRole("button", { name: "Ver a linha do motor" }));
+    const board = screen.getByRole("region", { name: "Tabuleiro da partida" });
+    // O primeiro passo da linha entra depois de 600 ms.
+    expect(
+      await within(board).findByText("Linha do motor", {}, { timeout: 2000 }),
+    ).toBeInTheDocument();
+    expect(within(panel).getByText("22...Ta7 · Erro")).toBeInTheDocument();
+  });
+
+  it("na posição inicial convida a escolher um lance (MR-12)", async () => {
+    renderReview();
+    await userEvent.click(screen.getByRole("button", { name: "Início" }));
+    const panel = screen.getByRole("region", { name: "Revisão do lance" });
+    expect(within(panel).getByText(/^Escolha um lance na lista/)).toBeInTheDocument();
+  });
+
+  it("mostra a classificação de cada lance na lista e a barra de avaliação (MR-09, MR-11)", () => {
+    renderReview();
+    const moves = screen.getByRole("region", { name: "Lances" });
+    expect(within(moves).getAllByRole("img", { name: "Erro" }).length).toBeGreaterThan(0);
+    expect(within(moves).getAllByRole("img", { name: "Capivarada" }).length).toBeGreaterThan(0);
+    expect(within(moves).getAllByRole("img", { name: "Melhor" }).length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("img", { name: /^Avaliação do motor: [+−]?(M?\d|\d+,\d) para as brancas$/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("a barra de avaliação segue a posição mostrada (MR-11)", async () => {
+    renderReview();
+    await userEvent.click(screen.getByRole("button", { name: "Início" }));
+    const first = referenceResult().evaluations[0];
+    if (!first) throw new Error("sem avaliação");
+    const expected = evaluationLabel(first);
+    expect(
+      screen.getByRole("img", { name: `Avaliação do motor: ${expected} para as brancas` }),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Próximo lance" }));
+    const second = referenceResult().evaluations[1];
+    if (!second) throw new Error("sem avaliação");
+    expect(
+      screen.getByRole("img", {
+        name: `Avaliação do motor: ${evaluationLabel(second)} para as brancas`,
+      }),
+    ).toBeInTheDocument();
   });
 });

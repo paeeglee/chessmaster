@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 54,
+  "next_id": 59,
   "lessons": [
     {
       "id": "L-001",
@@ -960,6 +960,96 @@
       ],
       "created": "2026-11-24T03:37:56Z",
       "last_seen": "2026-11-24T03:37:56Z"
+    },
+    {
+      "id": "L-054",
+      "key": "surviving_mutant::when an engine score has an ambiguous sentinel mate 0 test terminal overrides with a fixture where the other side wins or the override hides the bug",
+      "text": "When an engine score has an ambiguous sentinel (mate 0), test terminal overrides with a fixture where the other side wins, or the override hides the bug.",
+      "signal": "surviving_mutant",
+      "scope": "analysis/model",
+      "status": "candidate",
+      "features": [
+        "move-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M8 apps/web/src/domains/analysis/model/moveReview.ts:55 (analysis/model)"
+      ],
+      "created": "2026-11-24T13:23:29Z",
+      "last_seen": "2026-11-24T13:23:29Z"
+    },
+    {
+      "id": "L-055",
+      "key": "spec_precision_gap::when a label can be reached by two rules engine move or zero loss make every ui sentence key on the same rule as the label and pin it with a test",
+      "text": "When a label can be reached by two rules (engine move or zero loss), make every UI sentence key on the same rule as the label and pin it with a test.",
+      "signal": "spec_precision_gap",
+      "scope": "review/model",
+      "status": "candidate",
+      "features": [
+        "move-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "G2 apps/web/src/domains/review/model/coach.ts:61 (review/model)"
+      ],
+      "created": "2026-11-24T13:23:29Z",
+      "last_seen": "2026-11-24T13:23:29Z"
+    },
+    {
+      "id": "L-056",
+      "key": "surviving_mutant::guard test infrastructure isolation ports server reuse fake providers with a cheap unit test on the config since e2e passes either way when nothing else is running",
+      "text": "Guard test-infrastructure isolation (ports, server reuse, fake providers) with a cheap unit test on the config, since e2e passes either way when nothing else is running.",
+      "signal": "surviving_mutant",
+      "scope": "e2e config",
+      "status": "candidate",
+      "features": [
+        "move-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M28/M29 apps/web/playwright.config.ts:56 (e2e config)"
+      ],
+      "created": "2026-11-24T13:23:29Z",
+      "last_seen": "2026-11-24T13:23:29Z"
+    },
+    {
+      "id": "L-057",
+      "key": "surviving_mutant::each new allowed facts builder needs its own rejection tests for both labeled and unlabeled moves not only reuse of the shared verifier tests",
+      "text": "Each new allowed-facts builder needs its own rejection tests for both labeled and unlabeled moves, not only reuse of the shared verifier tests.",
+      "signal": "surviving_mutant",
+      "scope": "api verification",
+      "status": "candidate",
+      "features": [
+        "move-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M27 apps/api/src/game_analyzer/domains/explanation/domain/verification.py:149 (api verification)"
+      ],
+      "created": "2026-11-24T13:23:29Z",
+      "last_seen": "2026-11-24T13:23:29Z"
+    },
+    {
+      "id": "L-058",
+      "key": "surviving_mutant::when a ui shows a value indexed by the current position assert the exact value at a position whose neighbours differ not just the label format",
+      "text": "When a UI shows a value indexed by the current position, assert the exact value at a position whose neighbours differ, not just the label format.",
+      "signal": "surviving_mutant",
+      "scope": "review/components",
+      "status": "candidate",
+      "features": [
+        "move-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N12 apps/web/src/domains/review/components/BoardPanel.tsx:57 (review/components)"
+      ],
+      "created": "2026-11-24T15:35:48Z",
+      "last_seen": "2026-11-24T15:35:48Z"
     }
   ]
 }

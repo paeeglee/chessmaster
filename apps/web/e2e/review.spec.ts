@@ -2,7 +2,8 @@ import { expect, test } from "@playwright/test";
 import { analyzeReferenceGame, STABLE_MOMENTS } from "./reference";
 
 test.describe("resultado da análise (step_03)", () => {
-  test.setTimeout(180_000);
+  // Com ~500 ms por posição, a análise da partida de referência leva cerca de 75 s.
+  test.setTimeout(300_000);
 
   test("mostra o resultado da partida de referência e leva ao treino", async ({ page }) => {
     await analyzeReferenceGame(page);
@@ -39,6 +40,23 @@ test.describe("resultado da análise (step_03)", () => {
       await expect(
         page.getByRole("region", { name: "Lances" }).locator('[aria-current="true"]'),
       ).toHaveText("Te6??");
+    });
+
+    await test.step("o painel do treinador revisa 22...Ta7 com o motor e a IA (F9)", async () => {
+      await page.getByRole("button", { name: /^Momento \d: 22\.\.\.Ta7$/ }).click();
+      const panel = page.getByRole("region", { name: "Revisão do lance" });
+      await expect(panel.getByText(/^22\.\.\.Ta7 · (Erro|Capivarada)$/)).toBeVisible();
+      await expect(panel.getByText(/^Melhor era 22\.\.\./)).toBeVisible();
+      // Texto da IA sob demanda (provedor falso, só com fatos do contrato do lance).
+      await expect(panel.getByRole("status")).toHaveText(
+        /^22\.\.\.Ta7 foi (um erro|uma capivarada)\./,
+        {
+          timeout: 30_000,
+        },
+      );
+      const moves = page.getByRole("region", { name: "Lances" });
+      await expect(moves.getByRole("img", { name: /^(Erro|Capivarada)$/ }).first()).toBeVisible();
+      await expect(page.getByRole("img", { name: /^Avaliação do motor: / })).toBeVisible();
     });
 
     await test.step("Pergunte à IA responde com fatos dos motores (R-11)", async () => {

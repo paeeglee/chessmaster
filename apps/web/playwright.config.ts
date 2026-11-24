@@ -1,6 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const previewUrl = "http://localhost:4173";
+// Porta própria do api nos testes: o `make dev` usa a 8000 com a IA de verdade, e
+// reaproveitar esse servidor faria os testes chamarem o provedor real.
+const E2E_API_PORT = 8100;
 const FULL_ANALYSIS_SPECS = /(analysis|review|training|endgame)\.spec\.ts$/;
 
 // Os testes rodam contra o build servido pelo `vite preview`, que envia os mesmos
@@ -38,17 +41,20 @@ export default defineConfig({
       name: "web",
       command: "pnpm build && pnpm preview",
       url: previewUrl,
-      reuseExistingServer: !process.env.CI,
+      env: { API_PROXY_TARGET: `http://localhost:${E2E_API_PORT}` },
+      // Sempre um preview novo, com o proxy apontando para o api dos testes.
+      reuseExistingServer: false,
       timeout: 120_000,
     },
     {
       name: "api",
-      command: "uv run uvicorn game_analyzer.main:app --port 8000",
+      command: `uv run uvicorn game_analyzer.main:app --port ${E2E_API_PORT}`,
       cwd: "../api",
       // Textos da IA por template: os testes não chamam um provedor de verdade.
       env: { AI_PROVIDER: "fake" },
-      url: "http://localhost:8000/api/health",
-      reuseExistingServer: !process.env.CI,
+      url: `http://localhost:${E2E_API_PORT}/api/health`,
+      // Nunca reaproveita: um api já de pé poderia estar com a IA de verdade.
+      reuseExistingServer: false,
       timeout: 60_000,
     },
   ],

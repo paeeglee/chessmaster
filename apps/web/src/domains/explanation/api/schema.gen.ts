@@ -55,10 +55,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/move-explanations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Explain Move
+         * @description Revisão lance a lance (F9): explica um lance quando o jogador o abre.
+         */
+        post: operations["explain_move_api_move_explanations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** BestMoveReasonsFact */
+        BestMoveReasonsFact: {
+            /**
+             * Check
+             * @description O melhor lance dá xeque
+             */
+            check: boolean;
+            /**
+             * Mate In
+             * @description Mate em N lances com o melhor lance
+             */
+            mate_in: number | null;
+            /**
+             * Wins
+             * @description Pontos de material que a linha do melhor lance ganha
+             */
+            wins: number;
+            /**
+             * Saves
+             * @description Peças en prise que o melhor lance salva
+             */
+            saves: components["schemas"]["PieceOnSquare"][];
+        };
         /**
          * GameContract
          * @description Tudo o que a IA pode afirmar sobre a partida.
@@ -176,6 +219,79 @@ export interface components {
              * @description Até 3 frases, com casas e lances concretos
              */
             explanation: string;
+        };
+        /**
+         * MoveContract
+         * @description Tudo o que a IA pode afirmar sobre UM lance (revisão lance a lance, F9).
+         */
+        MoveContract: {
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "beginner" | "intermediate" | "advanced";
+            /**
+             * Player Color
+             * @enum {string}
+             */
+            player_color: "w" | "b";
+            /**
+             * Mover
+             * @enum {string}
+             */
+            mover: "player" | "opponent";
+            /**
+             * Move Label
+             * @description Lance com número, em notação portuguesa: "22...Ta7"
+             */
+            move_label: string;
+            /**
+             * Move San
+             * @description O mesmo lance sem número: "Ta7"
+             */
+            move_san: string;
+            /**
+             * Quality
+             * @enum {string}
+             */
+            quality: "best" | "excellent" | "good" | "inaccuracy" | "mistake" | "blunder" | "miss";
+            /**
+             * Best Move Label
+             * @description Melhor lance do motor com número: "22...Bd4+"
+             */
+            best_move_label: string | null;
+            /**
+             * Best Line
+             * @description Linha do motor a partir do melhor lance
+             */
+            best_line: string[];
+            /**
+             * Undefended
+             * @description Peças que o lance deixou descobertas
+             */
+            undefended: components["schemas"]["PieceOnSquare"][];
+            /**
+             * Still En Prise
+             * @description Peças que já estavam atacadas sem defesa e continuaram
+             */
+            still_en_prise: components["schemas"]["PieceOnSquare"][];
+            /**
+             * Missed Material
+             * @description Material que o melhor lance ganharia a mais
+             */
+            missed_material: number;
+            best_reasons: components["schemas"]["BestMoveReasonsFact"] | null;
+        };
+        /**
+         * MoveExplanation
+         * @description Resposta da IA para o painel do treinador, sempre neste formato.
+         */
+        MoveExplanation: {
+            /**
+             * Text
+             * @description De 2 a 4 frases sobre o lance
+             */
+            text: string;
         };
         /** MoveFact */
         MoveFact: {
@@ -370,6 +486,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["QuestionAnswer"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description A IA citou algo fora do contrato mesmo depois de nova tentativa. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A IA está indisponível (provedor, chave ou rede). */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    explain_move_api_move_explanations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveContract"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoveExplanation"];
                 };
             };
             /** @description Validation Error */

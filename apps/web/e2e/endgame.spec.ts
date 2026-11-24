@@ -10,7 +10,8 @@ const krkMate = readFileSync(
 );
 
 test.describe("tabela de finais (F5)", () => {
-  test.setTimeout(180_000);
+  // Com ~500 ms por posição, a análise da partida de referência leva cerca de 75 s.
+  test.setTimeout(300_000);
 
   test("a etapa 4 roda e o resultado mostra os lances até o mate", async ({ page }) => {
     await page.goto("/");
@@ -19,7 +20,7 @@ test.describe("tabela de finais (F5)", () => {
     await page.getByRole("button", { name: "Pretas" }).click();
     await page.getByRole("button", { name: "Analisar partida →" }).click();
     await expect(page.getByRole("region", { name: "Resumo da partida" })).toBeVisible({
-      timeout: 120_000,
+      timeout: 240_000,
     });
     await expect(page.getByText("10 lances", { exact: true })).toBeVisible();
     await expect(page.getByText("para o mate de torre no final")).toBeVisible();

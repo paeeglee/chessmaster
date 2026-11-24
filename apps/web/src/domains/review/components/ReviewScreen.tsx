@@ -3,6 +3,7 @@ import type { ActorRefFrom } from "xstate";
 import { StepIndicator } from "../../../shared/ui/StepIndicator";
 import type { reviewMachine } from "../machines/reviewMachine";
 import { BoardPanel } from "./BoardPanel";
+import { CoachPanel } from "./CoachPanel";
 import { ConfirmNewGame } from "./ConfirmNewGame";
 import { KeyMomentsList } from "./KeyMomentsList";
 import { MaterialChart } from "./MaterialChart";
@@ -36,6 +37,7 @@ export function ReviewScreen({ reviewRef }: { reviewRef: ActorRefFrom<typeof rev
       <div className="flex flex-wrap items-start gap-6">
         <div className="flex min-w-0 flex-[1_1_460px] flex-col gap-3.5">
           <BoardPanel context={context} send={send} />
+          <CoachPanel context={context} send={send} />
           <MaterialChart context={context} send={send} />
           <MoveList context={context} send={send} />
         </div>

@@ -1,6 +1,7 @@
-import type { GameContract } from "../../explanation";
+import type { GameContract, MoveContract } from "../../explanation";
 import { formatMoveLabel, toPortugueseSan } from "../../game";
 import type { AnalysisRequest } from "../../game-input";
+import type { MoveReview } from "./moveReview";
 import type { AnalysisSummary } from "./summary";
 
 /** A partir de quanto o saldo de material conta como vantagem (mesmo limiar do D3). */
@@ -68,5 +69,30 @@ export function buildContract(request: AnalysisRequest, summary: AnalysisSummary
       count: pattern.count,
       move_labels: pattern.plies.map(label),
     })),
+  };
+}
+
+/**
+ * MR-13: contrato de UM lance para o painel do treinador (F9). Só fatos da revisão
+ * calculada pelos motores; a IA não recebe posições nem avaliações.
+ */
+export function buildMoveContract(request: AnalysisRequest, review: MoveReview): MoveContract {
+  const { facts } = review;
+  const reasons = facts.bestReasons;
+  return {
+    level: request.level,
+    player_color: request.playerColor,
+    mover: review.color === request.playerColor ? "player" : "opponent",
+    move_label: review.moveLabel,
+    move_san: review.moveLabel.replace(/^\d+\.(?:\.\.)?/, ""),
+    quality: review.quality,
+    best_move_label: facts.bestMoveLabel,
+    best_line: facts.bestLine,
+    undefended: facts.undefended,
+    still_en_prise: facts.stillEnPrise,
+    missed_material: facts.missedMaterial,
+    best_reasons: reasons
+      ? { check: reasons.check, mate_in: reasons.mateIn, wins: reasons.wins, saves: reasons.saves }
+      : null,
   };
 }

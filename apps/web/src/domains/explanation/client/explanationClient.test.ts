@@ -6,7 +6,9 @@ import {
   ExplanationError,
   type GameContract,
   type GameExplanation,
+  type MoveContract,
   requestExplanation,
+  requestMoveExplanation,
 } from "./explanationClient";
 
 const contract = { level: "beginner" } as unknown as GameContract;
@@ -58,5 +60,20 @@ describe("explanationClient", () => {
       answer: "Sim.",
       in_scope: true,
     });
+  });
+
+  it("explica um lance (MR-13)", async () => {
+    let received: unknown = null;
+    server.use(
+      http.post("/api/move-explanations", async ({ request }) => {
+        received = await request.json();
+        return HttpResponse.json({ text: "22...Ta7 foi um erro." });
+      }),
+    );
+    const move = { move_label: "22...Ta7" } as unknown as MoveContract;
+    await expect(requestMoveExplanation(move)).resolves.toEqual({
+      text: "22...Ta7 foi um erro.",
+    });
+    expect(received).toEqual(move);
   });
 });

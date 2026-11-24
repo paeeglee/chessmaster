@@ -232,3 +232,13 @@ export function hiddenMistakes(result: AnalysisResult): number {
   const mistakes = result.verdicts.filter((verdict) => verdict.kind === "mistake").length;
   return Math.max(0, mistakes - result.keyMoments.length);
 }
+
+/**
+ * MR-10: o lance que o painel do treinador revisa na posição `position`. Antes de um
+ * momento-chave (o tabuleiro para antes do erro), é o próprio erro; senão, o lance que
+ * levou à posição. 0 = posição inicial, sem lance.
+ */
+export function reviewedPly(result: AnalysisResult, position: number): number {
+  const isMomentNext = result.keyMoments.some((moment) => moment.ply === position + 1);
+  return isMomentNext ? position + 1 : position;
+}
