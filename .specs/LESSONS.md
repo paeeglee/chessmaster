@@ -312,6 +312,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: validation.md round 2 N05 (TrainingScreen.tsx:146) (web-tests) (web-tests)
 - last seen: 2026-11-24T03:16:27Z
 
+### L-045 - When an accessible label describes a transient visual state, assert the label both while the state is on and after it ends
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-a11y` · harmful: 0
+- features: training-screen
+- evidence: validation.md round 2 N02 (TrainingScreen.tsx:144) (web-a11y)
+- last seen: 2026-11-24T03:06:26Z
+
+### L-046 - When Portuguese text agrees in gender with a piece name, test both a masculine and a feminine piece
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: training-screen
+- evidence: validation.md round 2 N05 (TrainingScreen.tsx:146) (web-tests)
+- last seen: 2026-11-24T03:06:26Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
