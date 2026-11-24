@@ -55,6 +55,20 @@ def test_accepts_best_moves_and_ignores_check_signs(contract: GameContract) -> N
     assert verify_text("Bd4 e Bd4+ salvavam; 72...Ta6 deu mate.", facts) == []
 
 
+def test_accepts_best_moves_written_with_the_key_moment_number(contract: GameContract) -> None:
+    # A IA escreve o melhor lance com o número do lance errado: "22...Bd4+" no lugar de
+    # 22...Ta7. Bug visto com o GPT-5.1: textos corretos recusados pela verificação.
+    facts = allowed_facts(contract)
+    assert verify_text("O melhor era 22...Bd4+ e depois 27...Be2.", facts) == []
+    assert verify_text("O melhor era 22... Bd4+.", facts) == []
+
+
+def test_numbered_best_move_must_match_its_key_moment(contract: GameContract) -> None:
+    # O número tem de ser o do momento-chave: 27...Bd4+ não foi recomendado em lugar nenhum.
+    facts = allowed_facts(contract)
+    assert verify_text("O melhor era 27...Bd4+.", facts) == ["lance 27...Bd4+ não está no contrato"]
+
+
 def test_reports_a_square_not_in_the_contract(contract: GameContract) -> None:
     facts = allowed_facts(contract)
     assert verify_text("O cavalo em h3 ficou solto.", facts) == ["casa h3 não está no contrato"]

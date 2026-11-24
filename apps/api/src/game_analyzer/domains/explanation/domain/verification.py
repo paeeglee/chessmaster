@@ -25,6 +25,8 @@ _SQUARE = re.compile(r"[a-h][1-8]")
 _STANDALONE_SQUARE = re.compile(r"(?<![\w])[a-h][1-8](?!\w)")
 _DECIMAL = re.compile(r"[+-]?\d+[.,]\d+")
 _INTEGER = re.compile(r"(?<![\w])\d+(?!\w)")
+# Número do lance no rótulo do momento-chave ("22..." em "22...Ta7").
+_MOVE_NUMBER = re.compile(r"^\d+\s?(?:\.\.\.|…|\.)")
 
 
 def _normalize_move(move: str) -> str:
@@ -51,6 +53,10 @@ def allowed_facts(contract: GameContract) -> AllowedFacts:
     for moment in contract.key_moments:
         if moment.best_move:
             moves.add(_normalize_move(moment.best_move))
+            # O melhor lance também pode vir com o número do lance errado ("22...Bd4+").
+            number = _MOVE_NUMBER.match(moment.move_label)
+            if number:
+                labels.add(_normalize_move(number.group(0) + moment.best_move))
         pieces.append(moment.lost_piece)
         numbers.add(moment.loss)
     for mistake in contract.opponent_mistakes:
