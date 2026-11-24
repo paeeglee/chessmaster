@@ -1,9 +1,15 @@
 import { assign, fromCallback, fromPromise, setup } from "xstate";
-import type { EngineClient, PositionEvaluation } from "../../evaluation";
+import {
+  type EngineClient,
+  type PositionEvaluation,
+  type ProbeResult,
+  probeEndgame,
+} from "../../evaluation";
 import { type GameExplanation, requestExplanation } from "../../explanation";
 import type { AnalysisRequest } from "../../game-input";
 import { classifyPly } from "../model/classify";
 import { buildContract } from "../model/contract";
+import { type EndgameSummary, findEndgameStart, summarizeEndgame } from "../model/endgame";
 import { type Finding, findingsFrom } from "../model/findings";
 import { type AnalysisSummary, summarizeAnalysis } from "../model/summary";
 
@@ -12,7 +18,13 @@ export type AnalysisResult = AnalysisSummary & {
   request: AnalysisRequest;
   explanation: GameExplanation | null;
   aiFailed: boolean;
+  /** Motor 4: o final com tabela que a partida alcançou (null se não houve ou falhou). */
+  endgame: EndgameSummary | null;
+  endgameStatus: EndgameStatus;
 };
+
+/** Etapa 4: ainda não chegou, rodando, concluída, não necessária ou com falha. */
+export type EndgameStatus = "waiting" | "running" | "done" | "skipped" | "failed";
 
 export type AnalysisInput = { request: AnalysisRequest; engine: EngineClient };
 
@@ -30,7 +42,11 @@ export type AnalysisContext = AnalysisInput & {
   summary: AnalysisSummary | null;
   explanation: GameExplanation | null;
   aiFailed: boolean;
+  endgame: EndgameSummary | null;
+  endgameStatus: EndgameStatus;
 };
+
+export type ProbeInput = { fen: string };
 
 /** Todas as posições da partida: a inicial e a posição depois de cada meio-lance. */
 export function positionsOf(request: AnalysisRequest): string[] {
@@ -44,7 +60,28 @@ export const analysisMachine = setup({
     events: {} as AnalysisEvent,
     output: {} as AnalysisResult,
   },
+  actions: {
+    summarize: assign(({ context }) => {
+      const last = classifyPly(
+        context.request.game,
+        context.evaluations,
+        context.request.game.plies.length,
+        context.request.playerColor,
+      );
+      return {
+        findings: last ? [...context.findings, ...findingsFrom([last])] : context.findings,
+        summary: summarizeAnalysis(
+          context.request.game,
+          context.evaluations,
+          context.request.playerColor,
+        ),
+      };
+    }),
+  },
   actors: {
+    probeEndgame: fromPromise<ProbeResult | null, ProbeInput>(({ input }) =>
+      probeEndgame(input.fen),
+    ),
     evaluatePositions: fromCallback<AnalysisEvent, AnalysisInput>(({ sendBack, input }) => {
       let cancelled = false;
       void (async () => {
@@ -82,6 +119,8 @@ export const analysisMachine = setup({
     summary: null,
     explanation: null,
     aiFailed: false,
+    endgame: null,
+    endgameStatus: "waiting",
   }),
   initial: "evaluating",
   states: {
@@ -109,30 +148,50 @@ export const analysisMachine = setup({
             return { evaluations, findings, elapsedMs: Date.now() - context.startedAt };
           }),
         },
-        "EVALUATION.DONE": {
-          target: "explaining",
-          actions: assign(({ context }) => {
-            const last = classifyPly(
-              context.request.game,
-              context.evaluations,
-              context.request.game.plies.length,
-              context.request.playerColor,
-            );
-            return {
-              findings: last ? [...context.findings, ...findingsFrom([last])] : context.findings,
-              summary: summarizeAnalysis(
-                context.request.game,
-                context.evaluations,
-                context.request.playerColor,
-              ),
-            };
-          }),
-        },
+        "EVALUATION.DONE": [
+          {
+            // TB-04: sem final com tabela, a etapa 4 não é necessária.
+            guard: ({ context }) => findEndgameStart(context.request.game) !== null,
+            target: "endgame",
+            actions: "summarize",
+          },
+          {
+            target: "explaining",
+            actions: ["summarize", assign({ endgameStatus: "skipped" })],
+          },
+        ],
         "EVALUATION.FAILED": { target: "evaluationFailed" },
       },
     },
     evaluationFailed: {
       on: { RETRY: { target: "evaluating" } },
+    },
+    endgame: {
+      entry: assign({ endgameStatus: "running" }),
+      invoke: {
+        src: "probeEndgame",
+        input: ({ context }) => ({ fen: findEndgameStart(context.request.game)?.fen ?? "" }),
+        onDone: {
+          target: "explaining",
+          actions: assign(({ context, event }) => {
+            const start = findEndgameStart(context.request.game);
+            return {
+              endgameStatus: "done" as const,
+              endgame:
+                start && event.output
+                  ? summarizeEndgame(
+                      context.request.game,
+                      start,
+                      event.output,
+                      context.request.playerColor,
+                    )
+                  : null,
+            };
+          }),
+        },
+        // TB-06: a análise segue sem a tabela.
+        onError: { target: "explaining", actions: assign({ endgameStatus: "failed" }) },
+      },
     },
     explaining: {
       invoke: {
@@ -158,5 +217,7 @@ export const analysisMachine = setup({
     request: context.request,
     explanation: context.explanation,
     aiFailed: context.aiFailed,
+    endgame: context.endgame,
+    endgameStatus: context.endgameStatus,
   }),
 });

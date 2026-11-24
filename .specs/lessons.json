@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 51,
+  "next_id": 54,
   "lessons": [
     {
       "id": "L-001",
@@ -906,6 +906,60 @@
       ],
       "created": "2026-11-24T03:16:27Z",
       "last_seen": "2026-11-24T03:16:27Z"
+    },
+    {
+      "id": "L-051",
+      "key": "surviving_mutant::pin sliding piece blocker logic with a probe where the own king shields the line extreme value checks like max dtm do not exercise it",
+      "text": "Pin sliding-piece blocker logic with a probe where the own king shields the line; extreme-value checks like max DTM do not exercise it",
+      "signal": "surviving_mutant",
+      "scope": "evaluation/tablebase",
+      "status": "candidate",
+      "features": [
+        "endgame-tablebase"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "apps/web/src/domains/evaluation/model/tablebase/generate.ts:99 (mutant 6) (evaluation/tablebase)"
+      ],
+      "created": "2026-11-24T03:37:56Z",
+      "last_seen": "2026-11-24T03:37:56Z"
+    },
+    {
+      "id": "L-052",
+      "key": "surviving_mutant::when a machine gains a new state add a component test that renders the screen in that state including its headline and failure label",
+      "text": "When a machine gains a new state, add a component test that renders the screen in that state, including its headline and failure label",
+      "signal": "surviving_mutant",
+      "scope": "analysis/components",
+      "status": "candidate",
+      "features": [
+        "endgame-tablebase"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "apps/web/src/domains/analysis/components/AnalyzingScreen.tsx:75 (mutant 22) (analysis/components)"
+      ],
+      "created": "2026-11-24T03:37:56Z",
+      "last_seen": "2026-11-24T03:37:56Z"
+    },
+    {
+      "id": "L-053",
+      "key": "spec_precision_gap::spec every status a ui indicator can show including the failure state not only the used and not needed cases",
+      "text": "Spec every status a UI indicator can show, including the failure state, not only the used and not-needed cases",
+      "signal": "spec_precision_gap",
+      "scope": "review/footer",
+      "status": "candidate",
+      "features": [
+        "endgame-tablebase"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "TB-08 vs apps/web/src/domains/review/components/ReviewSidebar.tsx:141 (review/footer)"
+      ],
+      "created": "2026-11-24T03:37:56Z",
+      "last_seen": "2026-11-24T03:37:56Z"
     }
   ]
 }

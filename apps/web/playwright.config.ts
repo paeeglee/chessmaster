@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const previewUrl = "http://localhost:4173";
-const FULL_ANALYSIS_SPECS = /(analysis|review|training)\.spec\.ts$/;
+const FULL_ANALYSIS_SPECS = /(analysis|review|training|endgame)\.spec\.ts$/;
 
 // Os testes rodam contra o build servido pelo `vite preview`, que envia os mesmos
 // cabeçalhos de isolamento de origem do servidor de desenvolvimento, com o api de pé

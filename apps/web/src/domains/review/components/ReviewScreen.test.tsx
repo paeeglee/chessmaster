@@ -104,10 +104,41 @@ describe("IA indisponível (RV-03)", () => {
     expect(screen.getByText("✓ IA: só explica, não calcula")).toBeInTheDocument();
   });
 
-  it("o rodapé não marca a tabela de finais como usada antes da F5 (RV-18)", () => {
+  it("o rodapé mostra a tabela de finais como não necessária quando não foi usada (TB-08)", () => {
     renderReview();
-    expect(screen.getByText("– Tabela de finais (ainda não disponível)")).toBeInTheDocument();
+    expect(screen.getByText("– Tabela de finais (não necessária)")).toBeInTheDocument();
     expect(screen.queryByText(/✓ Tabela de finais/)).toBeNull();
+  });
+
+  it("o rodapé mostra a tabela de finais usada ou com falha (TB-08)", () => {
+    renderReview({ adjust: (result) => ({ ...result, endgameStatus: "done" }) });
+    expect(screen.getByText("✓ Tabela de finais")).toBeInTheDocument();
+  });
+
+  it("o rodapé avisa a falha da tabela de finais (TB-06)", () => {
+    renderReview({ adjust: (result) => ({ ...result, endgameStatus: "failed" }) });
+    expect(screen.getByText("✕ Tabela de finais: falhou")).toBeInTheDocument();
+  });
+
+  it("mostra o 4º cartão com os lances até o mate e o ideal (TB-07)", () => {
+    renderReview({
+      adjust: (result) => ({
+        ...result,
+        endgameStatus: "done",
+        endgame: {
+          kind: "KRK",
+          position: 130,
+          strongColor: "b",
+          playerIsStrong: true,
+          winner: "b",
+          optimalMoves: 5,
+          movesToMate: 7,
+        },
+      }),
+    });
+    expect(screen.getByText("7 lances")).toBeInTheDocument();
+    expect(screen.getByText("para o mate de torre no final")).toBeInTheDocument();
+    expect(screen.getByText("o mais rápido era 5")).toBeInTheDocument();
   });
 });
 

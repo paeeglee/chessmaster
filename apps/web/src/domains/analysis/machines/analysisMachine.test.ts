@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createActor, fromPromise, waitFor } from "xstate";
-import type { EngineClient, PositionEvaluation } from "../../evaluation";
+import type { EngineClient, PositionEvaluation, ProbeResult } from "../../evaluation";
 import type { GameExplanation } from "../../explanation";
 import { parseGameText, replayGame } from "../../game";
 import referenceGameHtml from "../../game/fixtures/reference-game.chesscom.html?raw";
 import type { AnalysisRequest } from "../../game-input";
+import { krkGame } from "../fixtures/krkGame";
 import referenceEvaluations from "../fixtures/reference-game.evaluations.json";
 import type { AnalysisSummary } from "../model/summary";
-import { analysisMachine, positionsOf } from "./analysisMachine";
+import { analysisMachine, type ProbeInput, positionsOf } from "./analysisMachine";
 
 const evaluations = referenceEvaluations as PositionEvaluation[];
 
@@ -196,5 +197,93 @@ describe("analysisMachine", () => {
     expect(engine.calls).toHaveLength(45);
     const labels = actor.getSnapshot().context.findings.map((finding) => finding.moveLabel);
     expect(labels.at(-1)).toBe("22...Ta7?");
+  });
+});
+
+describe("analysisMachine: tabela de finais (TB-04, TB-05, TB-06)", () => {
+  /** Motor falso que avalia qualquer posição sem variante. */
+  function plainEngine(): EngineClient {
+    return {
+      evaluate: async (fen: string) => ({
+        fen,
+        depth: 18,
+        score: { kind: "cp", value: 0 },
+        bestMove: null,
+        pv: [],
+      }),
+      cancel: () => {},
+    } as unknown as EngineClient;
+  }
+
+  function startWith(
+    request: AnalysisRequest,
+    engine: EngineClient,
+    probe: (input: ProbeInput) => Promise<ProbeResult | null>,
+  ) {
+    const probes: string[] = [];
+    const machine = analysisMachine.provide({
+      actors: {
+        explainGame: fromPromise(async () => explanation),
+        probeEndgame: fromPromise<ProbeResult | null, ProbeInput>(async ({ input }) => {
+          probes.push(input.fen);
+          return probe(input);
+        }),
+      },
+    });
+    const actor = createActor(machine, { input: { request, engine } }).start();
+    return { actor, probes };
+  }
+
+  const krkRequest = (): AnalysisRequest => ({
+    game: krkGame(),
+    playerColor: "w",
+    level: "beginner",
+    priorities: [],
+  });
+
+  it("sem final com tabela, a etapa não é necessária e a tabela não é consultada", async () => {
+    const { actor, probes } = startWith(referenceRequest(), fakeEngine(), async () => null);
+    await waitFor(actor, (snapshot) => snapshot.status === "done");
+    expect(probes).toEqual([]);
+    expect(actor.getSnapshot().output).toMatchObject({ endgame: null, endgameStatus: "skipped" });
+  });
+
+  it("consulta a primeira posição do final e guarda o resumo", async () => {
+    let release: (result: ProbeResult) => void = () => {};
+    const { actor, probes } = startWith(
+      krkRequest(),
+      plainEngine(),
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    await waitFor(actor, (snapshot) => snapshot.matches("endgame"));
+    expect(actor.getSnapshot().context.endgameStatus).toBe("running");
+    expect(probes).toEqual(["k7/8/1K6/8/8/8/8/R7 b - - 0 1"]);
+    release({ kind: "KRK", strongColor: "w", winner: "w", dtmPlies: 2, mateInMoves: 1 });
+    await waitFor(actor, (snapshot) => snapshot.status === "done");
+    expect(actor.getSnapshot().output).toMatchObject({
+      endgameStatus: "done",
+      endgame: { kind: "KRK", playerIsStrong: true, optimalMoves: 1, movesToMate: 1 },
+    });
+  });
+
+  it("se a tabela falhar, a análise segue sem ela", async () => {
+    const { actor } = startWith(krkRequest(), plainEngine(), async () => {
+      throw new Error("worker caiu");
+    });
+    await waitFor(actor, (snapshot) => snapshot.status === "done");
+    expect(actor.getSnapshot().output).toMatchObject({
+      endgame: null,
+      endgameStatus: "failed",
+      explanation,
+    });
+  });
+
+  it("posição fora da tabela na consulta não gera resumo", async () => {
+    const { actor } = startWith(krkRequest(), plainEngine(), async () => null);
+    await waitFor(actor, (snapshot) => snapshot.status === "done");
+    expect(actor.getSnapshot().output).toMatchObject({ endgame: null, endgameStatus: "done" });
   });
 });

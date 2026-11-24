@@ -113,6 +113,16 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   (`explaining`). Se a IA falhar, o resultado segue com `aiFailed: true`. Cancelar
   para o ator, que manda `stop` ao motor e rejeita a fila (`EngineClient.cancel`).
   Ao terminar, o `appMachine` vai para `review` com o `AnalysisResult`.
+- **Tabela de finais (F5, motor 4):** depois da avaliação, se a partida chegou a rei
+  e dama contra rei (KQK) ou rei e torre contra rei (KRK), o `analysisMachine` passa
+  pelo estado `endgame`: o ator `probeEndgame` manda a primeira posição desse final
+  a um Web Worker (`evaluation/workers/tablebase.worker.ts`), que gera a tabela por
+  retroanálise na primeira consulta (cerca de 1 s; o mate mais longo é de 10 lances
+  em KQK e 16 em KRK) e devolve o resultado exato e a distância até o mate. O
+  resultado ganha `endgame` (lances que o jogador levou até o mate e o ideal) e
+  `endgameStatus`; sem esse final, a etapa 4 fica "não necessária" e o worker nem é
+  criado. Se a tabela falhar, a análise segue sem ela. A tela Resultado mostra o 4º
+  cartão ("N lances para o mate de torre no final") e o status no rodapé.
 - **Resultado (F7):** no estado `review`, o `appMachine` invoca o `reviewMachine`
   (domínio `review`) com o `AnalysisResult`. Ele tem regiões paralelas: `board`
   (posição mostrada, orientação, momento aberto e a linha do motor andando a cada
