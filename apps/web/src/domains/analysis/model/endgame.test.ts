@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { ProbeResult } from "../../evaluation";
+import { generateTable, probe } from "../../evaluation";
+import { parseGameText, replayGame } from "../../game";
+import krkMate from "../fixtures/krk-mate.txt?raw";
 import { krkGame } from "../fixtures/krkGame";
 import { findEndgameStart, summarizeEndgame } from "./endgame";
 
@@ -51,4 +54,25 @@ describe("summarizeEndgame (TB-05)", () => {
     const unfinished = { ...game, plies: game.plies.slice(0, 2), termination: null };
     expect(summarizeEndgame(unfinished, start, probed, "w").movesToMate).toBeNull();
   });
+});
+
+describe("partida real que chega a KRK (TB-05, TB-07)", () => {
+  it("as pretas dão mate em 10 lances, o mesmo que o ideal da tabela", () => {
+    const parsed = parseGameText(krkMate);
+    if (parsed.kind !== "parsed") throw new Error("partida inválida");
+    const replayed = replayGame(parsed.game);
+    if (replayed.kind !== "legal") throw new Error("lance ilegal");
+    const game = replayed.game;
+    const start = findEndgameStart(game);
+    expect(start).toMatchObject({ position: 88, kind: "KRK", strongColor: "b" });
+    if (!start) throw new Error("sem final");
+    const probed = probe(generateTable("KRK"), start.fen);
+    if (!probed) throw new Error("fora da tabela");
+    expect(summarizeEndgame(game, start, probed, "b")).toMatchObject({
+      playerIsStrong: true,
+      winner: "b",
+      optimalMoves: 10,
+      movesToMate: 10,
+    });
+  }, 30_000);
 });
