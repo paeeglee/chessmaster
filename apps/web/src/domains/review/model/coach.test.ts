@@ -90,7 +90,9 @@ describe("barra de avaliação (MR-11)", () => {
     expect(evaluationLabel(at({ kind: "cp", value: 120 }))).toBe("+1,2");
     expect(evaluationLabel(at({ kind: "cp", value: -40 }))).toBe("−0,4");
     expect(evaluationLabel(at({ kind: "cp", value: 3 }))).toBe("0,0");
-    expect(evaluationLabel(at({ kind: "cp", value: 2500 }))).toBe("+10,0");
+    expect(evaluationLabel(at({ kind: "cp", value: 2500 }))).toBe("+10");
+    expect(evaluationLabel(at({ kind: "cp", value: -1000 }))).toBe("−10");
+    expect(evaluationLabel(at({ kind: "cp", value: 999 }))).toBe("+10,0");
     expect(evaluationLabel(at({ kind: "mate", value: 3 }))).toBe("M3");
     expect(evaluationLabel(at({ kind: "mate", value: -2 }))).toBe("−M2");
   });
