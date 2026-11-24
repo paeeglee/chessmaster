@@ -49,7 +49,7 @@ test.describe("análise da partida (step_02)", () => {
     await expect(page.getByRole("button", { name: "Analisar partida →" })).toBeEnabled();
   });
 
-  test("cancelar no meio e analisar de novo usa o motor sem resultado velho", async ({ page }) => {
+  test("cancelar no meio e analisar de novo chega ao resultado", async ({ page }) => {
     await startReferenceAnalysis(page);
     // Cancela com a avaliação em andamento (o Stockfish está buscando).
     await expect(page.getByRole("progressbar", { name: "Motor de avaliação" })).toBeVisible();
