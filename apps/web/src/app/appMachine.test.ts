@@ -227,18 +227,25 @@ describe("appMachine com a tela Colar", () => {
     });
   });
 
-  it("leva ao treino de um momento e volta ao resultado (RV-12)", async () => {
+  it("leva ao treino de um momento e volta ao resultado (RV-12, TR-12)", async () => {
+    const engine = { evaluate: async () => ({}) };
+    const result = { keyMoments: [] };
+    let trainingInput: unknown = null;
     const logic = appMachine.provide({
       actors: {
         engineLoader: engineLoaderMachine.provide({
           actors: {
             loadEngine: fromCallback(({ sendBack }) => {
-              sendBack({ type: "ENGINE.READY", engine: {} as never });
+              sendBack({ type: "ENGINE.READY", engine: engine as never });
             }),
           },
         }),
-        analysis: fromPromise(async () => ({}) as never) as never,
+        analysis: fromPromise(async () => result as never) as never,
         review: createMachine({}) as never,
+        // A sessão de treino é testada no domínio training; aqui só o input importa.
+        training: fromCallback(({ input }) => {
+          trainingInput = input;
+        }) as never,
       },
     });
     const app = createActor(logic).start();
@@ -249,6 +256,7 @@ describe("appMachine com a tela Colar", () => {
     app.send({ type: "TRAINING.REQUESTED", ply: 86 });
     expect(app.getSnapshot().value).toBe("training");
     expect(app.getSnapshot().context.trainingPly).toBe(86);
+    expect(trainingInput).toEqual({ result, ply: 86, engine });
     app.send({ type: "TRAINING.BACK" });
     expect(app.getSnapshot().value).toBe("review");
     expect(app.getSnapshot().context.trainingPly).toBeNull();

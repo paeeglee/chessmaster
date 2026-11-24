@@ -3,6 +3,7 @@ import type { ActorRefFrom } from "xstate";
 import { AnalyzingScreen } from "../domains/analysis";
 import { GameInputScreen, type gameInputMachine } from "../domains/game-input";
 import { ReviewScreen } from "../domains/review";
+import { TrainingScreen } from "../domains/training";
 import { AppHeader } from "./AppHeader";
 import { AppMachineContext } from "./AppMachineContext";
 import { EngineIndicator, type EngineLoaderRef, useEngineState } from "./EngineIndicator";
@@ -24,29 +25,13 @@ function ConnectedGameInput({
   );
 }
 
-function TrainingPlaceholder() {
-  const app = AppMachineContext.useActorRef();
-  // Marcador da tela Treinar momento-chave; o conteúdo chega na F8.
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => app.send({ type: "TRAINING.BACK" })}
-        className="min-h-11 self-start rounded-md border border-line bg-surface px-4 font-semibold text-ink"
-      >
-        ← Voltar ao resultado
-      </button>
-      <h1 className="m-0 font-semibold font-serif text-[30px]">Treinar momento-chave</h1>
-    </>
-  );
-}
-
 function CurrentScreen() {
   const screen = AppMachineContext.useSelector((snapshot) => snapshot.value);
   const inputRef = AppMachineContext.useSelector((snapshot) => snapshot.children.gameInput);
   const engineRef = AppMachineContext.useSelector((snapshot) => snapshot.children.engine);
   const analysisRef = AppMachineContext.useSelector((snapshot) => snapshot.children.analysis);
   const reviewRef = AppMachineContext.useSelector((snapshot) => snapshot.children.review);
+  const trainingRef = AppMachineContext.useSelector((snapshot) => snapshot.children.training);
   const app = AppMachineContext.useActorRef();
 
   if (!engineRef) {
@@ -65,7 +50,7 @@ function CurrentScreen() {
     case "review":
       return reviewRef ? <ReviewScreen reviewRef={reviewRef} /> : null;
     case "training":
-      return <TrainingPlaceholder />;
+      return trainingRef ? <TrainingScreen trainingRef={trainingRef} /> : null;
   }
 }
 

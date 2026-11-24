@@ -25,6 +25,9 @@
   --color-brand-divider: #dcebea;
   --color-on-ink-muted: #c9ced6;
   --color-on-ink-soft: #d7dbe1;
+  /* Caixa de dica do treino (step_04). */
+  --color-hint: #173d78;
+  --color-hint-soft: #e6eefb;
 
   /* Tabuleiro: casas, marcações (vermelho = peça atacada, verde = lance sugerido,
      amarelo = último lance), peças e coordenadas. */

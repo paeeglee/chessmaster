@@ -10,6 +10,7 @@ import {
   initialLevel,
 } from "../domains/game-input";
 import { type ReviewParentEvent, reviewMachine } from "../domains/review";
+import { trainingMachine } from "../domains/training";
 
 export type AppContext = {
   /** O que o jogador preencheu na tela Colar; volta intacto ao cancelar a análise. */
@@ -47,6 +48,7 @@ export const appMachine = setup({
       gameInput: "gameInput";
       analysis: "analysis";
       review: "review";
+      training: "training";
     },
   },
   actors: {
@@ -54,6 +56,7 @@ export const appMachine = setup({
     gameInput: gameInputMachine,
     analysis: analysisMachine,
     review: reviewMachine,
+    training: trainingMachine,
   },
 }).createMachine({
   id: "app",
@@ -129,6 +132,15 @@ export const appMachine = setup({
       },
     },
     training: {
+      invoke: {
+        id: "training",
+        src: "training",
+        input: ({ context }) => ({
+          result: context.result as AnalysisResult,
+          ply: context.trainingPly as number,
+          engine: context.engine,
+        }),
+      },
       on: {
         "TRAINING.BACK": { target: "review", actions: assign({ trainingPly: null }) },
       },

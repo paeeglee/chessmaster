@@ -270,6 +270,60 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: .specs/features/analysis-screen/validation.md:434 validate_state unfilled verdict (specs)
 - last seen: 2026-11-24T03:11:11Z
 
+### L-044 - When the UI shows a counter or ordinal, drive it past its first value in a test and assert the exact second value
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: training-screen
+- evidence: validation.md M20 (trainingMachine.ts:194) (web-tests) (web-tests)
+- last seen: 2026-11-24T03:16:27Z
+
+### L-045 - When a criterion says something must not be shown, assert its absence explicitly, not only the presence of the expected text
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: training-screen
+- evidence: validation.md M21 (TrainingScreen.tsx:70), step_04 §7 AC2 (web-tests) (web-tests)
+- last seen: 2026-11-24T03:16:27Z
+
+### L-046 - Pin spec-defined timings and limits with literal values in tests instead of the exported constant
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: training-screen
+- evidence: validation.md M06 (trainingMachine.ts:17) (web-tests) (web-tests)
+- last seen: 2026-11-24T03:16:27Z
+
+### L-047 - Give every color or shape highlight on the board a text equivalent in an accessible name and test it by role and name
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `web-a11y` · harmful: 0
+- features: training-screen
+- evidence: validation.md G4, step_04 §8 (web-a11y) (web-a11y)
+- last seen: 2026-11-24T03:16:27Z
+
+### L-048 - When a flow can start mid-sequence, state in the spec what totals and summaries count
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `specs` · harmful: 0
+- features: training-screen
+- evidence: validation.md G5, TR-11 (specs) (specs)
+- last seen: 2026-11-24T03:16:27Z
+
+### L-049 - When an accessible label describes a transient visual state, assert the label both while the state is on and after it ends
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-a11y` · harmful: 0
+- features: training-screen
+- evidence: validation.md round 2 N02 (TrainingScreen.tsx:144) (web-a11y) (web-a11y)
+- last seen: 2026-11-24T03:16:27Z
+
+### L-050 - When Portuguese text agrees in gender with a piece name, test both a masculine and a feminine piece
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: training-screen
+- evidence: validation.md round 2 N05 (TrainingScreen.tsx:146) (web-tests) (web-tests)
+- last seen: 2026-11-24T03:16:27Z
+
+### L-045 - When an accessible label describes a transient visual state, assert the label both while the state is on and after it ends
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-a11y` · harmful: 0
+- features: training-screen
+- evidence: validation.md round 2 N02 (TrainingScreen.tsx:144) (web-a11y)
+- last seen: 2026-11-24T03:06:26Z
+
+### L-046 - When Portuguese text agrees in gender with a piece name, test both a masculine and a feminine piece
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: training-screen
+- evidence: validation.md round 2 N05 (TrainingScreen.tsx:146) (web-tests)
+- last seen: 2026-11-24T03:06:26Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

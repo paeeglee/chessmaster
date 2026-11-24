@@ -16,6 +16,12 @@ export {
   positionsAlongLine,
   uciToSan,
 } from "./model/lines";
+export {
+  legalDestinations,
+  type PlayedMove,
+  playMove,
+  portugueseLine,
+} from "./model/moves";
 export { toPortugueseSan } from "./model/notation";
 export { MAX_PASTE_BYTES, parseGameText } from "./model/parseGameText";
 export { replayGame } from "./model/replay";
