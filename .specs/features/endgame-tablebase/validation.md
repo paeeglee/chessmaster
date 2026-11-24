@@ -1,13 +1,34 @@
 # F5 · Endgame tablebase Validation
 
-**Date**: 2026-11-24
+**Date**: 2026-11-24 (round 2)
 **Spec**: `.specs/features/endgame-tablebase/spec.md`
-**Diff range**: `origin/main..HEAD` (`bfa4c46..8aa1073`, 5 commits)
+**Diff range**: `origin/main..HEAD` (`bfa4c46..008350a`). Round 2 re-verified the fix commit `008350a` on top of round 1 (`8aa1073`, report `5f6cf3b`).
 **Verifier**: independent sub-agent (author ≠ verifier)
 
-**Verdict**: FAIL
+**Verdict**: PASS
+**Result**: PASS (round 2, latest)
 
-The behavior is correct: an independent check against chess.js move generation found no wrong value in 10,000 sampled positions, and both gates are green. The verdict is FAIL because 2 of 23 sensor mutants survived. One of them is a real bug the tests cannot see: if the blocker check in the generator's attack test is removed, the generator treats the strong king as transparent, and no test fails. The fix is 2 small test additions (Fix 1, Fix 2).
+All round-1 gaps are closed. Both gates are green, and all 23 sensor mutants are killed, including the 2 that survived round 1 (6 and 22). The independent chess.js check from round 1 still holds, because `008350a` changes only tests and specs.
+
+## Round 2 (HEAD `008350a`)
+
+| Round-1 gap | Fix evidence | Result |
+| ----------- | ------------ | ------ |
+| Fix 1: blocker logic (mutant 6) | `apps/web/src/domains/evaluation/model/tablebase/tablebase.test.ts:71` - `8/8/4R3/4K3/8/8/4k3/8 w` `toMatchObject({ winner: "w" })`; `:73-75` - `8/8/4R3/4K3/8/4k3/8/8 b` (e2 escape behind the strong king) is not null and `dtmPlies` is not 0 | ✅ Mutant 6 killed |
+| Fix 2: stage 4 on screen (TB-06, mutant 22) | `apps/web/src/domains/analysis/components/AnalyzingScreen.test.tsx:201` - `"Etapa 4 de 5: tabela de finais."`; `:202` - `"Tabela de finais — em andamento"`; `:204` - `"— falhou"`; `:205` - `"Explicação da IA — em andamento"`; `:211` / `:208` - `"aguardando"` → `"não necessária"` | ✅ Mutants 21 and 22 killed by TB-06 tests |
+| Fix 3: docs drift | `spec.md` TB-08 adds "✕ Tabela de finais: falhou" (step_03 R-12); traceability marked Done (T1–T3); `design.md` drops `board.ts` | ✅ |
+
+- **`make check`** (round 2): exit 0. Biome checked 136 files; Ruff, `tsc` and mypy clean. Vitest: 39 files, **445 passed** (+3), 96.31% stmts / 91% branches. pytest: 75 passed.
+- **`make test-e2e`** (round 2): exit 0, **18 passed** (3.0 min), including `e2e/endgame.spec.ts:15`. Ports 4173/8000 were free before the run.
+- **Sensor** (round 2): the same 23 mutants ran in a fresh detached scratch worktree at `008350a`, using the full web Vitest suite. **23/23 killed.** The scratch worktree was removed and pruned, and real-tree porcelain matches the baseline (empty).
+
+The round-1 sections below are kept for history. Their FAIL items are resolved by the table above.
+
+---
+
+# Round 1 (HEAD `8aa1073`)
+
+Round 1 was FAIL. The behavior was already correct (0 mismatches against chess.js in 10,000 positions), but 2 of 23 mutants survived.
 
 ---
 
@@ -88,7 +109,7 @@ The sensor ran in a detached scratch worktree (`git worktree add --detach … HE
 **Mutant 6 is not equivalent.** The independent chess.js check run against it fails at once. For example, `8/8/4R3/4K3/8/8/4k3/8 w` (the rook shielded by its own king) probes as `null` instead of a win. The max-DTM test does not catch it because the longest mates happen not to depend on that shielding.
 
 **Sensor depth**: P0-style manual (23 mutants over every new branch of engine 4 and stage 4).
-**Result**: 21/23 killed - ❌ FAIL
+**Result (round 1)**: 21/23 killed - ❌ FAIL. **Round 2**: 23/23 killed - ✅ PASS (mutants 6 and 22 are now killed by `tablebase.test.ts:69` and `AnalyzingScreen.test.tsx:201`).
 
 ---
 
@@ -155,17 +176,19 @@ The sensor ran in a detached scratch worktree (`git worktree add --detach … HE
 
 | Requirement | Previous Status | New Status |
 | ----------- | --------------- | ---------- |
-| TB-01 | Pending | ❌ Needs Fix (Fix 1) |
+| TB-01 | Pending | ✅ Verified (round 2) |
 | TB-02, TB-03, TB-04, TB-05, TB-07 | Pending | ✅ Verified |
-| TB-06 | Pending | ❌ Needs Fix (Fix 2) |
-| TB-08 | Pending | ✅ Verified (⚠️ spec text, Fix 3) |
-| TB-09 | Pending | ❌ Needs Fix (Fix 1) |
+| TB-06 | Pending | ✅ Verified (round 2, UI asserted) |
+| TB-08 | Pending | ✅ Verified (spec text updated in round 2) |
+| TB-09 | Pending | ✅ Verified (round 2) |
 
 ---
 
 ## Summary
 
-**Overall**: ❌ Not Ready. The behavior is correct, but the tests have 2 holes.
+**Overall (round 2)**: ✅ Ready. 9/9 requirements match the spec outcome, 23/23 mutants are killed, `make check` (445 + 75) and `make test-e2e` (18) pass.
+
+**Round 1 overall**: ❌ Not Ready. The behavior was correct, but the tests had 2 holes.
 
 **Spec-anchored check**: 7/9 matched the spec outcome without reservations; TB-06 is machine-only; 1 spec-precision gap (TB-08).
 **Sensor**: 21/23 killed.
