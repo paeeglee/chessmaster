@@ -37,11 +37,12 @@ export function ReviewScreen({ reviewRef }: { reviewRef: ActorRefFrom<typeof rev
       <div className="flex flex-wrap items-start gap-6">
         <div className="flex min-w-0 flex-[1_1_460px] flex-col gap-3.5">
           <BoardPanel context={context} send={send} />
-          <CoachPanel context={context} send={send} />
           <MaterialChart context={context} send={send} />
           <MoveList context={context} send={send} />
         </div>
         <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-4">
+          {/* Ao lado do tabuleiro, para a revisão do lance caber na primeira tela. */}
+          <CoachPanel context={context} send={send} />
           <KeyMomentsList context={context} send={send} />
           <StrengthsList context={context} />
           <NextGameHabit context={context} />

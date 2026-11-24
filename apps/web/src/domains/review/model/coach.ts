@@ -108,7 +108,8 @@ export function evaluationLabel(evaluation: PositionEvaluation): string {
     return score.value >= 0 ? `M${score.value}` : `−M${Math.abs(score.value)}`;
   }
   const pawns = Math.min(10, Math.max(-10, score.value / 100));
-  const text = Math.abs(pawns).toFixed(1).replace(".", ",");
+  // No limite (±10) sem casa decimal, para caber na barra estreita.
+  const text = Math.abs(pawns) >= 10 ? "10" : Math.abs(pawns).toFixed(1).replace(".", ",");
   if (text === "0,0") return "0,0";
   return pawns > 0 ? `+${text}` : `−${text}`;
 }

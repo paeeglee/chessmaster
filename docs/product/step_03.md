@@ -34,10 +34,10 @@ Responder em poucos segundos à pergunta "o que aconteceu nesta partida?" e leva
    - lances até o mate no final (quando houver).
 4. **Coluna esquerda:**
    - **Tabuleiro**: posição do momento selecionado, vista pelo lado do jogador; controles de início, anterior, próximo, fim e girar; legenda das marcações (peça atacada em vermelho, lance sugerido em verde). Ao lado, a **barra de avaliação** do motor para a posição mostrada (ponto de vista das brancas).
-   - **Revisão do lance** (painel do treinador, estilo Game Review do Chess.com): só para os lances do jogador: o lance da posição mostrada, quando é do jogador, ou o lance que o jogador fez a partir dela ("Seu lance a seguir"), quando a posição vem depois de um lance do adversário, a classificação, de quem é o lance, "Melhor era …" com o porquê, o que o lance deixou descoberto ou deixou passar, a linha do motor com "Ver a linha do motor" e a explicação da IA, pedida só quando o lance é aberto.
    - **Gráfico "Vantagem de material"**: curva ao longo dos lances, com os momentos-chave marcados por círculos numerados e clicáveis.
    - **Lista de lances**: em colunas, com os lances do jogador anotados (`?`, `??`, `!`), o ícone da classificação de cada lance do jogador e o lance selecionado destacado.
 5. **Coluna direita:**
+   - **Revisão do lance** (painel do treinador, estilo Game Review do Chess.com) — no topo, ao lado do tabuleiro, para caber na primeira tela: só para os lances do jogador: o lance da posição mostrada, quando é do jogador, ou o lance que o jogador fez a partir dela ("Seu lance a seguir"), quando a posição vem depois de um lance do adversário, a classificação, de quem é o lance, "Melhor era …" com o porquê, o que o lance deixou descoberto ou deixou passar, a linha do motor com "Ver a linha do motor" e a explicação da IA, pedida só quando o lance é aberto.
    - **Momentos-chave:** lista em ordem cronológica; um item fica expandido por vez, com explicação, melhor lance, variação de vantagem, "Treinar este momento" e "Ver a linha no tabuleiro".
    - **"O que você fez bem":** de 1 a 3 itens.
    - **Hábito para a próxima partida:** uma frase acionável, ligada aos padrões encontrados.

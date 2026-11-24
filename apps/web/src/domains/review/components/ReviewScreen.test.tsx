@@ -426,7 +426,9 @@ describe("revisão lance a lance (F9)", () => {
     expect(within(moves).getAllByRole("img", { name: "Capivarada" }).length).toBeGreaterThan(0);
     expect(within(moves).getAllByRole("img", { name: "Melhor" }).length).toBeGreaterThan(0);
     expect(
-      screen.getByRole("img", { name: /^Avaliação do motor: [+−]?(M?\d|\d+,\d) para as brancas$/ }),
+      screen.getByRole("img", {
+        name: /^Avaliação do motor: [+−]?(M\d+|\d+(,\d)?) para as brancas$/,
+      }),
     ).toBeInTheDocument();
   });
 
