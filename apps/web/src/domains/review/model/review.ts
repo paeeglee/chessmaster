@@ -242,3 +242,20 @@ export function reviewedPly(result: AnalysisResult, position: number): number {
   const isMomentNext = result.keyMoments.some((moment) => moment.ply === position + 1);
   return isMomentNext ? position + 1 : position;
 }
+
+/**
+ * O lance do jogador que o painel do treinador revisa na posição `position` (só os
+ * lances do jogador são revisados). Depois de um lance do jogador, é esse lance; depois
+ * de um lance do adversário (ou na posição inicial), é o lance que o jogador jogou a
+ * partir dali. null quando não há lance do jogador a revisar.
+ */
+export function coachPly(
+  result: AnalysisResult,
+  position: number,
+): { ply: number; upcoming: boolean } | null {
+  const { plies } = result.request.game;
+  const player = result.request.playerColor;
+  if (plies[position - 1]?.color === player) return { ply: position, upcoming: false };
+  if (plies[position]?.color === player) return { ply: position + 1, upcoming: true };
+  return null;
+}

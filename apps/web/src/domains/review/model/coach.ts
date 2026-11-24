@@ -84,11 +84,14 @@ export function coachFindings(review: MoveReview): string[] {
   return items;
 }
 
-/** Título do painel: "22...Ta7 · Erro" e de quem é o lance. */
-export function coachTitle(review: MoveReview, playerColor: "w" | "b") {
+/**
+ * Título do painel: "22...Ta7 · Erro". Só os lances do jogador são revisados; quando o
+ * tabuleiro está antes do lance (vez do jogador), ele é "Seu lance a seguir".
+ */
+export function coachTitle(review: MoveReview, upcoming: boolean) {
   return {
     title: `${review.moveLabel} · ${MOVE_QUALITY_LABEL[review.quality]}`,
-    owner: review.color === playerColor ? "Seu lance" : "Lance do adversário",
+    owner: upcoming ? "Seu lance a seguir" : "Seu lance",
   };
 }
 

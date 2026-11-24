@@ -360,7 +360,8 @@ describe("revisão lance a lance (F9)", () => {
     renderReview();
     const panel = screen.getByRole("region", { name: "Revisão do lance" });
     expect(within(panel).getByText("22...Ta7 · Erro")).toBeInTheDocument();
-    expect(within(panel).getByText("Seu lance")).toBeInTheDocument();
+    // O tabuleiro está antes do erro: é o lance a seguir do jogador.
+    expect(within(panel).getByText("Seu lance a seguir")).toBeInTheDocument();
     expect(
       within(panel).getByText("Melhor era 22...Bd4+: dá xeque e salva o bispo em a1."),
     ).toBeInTheDocument();
@@ -415,7 +416,7 @@ describe("revisão lance a lance (F9)", () => {
     renderReview();
     await userEvent.click(screen.getByRole("button", { name: "Início" }));
     const panel = screen.getByRole("region", { name: "Revisão do lance" });
-    expect(within(panel).getByText(/^Escolha um lance na lista/)).toBeInTheDocument();
+    expect(within(panel).getByText(/^Escolha um dos seus lances na lista/)).toBeInTheDocument();
   });
 
   it("mostra a classificação de cada lance na lista e a barra de avaliação (MR-09, MR-11)", () => {
@@ -427,6 +428,32 @@ describe("revisão lance a lance (F9)", () => {
     expect(
       screen.getByRole("img", { name: /^Avaliação do motor: [+−]?(M?\d|\d+,\d) para as brancas$/ }),
     ).toBeInTheDocument();
+  });
+
+  it("lance do adversário não é revisado: o painel mostra o seu lance a seguir", async () => {
+    const calls: number[] = [];
+    renderReview({
+      explainMove: async ({ input }) => {
+        calls.push(input.ply);
+        return { text: `Explicação do lance ${input.ply}.` };
+      },
+    });
+    const moves = screen.getByRole("region", { name: "Lances" });
+    // 23.Txa1 é das brancas (adversário); o seu lance a seguir é 23...Td7.
+    await userEvent.click(within(moves).getByRole("button", { name: "Txa1" }));
+    const panel = screen.getByRole("region", { name: "Revisão do lance" });
+    expect(within(panel).getByText(/^23\.\.\.Td7 · /)).toBeInTheDocument();
+    expect(within(panel).getByText("Seu lance a seguir")).toBeInTheDocument();
+    expect(await within(panel).findByText("Explicação do lance 46.")).toBeInTheDocument();
+    // Nenhum pedido à IA para um lance das brancas.
+    expect(calls.every((ply) => ply % 2 === 0)).toBe(true);
+  });
+
+  it("só os seus lances têm ícone de classificação (MR-09)", () => {
+    renderReview();
+    const moves = screen.getByRole("region", { name: "Lances" });
+    // Pretas: 72 lances do jogador, um ícone cada.
+    expect(within(moves).getAllByRole("img")).toHaveLength(72);
   });
 
   it("a barra de avaliação segue a posição mostrada (MR-11)", async () => {

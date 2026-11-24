@@ -57,8 +57,8 @@ The app only highlights moves that lose 2+ points of material (D3). It does not 
 
 ### P1: Coach panel on the Result screen ⭐ MVP
 
-1. The move list SHALL show each move's classification as an icon with an accessible name. <!-- MR-09 -->
-2. Selecting a move (list, arrows, chart, key moment) SHALL show the coach panel for the move that led to the board position: classification tag, "Melhor era …" (unless it was the best move), the facts of MR-06..MR-08, and "Ver a linha do motor". <!-- MR-10 -->
+1. The move list SHALL show the classification of each of the player's moves as an icon with an accessible name; the opponent's moves are not reviewed on screen (user decision, 2026-11-24). <!-- MR-09 -->
+2. Selecting a move (list, arrows, chart, key moment) SHALL show the coach panel for a player's move only: the move that led to the board position when it is the player's ("Seu lance"), otherwise the player's next move from that position ("Seu lance a seguir"); the AI is only asked about player's moves: classification tag, "Melhor era …" (unless it was the best move), the facts of MR-06..MR-08, and "Ver a linha do motor". <!-- MR-10 -->
 3. An evaluation bar next to the board SHALL show the engine evaluation of the shown position from White's side (clamped at ±10, mate shown as "M N"). <!-- MR-11 -->
 4. At the initial position the panel SHALL invite the player to pick a move. <!-- MR-12 -->
 

@@ -144,8 +144,9 @@ máquinas deixam esses estados e transições explícitos e testáveis.
   (`moveQuality.ts`, com o piso de material do D3) e calcula os fatos do lance
   (`moveFacts.ts`: melhor lance e linha, peças en prise com `enPrisePieces` do domínio
   `game`, material deixado de ganhar, motivos do melhor lance). O resultado ganha
-  `moveReviews`. No Resultado, o `reviewMachine` tem a região `coach`: quando o lance
-  revisado (`reviewedPly`) ainda não tem texto, o ator `explainMove` chama
+  `moveReviews`. No Resultado, o `reviewMachine` tem a região `coach`: quando o lance do
+  jogador revisado (`coachPly`: o lance da posição, se for do jogador, senão o lance
+  seguinte dele) ainda não tem texto, o ator `explainMove` chama
   `POST /api/move-explanations` com o contrato do lance (`buildMoveContract`), um lance
   por vez, e guarda o resultado por meio-lance; `COACH.RETRY` pede de novo depois de
   uma falha. `COACH.SHOW_BEST_LINE` anima a linha do melhor lance sem mudar o lance

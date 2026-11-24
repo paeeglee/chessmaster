@@ -8,7 +8,7 @@ import {
   QUALITY_SYMBOL,
   reviewAt,
 } from "../model/coach";
-import { reviewedPly } from "../model/review";
+import { coachPly } from "../model/review";
 
 type CoachPanelProps = {
   context: ReviewContext;
@@ -18,8 +18,8 @@ type CoachPanelProps = {
 /** Painel do treinador: revisão do lance da posição mostrada (F9, MR-10..MR-16). */
 export function CoachPanel({ context, send }: CoachPanelProps) {
   const { result, position } = context;
-  const ply = reviewedPly(result, position);
-  const review = reviewAt(result, ply);
+  const target = coachPly(result, position);
+  const review = target ? reviewAt(result, target.ply) : null;
 
   return (
     <section
@@ -29,22 +29,28 @@ export function CoachPanel({ context, send }: CoachPanelProps) {
       <h2 id="coach-title" className="m-0 font-semibold font-serif text-xl">
         Revisão do lance
       </h2>
-      {review === null ? (
+      {review === null || target === null ? (
         <p className="m-0 text-[15px] text-ink-muted">
-          Escolha um lance na lista ou avance o tabuleiro para ver o que o motor achou dele.
+          Escolha um dos seus lances na lista ou avance o tabuleiro para ver o que o motor achou
+          dele.
         </p>
       ) : (
-        <CoachReview context={context} send={send} ply={ply} />
+        <CoachReview context={context} send={send} ply={target.ply} upcoming={target.upcoming} />
       )}
     </section>
   );
 }
 
-function CoachReview({ context, send, ply }: CoachPanelProps & { ply: number }) {
+function CoachReview({
+  context,
+  send,
+  ply,
+  upcoming,
+}: CoachPanelProps & { ply: number; upcoming: boolean }) {
   const { result } = context;
   const review = reviewAt(result, ply);
   if (!review) return null;
-  const { title, owner } = coachTitle(review, result.request.playerColor);
+  const { title, owner } = coachTitle(review, upcoming);
   const best = bestMoveSentence(review);
   const findings = coachFindings(review);
   const entry = context.coach[ply];
