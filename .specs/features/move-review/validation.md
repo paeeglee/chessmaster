@@ -2,9 +2,36 @@
 
 **Date**: 2026-11-24
 **Spec**: `.specs/features/move-review/spec.md`
-**Diff range**: `origin/main..HEAD` (00374b7..aab3e22). Round 1 covered 00374b7..68a4d82; round 2 adds aab3e22.
+**Diff range**: `origin/main..HEAD` (00374b7..ccb273f). Round 1 covered 00374b7..68a4d82, round 2 aab3e22, round 3 ccb273f.
 **Verifier**: independent sub-agent (author ≠ verifier)
-**Verdict (latest, round 2)**: FAIL ❌. G1–G5 from round 1 are fixed and all gates are green. One real surviving mutant remains (N12: the evaluation bar can read the wrong position and no test notices). M8 also still survives, but it is practically equivalent.
+**Verdict (latest, round 3)**: PASS ✅. All gaps from rounds 1 and 2 are closed, all gates are green, and the sensor kills 39/39.
+
+---
+
+## Round 3 (ccb273f)
+
+### Fixes from round 2
+
+| Gap | Fix verified | Evidence |
+| --- | ------------ | -------- |
+| R2-G1 eval bar tied to the shown position (MR-11) | ✅ | `apps/web/src/domains/review/components/ReviewScreen.test.tsx:432`: after "Início" the bar is named with `evaluationLabel(evaluations[0])` ("+0,4"), and after "Próximo lance" with `evaluations[1]` ("+0,1"). The test builds the expected name with `evaluationLabel` itself, but the two labels differ, so it still catches an index error (N12 killed). |
+| R2-G2 result decides (MR-18) | ✅ | `apps/web/src/domains/analysis/model/moveReview.test.ts:123-135`: with termination checkmate and every evaluation `{cp, 0}`, the last move gets `winAfter: 100`; with stalemate, 50 (M8 killed). |
+
+### Gates (round 3)
+
+- `make check`: ✅ Vitest **503 passed** (44 files, 96.66% statements, 91.76% branches); pytest **99 passed**; Biome, tsc, mypy and Ruff clean.
+- `make test-e2e`: ✅ **18 passed** (6.9 min), own API on 8100, preview on 4173, `make dev` on 8000 untouched.
+- Test count is 602 (528 before the feature, +74). None were removed and none are skipped.
+
+### Discrimination sensor (round 3)
+
+I re-ran the same 39 faults as round 2 in a fresh scratch worktree at ccb273f, with the full Vitest and pytest suites. **39/39 killed**, including M8 (checkmate override, now caught by `moveReview.test.ts:133`) and N12 (eval bar off by one, now caught by `ReviewScreen.test.tsx:432`). The scratch worktree is removed and the real worktree porcelain matches the baseline (clean).
+
+**Result**: 39/39 killed: PASS ✅.
+
+### Requirement traceability (final)
+
+MR-01..MR-20 ✅ Verified. step_03 R-14..R-17 and the two new acceptance criteria ✅ Verified.
 
 ---
 
@@ -47,7 +74,7 @@ This run used a fresh scratch worktree at aab3e22 and ran the full suites. M11 a
 | N11 | `apps/web/src/domains/analysis/model/moveFacts.ts:117` | `saves` inverted | ✅ Killed |
 | N12 | `apps/web/src/domains/review/components/BoardPanel.tsx:57` | eval bar reads `evaluations[position + 1]` | ❌ Survived |
 
-**Result**: 37/39 killed. 1 practically equivalent (M8), 1 real survivor (N12): FAIL ❌.
+**Sensor outcome, round 2 (superseded)**: 37/39 killed. 1 practically equivalent (M8), 1 real survivor (N12): FAIL ❌.
 
 ### Ranked gaps (round 2)
 
@@ -156,7 +183,7 @@ Scratch git worktree (detached HEAD, symlinked `node_modules` / `.venv`, `PYTHON
 | M29 | `apps/web/playwright.config.ts:6` | e2e API back on port 8000 | ❌ Survived (config, no guard) |
 
 **Sensor depth**: extended (29 manual mutants).
-**Result**: 23/27 non-equivalent killed (85%), 2 equivalent: FAIL ❌.
+**Sensor outcome, round 1 (superseded)**: 23/27 non-equivalent killed (85%), 2 equivalent: FAIL ❌.
 
 Note: some killed runs also timed out "navega com os botões e gira (RV-06)" because of CPU load from the M18 hang. Each kill above was confirmed by a requirement-specific failing test, not by that timeout.
 
@@ -209,7 +236,7 @@ UI: no mockup exists for the coach panel. The panel reuses the step_03 tokens (`
 
 ## Summary
 
-**Overall (round 1)**: ❌ Not ready. Fix G1 to G4 and re-verify (iteration 1 of 3). **Round 2**: G1–G5 fixed; R2-G1 open (iteration 2 of 3).
+**Overall (round 1)**: ❌ Not ready. Fix G1 to G4 and re-verify (iteration 1 of 3). **Round 2**: G1–G5 fixed; R2-G1 open (iteration 2 of 3). **Round 3**: R2-G1 and R2-G2 fixed, 39/39 killed: ✅ Ready.
 **Spec-anchored check**: 18/20 MR + 4/4 R matched, 2 needing fixes, 1 spec-precision gap.
 **Sensor**: 23/27 non-equivalent killed (2 equivalent).
 **Gate**: make check (494 + 98) ✅, make test-e2e 18/18 ✅.
