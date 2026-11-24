@@ -264,6 +264,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: R4-3 apps/web/e2e/analysis.spec.ts:24 (e2e)
 - last seen: 2026-11-24T02:51:03Z
 
+### L-043 - In a multi-round validation report keep a single Result line for the latest round and relabel older rounds' results
+- signal: `gate_fail` · recurrence: 1 feature(s) · scope: `specs` · harmful: 0
+- features: analysis-screen
+- evidence: .specs/features/analysis-screen/validation.md:434 validate_state unfilled verdict (specs)
+- last seen: 2026-11-24T03:11:11Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

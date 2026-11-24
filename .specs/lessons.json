@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 43,
+  "next_id": 44,
   "lessons": [
     {
       "id": "L-001",
@@ -762,6 +762,24 @@
       ],
       "created": "2026-11-24T02:51:03Z",
       "last_seen": "2026-11-24T02:51:03Z"
+    },
+    {
+      "id": "L-043",
+      "key": "gate_fail::in a multi round validation report keep a single result line for the latest round and relabel older rounds results",
+      "text": "In a multi-round validation report keep a single Result line for the latest round and relabel older rounds' results",
+      "signal": "gate_fail",
+      "scope": "specs",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        ".specs/features/analysis-screen/validation.md:434 validate_state unfilled verdict (specs)"
+      ],
+      "created": "2026-11-24T03:11:11Z",
+      "last_seen": "2026-11-24T03:11:11Z"
     }
   ]
 }

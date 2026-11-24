@@ -1,13 +1,13 @@
 # F4b · Analysis pipeline and screen Validation
 
-**Date**: 2026-11-23 (round 4, re-verification on `main`)
+**Date**: 2026-11-24 (round 5, re-verification of the round-4 test fixes)
 **Spec**: `.specs/features/analysis-screen/spec.md`
-**Diff range**: `9de6292..9d8486c` (round 4 re-verified `main` at `9d8486c`, which contains F4b as `91cc8cc`)
+**Diff range**: `9de6292..8fd158f` (round 5 re-verified `8fd158f` on `fix/f4b-verification-gaps`; F4b on `main` is `91cc8cc`)
 **Verifier**: independent sub-agent (author ≠ verifier)
 
-**Verdict**: FAIL
+**Verdict**: PASS
 
-Round 4 confirms the post-round-3 fixes E1 and E2 and the E3 behavior, and every gate is green (`make check`, `make test-e2e` 3/3). Two sensor mutants survive in the E3 tests of `EngineClient.cancel`: the "no wait without a search" promise and the 2 s cap are not asserted. See "Round 4" at the end of this file. Rounds 1–3 are kept below.
+Round 5 confirms all six round-4 gaps (R4-1..R4-6) are fixed. The gates are green: `make check`, and `make test-e2e` 15/15 twice. The sensor caught all 16 unit faults (S09 and S16 included) and both e2e assertion faults. E4 (the played-line rule) is still a product decision for the user. See "Round 5" at the end of this file. Rounds 1–4 are kept below.
 
 ---
 
@@ -46,7 +46,7 @@ AS-03 evidence was updated to the new timing: `analysisMachine.test.ts:87-96` (e
 | T09 | `AnalyzingScreen.tsx:28` | last-move marks removed (M29) | ✅ |
 | T10 | `contract.ts:28` | `>=` → `>` (M17) | ✅ |
 
-**Result**: 9/10 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; the real tree's `git status --porcelain` matches the baseline (empty).
+**Sensor outcome (historical)**: 9/10 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; the real tree's `git status --porcelain` matches the baseline (empty).
 
 ## Round 3 · Remaining gaps (escalated to the user, iteration cap reached)
 
@@ -100,7 +100,7 @@ AS-03 evidence was updated to the new timing: `analysisMachine.test.ts:87-96` (e
 | R10 | `analysisMachine.ts:112-114` | machine passes no continuation | ❌ **Survived** |
 | R11 | `analysisMachine.ts:113` | machine continuation skips the reply | ❌ **Survived** |
 
-**Result**: 7/11 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; the real tree's `git status --porcelain` matches the baseline (empty).
+**Sensor outcome (historical)**: 7/11 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; the real tree's `git status --porcelain` matches the baseline (empty).
 
 ### Probe: continuation rule false positive (scratch only, not committed)
 
@@ -221,7 +221,7 @@ Scratch worktree at `HEAD` (`.../scratchpad/f4b-sensor`), `pnpm install --frozen
 | M31 | `appMachine.ts:93` | ANALYSIS.CANCELLED has no target | ✅ |
 
 **Sensor depth**: extended lightweight (31 manual mutants; e2e not re-run per mutant because the unit suite killed every pipeline mutant).
-**Result**: 29/31 killed - ❌ FAIL
+**Sensor outcome (historical)**: 29/31 killed - ❌ FAIL
 **Isolation**: scratch removed with `git worktree remove --force`; the real tree's `git status --porcelain` matches the pre-sensor baseline (empty).
 
 ---
@@ -374,7 +374,7 @@ The scratch is a detached `git worktree` in the session scratchpad, set up with 
 | S15 | `AnalyzingScreen.tsx:45` | stage 3 "running" when evaluation failed | ✅ | `AnalyzingScreen.test.tsx:147` |
 | S16 | `EngineClient.ts:165-167` | `searching` never reset, so every later cancel waits for a `bestmove` that never comes | ❌ **Survived** | `EngineClient.test.ts:323` still passes but takes **2004 ms** (measured), which contradicts its title "não espera bestmove" |
 
-**Result**: 14/16 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; `git worktree list` no longer shows it; the real tree's `git status --porcelain` matches the pre-sensor baseline (empty).
+**Sensor outcome (historical)**: 14/16 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; `git worktree list` no longer shows it; the real tree's `git status --porcelain` matches the pre-sensor baseline (empty).
 
 S16 matters in the app. `analysisMachine` calls `engine.cancel()` every time it leaves `evaluating` (`analysisMachine.ts:64-67`), including after a normal EVALUATION.DONE. With S16, each later engine use would wait 2 s. The current code is correct; the tests do not protect it.
 
@@ -393,3 +393,52 @@ S16 matters in the app. `analysisMachine` calls `engine.cancel()` every time it 
 AS-01..AS-13, AS-15, AS-16: ✅ Verified. AS-14: ⚠️ verified, but the no-positions/scores narrowing is still unconfirmed. AS-08 (E3 hardening): behavior verified, tests need R4-1 and R4-2.
 
 **Next steps**: fix R4-1 and R4-2 (test-only, about 15 lines in `EngineClient.test.ts`), optionally R4-3..R4-6, then re-run the sensor on S09 and S16. This round runs after the 3-iteration cap at the user's explicit request; the result goes back to the user.
+
+---
+
+## Round 5 (re-verification of the round-4 fixes)
+
+**HEAD**: `8fd158f` ("test(web): pin the stale bestmove wait and harden the analysis e2e") on `fix/f4b-verification-gaps`, on top of `main` `9d8486c`. The commit only touches tests and the spec goal: `apps/web/src/domains/evaluation/engine/EngineClient.test.ts`, `apps/web/e2e/analysis.spec.ts` and `.specs/features/analysis-screen/spec.md:9`. Production code is unchanged since round 4, so the round-4 AC table still applies.
+**Verdict**: ✅ PASS
+
+### Round 5 · Gate Check
+
+- **`make check`**: exit 0. Biome clean, tsc + mypy clean, Vitest **33 files / 365 passed** (98.23% stmts, 90.54% branches), pytest **75 passed**.
+- **`make test-e2e`**: **2 full runs, 2/2 exit 0, 15 passed each** (1.6 min and 1.9 min). `[full-analysis]` runs after `[chromium]`: `analysis.spec.ts:7`, `:40`, `:52` (new) and `review.spec.ts:7`.
+- Ports 4173/8000 were checked before each run, with a wait loop because another verifier shares them. They were free each time.
+
+### Round 5 · Round-4 gaps re-checked
+
+| Gap | Fix evidence | Result |
+| --- | ------------ | ------ |
+| R4-1 (S16) no-search cancel waits | `EngineClient.test.ts:330-357`: fake timers, `advanceTimersByTimeAsync(0)` only (`:347`), then `expect(result).toMatchObject({ bestMove: "e2e4" })` (`:348`) and the command tail `stop, isready, position, go` | ✅ S16 killed |
+| R4-2 (S09) 2 s cap | `EngineClient.test.ts:315` `expect(STALE_BESTMOVE_TIMEOUT_MS).toBe(2000)`; `:321` advance 1999 → `settled` false; then 1 ms → resolves `e2e4` | ✅ S09 killed |
+| R4-3 any 5th moment | `apps/web/e2e/analysis.spec.ts:30-33`: every listed moment ∈ `[...STABLE_MOMENTS, "27...Tb7"]` | ✅ X2 killed |
+| R4-4 "22...Ta7?" before the end | `e2e/analysis.spec.ts:13-15`: the label is looked up inside `region "Já encontrado"`, and the heading "Analisando sua partida…" is still visible right after | ✅ X1 killed |
+| R4-5 spec goal | `.specs/features/analysis-screen/spec.md:9`: "four stable key moments … the exact five are checked in Vitest" | ✅ |
+| R4-6 cancel → re-analyze, real engine | `e2e/analysis.spec.ts:52-66`: cancel during evaluation, analyze again, "22...Ta7?" in "Já encontrado", then the Result. This is a smoke test of the real path. It does not catch a stale `bestmove` (X3 survives at e2e level); the unit test `EngineClient.test.ts:266` does (S07) | ✅ (see note) |
+| E4 played-line rule | `spec.md` assumption "Played line robustness" is still `Confirmed? n` | ⏸ user decision |
+
+### Round 5 · Discrimination Sensor (fresh scratch `f4b-sensor5` at `8fd158f`)
+
+**Unit level.** The scratch is a detached `git worktree`, with `pnpm install --frozen-lockfile` and `copy-engine.mjs`; the baseline was 365/365. I re-ran the same 16 faults as round 4 (S01–S16, defined in the Round 4 table), each alone with a full `vitest run`. **16/16 killed.** S09 is killed by "segue sem o bestmove atrasado depois do limite de tempo" and S16 by "cancelar sem busca em andamento não espera bestmove".
+
+**E2e level.** Each fault was built with `pnpm build` and run with `playwright test --project=full-analysis --no-deps e2e/analysis.spec.ts`, after checking the ports were free.
+
+| # | Mutation | Targets | Killed? |
+| - | -------- | ------- | ------- |
+| X1 | no findings on POSITION.EVALUATED (`analysisMachine.ts:106-108`) | R4-4, R4-6 "Já encontrado" assertions | ✅ (`analysis.spec.ts:7` and `:52` failed on `toBeVisible`) |
+| X2 | `summary.ts`: drop 27...Tb7 and add a fake 5th moment "60...Tz9" | R4-3 membership check | ✅ (`analysis.spec.ts:7` failed) |
+| X3 | `EngineClient.ts:106`: never wait for the stale `bestmove` | R4-6 cancel → re-analyze | ❌ survived at e2e level; **killed at unit level** (S07). The first X3 attempt (`false && …`) failed the `tsc` step of the build, so it was discarded as invalid and re-run with a type-clean form |
+
+**Result**: 16/16 unit + 2/2 e2e-assertion faults killed - ✅ PASS. X3 is an observability limit of the real engine: a stale `bestmove` at position 0 does not change any visible finding. The behavior is protected by `EngineClient.test.ts:266-295`. Scratch removed with `git worktree remove --force`; `git worktree list` no longer shows it; the real tree's `git status --porcelain` matches the pre-sensor baseline (empty).
+
+### Round 5 · Remaining notes (non-blocking)
+
+1. **E4 - product confirmation pending (user decision).** The played-line rule changes how D3 is measured. It is still `Confirmed? n`.
+2. **Test title overclaims (Cosmetic).** `e2e/analysis.spec.ts:52` says "sem resultado velho", but it cannot observe a stale result (X3). Consider renaming it to "cancelar no meio e analisar de novo chega ao resultado", or point to the unit test in a comment.
+3. **AS-14 narrowing** (no positions or scores in the contract) is still `Confirmed? n` in the spec.
+
+### Round 5 · Traceability
+
+AS-01..AS-16: ✅ Verified (AS-14 with the logged narrowing). F4b is done apart from the E4 product confirmation.
