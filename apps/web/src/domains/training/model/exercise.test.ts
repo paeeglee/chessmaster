@@ -7,6 +7,7 @@ import {
   checkAttempt,
   exerciseFor,
   exerciseMarks,
+  highlightSentence,
   hintText,
   outcomeOf,
   principleFor,
@@ -229,5 +230,15 @@ describe("casos de borda do motor", () => {
   it("dica de peça no feminino", () => {
     const rook = exerciseFor(result, 86);
     expect(hintText(rook, 2)).toBe("A torre pode sair dali ou ser protegida.");
+  });
+});
+
+describe("highlightSentence (§8)", () => {
+  it("descreve a peça destacada no masculino e no feminino", () => {
+    expect(highlightSentence(exercise)).toBe("O bispo em a1 está destacado.");
+    expect(highlightSentence(exerciseFor(result, 86))).toBe("A torre em a3 está destacada.");
+    expect(
+      highlightSentence({ ...exercise, moment: { ...exercise.moment, lostPiece: null } }),
+    ).toBeNull();
   });
 });

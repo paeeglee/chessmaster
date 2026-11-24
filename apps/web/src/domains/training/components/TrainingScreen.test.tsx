@@ -72,6 +72,12 @@ describe("TrainingScreen", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByText("Pretas jogam (você)")).toBeInTheDocument();
+    // Pretas embaixo: a primeira casa desenhada é h1 e a última é a8.
+    const squares = screen
+      .getByRole("group", { name: /^Posição antes de 22\.\.\.Ta7/ })
+      .querySelectorAll("[data-square]");
+    expect(squares[0]).toHaveAttribute("data-square", "h1");
+    expect(squares[63]).toHaveAttribute("data-square", "a8");
     expect(screen.queryByText(/Bd4/)).not.toBeInTheDocument();
     // A peça em perigo fica marcada.
     expect(square("a1")).toHaveAttribute("data-mark", "red");
@@ -95,8 +101,11 @@ describe("TrainingScreen", () => {
     expect(
       within(status).getByText("Depois de 23.Txa1, o bispo some do tabuleiro."),
     ).toBeInTheDocument();
-    // A resposta aparece no tabuleiro.
+    // A resposta aparece no tabuleiro, e o rótulo não fala mais em destaque.
     expect(square("a1")).toHaveAccessibleName("a1, torre branca");
+    expect(
+      screen.getByRole("group", { name: "Posição antes de 22...Ta7, vista pelas pretas." }),
+    ).toBeInTheDocument();
     // Sem revelar a solução (step_04 §7).
     expect(within(status).queryByText(/Bd4|Bb2|solução/)).toBeNull();
     expect(square("d4")).not.toHaveAttribute("data-mark", "green");

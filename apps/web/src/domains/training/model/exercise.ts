@@ -251,3 +251,12 @@ export function exerciseMarks(input: {
   if (input.selected) marks[input.selected] = "selected";
   return marks;
 }
+
+/** §8: frase que acompanha a peça em perigo marcada no tabuleiro ("O bispo em a1 está destacado."). */
+export function highlightSentence(exercise: Exercise): string | null {
+  const lost = exercise.moment.lostPiece;
+  if (!lost) return null;
+  const name = pieceWithArticle(lost);
+  const ending = name.startsWith("a ") ? "a" : "o";
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)} está destacad${ending}.`;
+}

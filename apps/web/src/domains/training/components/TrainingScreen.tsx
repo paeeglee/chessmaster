@@ -1,10 +1,11 @@
 import { useSelector } from "@xstate/react";
 import type { ActorRefFrom } from "xstate";
 import { Board } from "../../../shared/ui/Board";
-import { MISTAKE_TYPE_LABEL, pieceWithArticle } from "../../analysis";
+import { MISTAKE_TYPE_LABEL } from "../../analysis";
 import type { TrainingContext, trainingMachine } from "../machines/trainingMachine";
 import {
   exerciseMarks,
+  highlightSentence,
   hintText,
   principleFor,
   solutionLabel,
@@ -140,10 +141,8 @@ function Summary({ context, onBack }: { context: TrainingContext; onBack: () => 
 function boardLabel(context: TrainingContext, atStart: boolean): string {
   const { exercise } = context;
   const base = `Posição antes de ${exercise.moment.moveLabel}, vista pelas ${colorName(exercise.playerColor).toLowerCase()}.`;
-  const lost = exercise.moment.lostPiece;
-  if (!atStart || !lost) return base;
-  const name = pieceWithArticle(lost);
-  return `${base} ${name.charAt(0).toUpperCase()}${name.slice(1)} está destacad${name.startsWith("a ") ? "a" : "o"}.`;
+  const highlight = atStart ? highlightSentence(exercise) : null;
+  return highlight ? `${base} ${highlight}` : base;
 }
 
 /** Tela 4, "Treinar momento-chave" (step_04). */
