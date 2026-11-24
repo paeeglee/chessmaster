@@ -211,8 +211,17 @@ máquinas deixam esses estados e transições explícitos e testáveis.
 - `make setup` copia o `.env.example` para `.env` quando o `.env` ainda não existe.
   Nunca sobrescreve um `.env` existente.
 - Ao adicionar uma variável, adicione-a também no `.env.example`.
-- Backend: `AI_PROVIDER`, `AI_MODEL` e a chave do provedor (`OPENAI_API_KEY`). As
-  configurações são lidas com `pydantic-settings`.
+- Backend: `AI_PROVIDER`, `AI_MODEL`, a chave do provedor (`OPENAI_API_KEY`), a
+  URL de um servidor compatível com a API da OpenAI (`OPENAI_BASE_URL`, vazia = API
+  da OpenAI) e o tempo máximo de cada chamada (`AI_TIMEOUT_SECONDS`, padrão 60). As
+  configurações são lidas com `pydantic-settings`; uma variável vazia no `.env` volta
+  ao valor padrão.
+- **Modelo local em desenvolvimento (LM Studio, vLLM, Ollama):** como esses
+  servidores falam a API da OpenAI, o adaptador `openai` atende a eles. Com o LM
+  Studio: `AI_PROVIDER=openai`, `AI_MODEL` com o identificador do modelo carregado,
+  `OPENAI_API_KEY` com qualquer valor não vazio, `OPENAI_BASE_URL=http://localhost:1234/v1`
+  e um `AI_TIMEOUT_SECONDS` maior (ex.: 180). O modelo precisa aceitar saída em JSON
+  Schema estrito; modelos pequenos falham mais na verificação dos textos.
 - Frontend: só variáveis com prefixo `VITE_`, e nunca segredos (tudo com `VITE_`
   vai para o navegador).
 
