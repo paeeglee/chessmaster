@@ -21,8 +21,8 @@ function withFacts(facts: Partial<MoveReview["facts"]>): MoveReview {
 
 describe("textos do painel do treinador (MR-06..MR-10)", () => {
   it("22...Ta7: título, dono, melhor lance com motivo e o que continuou atacado", () => {
-    expect(coachTitle(ta7, "b")).toEqual({ title: "22...Ta7 · Erro", owner: "Seu lance" });
-    expect(coachTitle(ta7, "w").owner).toBe("Lance do adversário");
+    expect(coachTitle(ta7, false)).toEqual({ title: "22...Ta7 · Erro", owner: "Seu lance" });
+    expect(coachTitle(ta7, true).owner).toBe("Seu lance a seguir");
     expect(bestMoveSentence(ta7)).toBe("Melhor era 22...Bd4+: dá xeque e salva o bispo em a1.");
     expect(coachFindings(ta7)).toEqual([
       "Continuou atacado e sem defesa: o bispo em a1.",

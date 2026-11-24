@@ -53,7 +53,7 @@ As metas abaixo são hipóteses iniciais e precisam ser validadas com usuários.
 - Avaliação de cada posição por um motor.
 - Tabela de finais exata para posições com poucas peças.
 - Resumo da partida, gráfico de vantagem, lista de lances anotada, momentos-chave, "o que você fez bem" e hábito sugerido.
-- Revisão lance a lance (estilo Game Review do Chess.com): classificação de cada lance, painel do treinador com o melhor lance e o porquê, o que ficou descoberto e a explicação da IA sob demanda.
+- Revisão lance a lance dos lances do jogador (estilo Game Review do Chess.com): classificação de cada lance dele, painel do treinador com o melhor lance e o porquê, o que ficou descoberto e a explicação da IA sob demanda.
 - Exercício "encontre o lance" para cada momento-chave.
 - Perguntas livres à IA sobre a partida analisada.
 - Uso em computador (desktop).

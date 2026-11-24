@@ -9,7 +9,7 @@ import {
   requestMoveExplanation,
 } from "../../explanation";
 import { positionsAlongLine } from "../../game";
-import { initialPosition, positionFen, reviewedPly } from "../model/review";
+import { coachPly, initialPosition, positionFen } from "../model/review";
 
 /** R-09: a linha do motor anda até 6 meios-lances, um a cada 600 ms. */
 export const LINE_PLIES = 6;
@@ -108,8 +108,8 @@ export const reviewMachine = setup({
   guards: {
     // MR-13/MR-15: pede só a primeira vez que o lance é revisado.
     needsCoachText: ({ context }) => {
-      const ply = reviewedPly(context.result, context.position);
-      return ply > 0 && context.coach[ply] === undefined;
+      const target = coachPly(context.result, context.position);
+      return target !== null && context.coach[target.ply] === undefined;
     },
   },
   actions: {
@@ -250,14 +250,17 @@ export const reviewMachine = setup({
           entry: assign({
             coach: ({ context }) => ({
               ...context.coach,
-              [reviewedPly(context.result, context.position)]: { status: "loading", text: null },
+              [coachPly(context.result, context.position)?.ply ?? 0]: {
+                status: "loading",
+                text: null,
+              },
             }),
           }),
           invoke: {
             src: "explainMove",
             input: ({ context }) => ({
               result: context.result,
-              ply: reviewedPly(context.result, context.position),
+              ply: coachPly(context.result, context.position)?.ply ?? 0,
             }),
             onDone: {
               target: "idle",

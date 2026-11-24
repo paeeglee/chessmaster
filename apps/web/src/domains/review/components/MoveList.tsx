@@ -72,8 +72,12 @@ export function MoveList({ context, send }: MoveListProps) {
   };
   // Antes de um momento-chave, o destaque fica no lance errado; senão, no último jogado.
   const highlighted = reviewedPly(result, position);
-  const qualityOf = (cell: MoveCell | null) =>
-    cell ? result.moveReviews[cell.ply - 1]?.quality : undefined;
+  // Só os lances do jogador são revisados: os do adversário não ganham ícone.
+  const player = result.request.playerColor;
+  const qualityOf = (cell: MoveCell | null) => {
+    const review = cell ? result.moveReviews[cell.ply - 1] : undefined;
+    return review?.color === player ? review.quality : undefined;
+  };
   const isSelected = (cell: MoveCell | null) => cell !== null && cell.ply === highlighted;
 
   return (

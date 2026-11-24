@@ -4,6 +4,7 @@ import {
   annotationOf,
   boardMarks,
   chartGeometry,
+  coachPly,
   contextLine,
   initialPosition,
   materialChange,
@@ -167,5 +168,27 @@ describe("textos dos momentos (RV-11)", () => {
     expect(suggestionChips({ ...result, keyMoments: [], strengths: [] })).toEqual([
       "Como posso melhorar no final?",
     ]);
+  });
+});
+
+describe("coachPly: só os lances do jogador são revisados", () => {
+  it("depois de um lance do jogador, revisa esse lance", () => {
+    // Pretas: o meio-lance 44 é 22...Ta7.
+    expect(coachPly(result, 44)).toEqual({ ply: 44, upcoming: false });
+  });
+
+  it("depois de um lance do adversário, revisa o lance seguinte do jogador", () => {
+    expect(coachPly(result, 43)).toEqual({ ply: 44, upcoming: true });
+  });
+
+  it("na posição inicial, as pretas ainda não jogaram: nada a revisar", () => {
+    expect(coachPly(result, 0)).toBeNull();
+  });
+
+  it("jogando de brancas, a posição inicial revisa o primeiro lance", () => {
+    const white = { ...result, request: { ...result.request, playerColor: "w" as const } };
+    expect(coachPly(white, 0)).toEqual({ ply: 1, upcoming: true });
+    // A partida termina num lance das pretas: no fim não há lance das brancas depois.
+    expect(coachPly(white, 144)).toBeNull();
   });
 });
