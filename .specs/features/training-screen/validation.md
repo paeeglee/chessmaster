@@ -1,13 +1,15 @@
 # F8 · Treinar momento-chave Validation
 
-**Date**: 2026-11-24 (round 2)
+**Date**: 2026-11-24 (round 3)
 **Spec**: `.specs/features/training-screen/spec.md`
-**Diff range**: `origin/main..HEAD` (`9d8486c..964139e`). Round 2 re-verified the fix commit `964139e` on top of the round-1 report (`94bc5db`) and the feature commits (`999ccef..335ba3b`).
+**Diff range**: `origin/main..HEAD` (`9d8486c..039ce3a`). Round 3 re-verified `039ce3a` ("pin the training board label and orientation") on top of the round-2 fix `964139e` and the feature commits `999ccef..335ba3b`.
 **Verifier**: independent sub-agent (author ≠ verifier)
 
-**Verdict**: FAIL
+**Verdict**: PASS
 
-All six round-1 gaps (G1–G6) are closed, and all three round-1 survivors (M06, M20, M21) are now killed. Both gates are green. The verdict stays FAIL because 2 of the 5 mutants aimed at the new §8 label code survive (N02, N05). Both are one-assertion test fixes on the board label (see Fix Plans R2-1 and R2-2). No production defect was found.
+Every TR-01..TR-14 requirement, every step_04 §7 criterion and §8 keyboard play and text-for-highlights have spec-anchored evidence. Both gates are green. The discrimination sensor kills **29/29** mutants in Vitest, including the orientation mutant, which round 1 caught only in Playwright.
+
+History: round 1 FAIL (M06, M20, M21 survived; §8 text missing), round 2 FAIL (N02, N05 survived on the new label code), round 3 PASS.
 
 ---
 
@@ -19,32 +21,32 @@ All six round-1 gaps (G1–G6) are closed, and all three round-1 survivors (M06,
 | T2 Training machine and app wiring | ✅ Done | `c1ee22e` |
 | T3 Interactive board and screen | ✅ Done | `79b27ef`, `632d8e8` |
 | T4 End-to-end and docs | ✅ Done | `335ba3b` |
-| Fix round 1 (G1–G6) | ✅ Done | `964139e`; `tasks.md` `**Status**: Done`, spec traceability rows Done |
+| Fix round 1 (G1–G6) | ✅ Done | `964139e` |
+| Fix round 2 (R2-1, R2-2, M15 in Vitest) | ✅ Done | `039ce3a` |
+
+`tasks.md` `**Status**: Done`; spec traceability TR-01..TR-14 `Done`, 14/14 mapped.
 
 ---
 
-## Gate Check (round 2, HEAD `964139e`)
+## Gate Check (round 3, HEAD `039ce3a`)
 
-- **`make check`**: exit 0.
-  - Biome, `tsc --noEmit`, Ruff and mypy clean.
-  - Vitest: 37 files, **417 passed** (round 1: 416, +1). Coverage 98.69% stmts / 91.13% branches overall. The per-domain 90% `model/**` thresholds (`apps/web/vite.config.ts:43-56`) pass, including `training/model`.
-  - pytest: 75 passed.
-- **`make test-e2e`**: exit 0, **16 passed** in 2.3 min, including both `[full-analysis] e2e/training.spec.ts` tests with the real engine. The first round-2 attempt is invalid: another worktree's `vite preview` took port 4173 between the free-port check and server start, then went away (`Port 4173 is already in use`, `ERR_CONNECTION_REFUSED`). It was rerun once the ports were free and passed.
-- **Test delta**: no tests removed. The changed assertions are stricter: an exact board label, an end-anchored e2e regex, a literal 1200 ms, and exact square names with ", destino possível".
+- **`make check`**: exit 0. Biome, `tsc --noEmit`, Ruff and mypy are clean. Vitest: 37 files, **418 passed** (round 2: 417). Coverage is 98.69% stmts / 91.15% branches overall, and the per-domain 90% `model/**` thresholds pass, `training/model` included. pytest: 75 passed.
+- **`make test-e2e`**: exit 0, **16 passed** in 2.2 min. This run built and served its own web app (`[web] vite build`, `vite preview`), and both `[full-analysis] e2e/training.spec.ts` tests passed with the real engine.
+- **Discarded runs (environment, not code)**: the first round-3 attempt overlapped another worktree's Playwright run. Vitest hit one 15 s timeout in the unchanged `review/components/explore.test.tsx` (RV-06) under CPU load, and the e2e run reused a foreign server on port 4173 that then went away (11 connection failures). Both gates were rerun after ports 4173/8000 had been free for 30 s and passed.
+- **Test delta**: Vitest 365 (before F8) → 418 (+53); Playwright 14 → 16 (+2). No tests were removed. Every changed assertion is stricter than before.
 - **Skipped**: none.
 
 ---
 
-## Round-1 gaps re-checked
+## Round-2 gaps re-checked
 
 | Gap | Fix verified | Evidence |
 | --- | ------------ | -------- |
-| G1 "Tentativa N" | ✅ | `apps/web/src/domains/training/machines/trainingMachine.test.ts:122-130`: e8e6, `UNDO`, a8a7 → `toMatchObject({kind:"wrong", attempt: 2})`. `components/TrainingScreen.test.tsx:106-114`: `findByText("Tentativa 2")` plus the full repeated-move text. M20 killed. |
-| G2 solution hidden after a wrong attempt | ✅ | `TrainingScreen.test.tsx:101-102`: `within(status).queryByText(/Bd4\|Bb2\|solução/)` null, `d4` not `data-mark="green"`. `apps/web/e2e/training.spec.ts:34` regex anchored with `$`; `:37` `not.toContainText("Bd4")`. M21 killed. |
-| G3 1.2 s refutation | ✅ | `trainingMachine.test.ts:107-111`: `toBe(1200)`, still `refuting` after 1199 ms, `playing` after 1 more ms. M06 killed. |
-| G4 §8 text for highlights | ✅ (two weak spots, R2-1/R2-2) | `TrainingScreen.tsx:140-147` `boardLabel`; `TrainingScreen.test.tsx:71` and `e2e/training.spec.ts:12`: group name "Posição antes de 22...Ta7, vista pelas pretas. O bispo em a1 está destacado.". `shared/ui/Board.tsx:148`; `Board.test.tsx:88-89`: "h3, vazia, destino possível", "f3, vazia, destino possível", and the exact "g1, cavalo branco" with no suffix. N01, N03, N04 killed. |
-| G5 TR-11 M | ✅ | `spec.md` TR-11 now defines M as the moments trained in this session and N as first-try without hints. `TrainingScreen.test.tsx:154-163` (opened on the last moment) asserts `"0 de 1 de primeira"`. |
-| G6 traceability | ✅ | `tasks.md:12` `**Status**: Done`; spec traceability TR-01..TR-14 `Done`, 14/14 mapped. |
+| R2-1 highlight sentence leaves with the mark | ✅ | `apps/web/src/domains/training/components/TrainingScreen.test.tsx:107`: while the refutation is on the board, `getByRole("group", {name: "Posição antes de 22...Ta7, vista pelas pretas."})`, which is the exact name without the sentence. N02 killed. |
+| R2-2 gender of the sentence | ✅ | The sentence moved to `apps/web/src/domains/training/model/exercise.ts:256-262` (`highlightSentence`), and `TrainingScreen.tsx:144-145` uses it only `atStart`. `model/exercise.test.ts:237-243`: `toBe("O bispo em a1 está destacado.")`, `toBe("A torre em a3 está destacada.")` (ply 86), `toBeNull()` without a lost piece. N05 and N06 killed. |
+| M15 orientation in Vitest | ✅ | `TrainingScreen.test.tsx:75-80`: `squares[0]` `data-square="h1"`, `squares[63]` `"a8"` for Black. Killed in Vitest; `e2e/training.spec.ts:16-17` still checks it in the browser. |
+
+Round-1 gaps G1–G6 stay closed (evidence below).
 
 ---
 
@@ -54,54 +56,75 @@ All six round-1 gaps (G1–G6) are closed, and all three round-1 survivors (M06,
 
 | ID | Spec-defined outcome | `file:line` + assertion | Result |
 | -- | -------------------- | ----------------------- | ------ |
-| TR-01 | Position before the mistake, player's side, player to move, "Momento N de M" | `trainingMachine.test.ts:58-65` (`index` 3 for ply 86, `fen` = `fenBefore`); `model/exercise.test.ts:36-39` (side to move `"b"`); `TrainingScreen.test.tsx:55` `"Momento 1 de 5"`; orientation `e2e/training.spec.ts:16-17` (first square `h1`, last `a8`) | ✅ |
-| TR-02 | Kicker, question, context | `model/exercise.test.ts:41-47` `toEqual({...})` with the three exact strings | ✅ |
-| TR-03 | Legal destinations highlighted; illegal targets ignored | `model/exercise.test.ts:170-180`; `trainingMachine.test.ts:72-87`; `TrainingScreen.test.tsx:77-82`; destinations named in text `Board.test.tsx:88-89` | ✅ |
-| TR-04 | Engine-evaluated, accepted when not a D3 mistake | `model/exercise.test.ts:49-81` (Te6 refused; Bd4+ and Bb2 accepted); `trainingMachine.test.ts:96`; `e2e/training.spec.ts` real engine | ✅ |
-| TR-05 | "Tentativa N", "{lance} ainda perde {peça}", reply on the board, return, no solution | `model/exercise.test.ts:59-62`; `trainingMachine.test.ts:99-113`, `:122-130`; `TrainingScreen.test.tsx:84-114` | ✅ |
-| TR-06 | "Esse foi o lance jogado na partida." | `model/exercise.test.ts:83-90`; `TrainingScreen.test.tsx:110-114` | ✅ |
-| TR-07 | Confirm, ≤ 4-ply continuation, principle, "Próximo momento" | `model/exercise.test.ts:74`; `TrainingScreen.test.tsx` TR-07 test (`/^Continuação do motor: Rf1 Bb2 Bc3 Bxc3/`, principle, "Momento 2 de 5") | ✅ (⚠️ confirmation wording not fixed by the spec) |
-| TR-08 | Hints pattern → piece, capped at 2; solution in green + "Próximo momento" | `model/exercise.test.ts:92-97`; `trainingMachine.test.ts` hint-cap and solution tests; `TrainingScreen.test.tsx` TR-08 test (`d4` `data-mark="green"`) | ✅ |
-| TR-09 | Undo to start, history kept | `trainingMachine.test.ts` "Desfazer volta na hora" (`attempts: 1`); `TrainingScreen.test.tsx:103-105` | ✅ |
-| TR-10 | first-try / with-hint / saw-solution | `model/exercise.test.ts:137-141`; `trainingMachine.test.ts` outcome assertions | ✅ |
-| TR-11 | "N de M de primeira" (M = moments in this session) + "Voltar ao resultado" | `model/exercise.test.ts:142-144` `"3 de 5 de primeira"`; `TrainingScreen.test.tsx:154-167` `"0 de 1 de primeira"` + back | ✅ |
-| TR-12 | Back to Result at any time | `TrainingScreen.test.tsx` top-link test; `trainingMachine.test.ts` `sendParent` test; `app/appMachine.test.ts:230-262`; `e2e/training.spec.ts` keyboard test ends on "Resumo da partida" | ✅ |
-| TR-13 | `role="status"` | `TrainingScreen.test.tsx:89-94`; `e2e/training.spec.ts:30-37` | ✅ |
-| TR-14 | Engine failure message, position resets | `trainingMachine.test.ts` TR-14 test (`attempts: 0`, `fen` = `fenBefore`); `TrainingScreen.test.tsx` TR-14 exact text | ✅ |
+| TR-01 | Position before the mistake, player's side, player to move, "Momento N de M" | `machines/trainingMachine.test.ts:58-65` (`index` 3 for ply 86, `fen` = `fenBefore`); `model/exercise.test.ts:36-39` (side to move `"b"`); `TrainingScreen.test.tsx:54-80` (`"Momento 1 de 5"`, board group name, `squares[0]` h1 / `squares[63]` a8, "Pretas jogam (você)"); `e2e/training.spec.ts:10-18` | ✅ |
+| TR-02 | Kicker, question, context, answer not revealed | `model/exercise.test.ts:41-47` `toEqual({kicker: "Encontre o lance · tipo: peça atacada", question: "Uma das suas peças está em perigo. O que fazer?", context: "Posição real da sua partida, antes do lance 22. Na partida você jogou 22...Ta7."})`; `TrainingScreen.test.tsx` `queryByText(/Bd4/)` null at load | ✅ |
+| TR-03 | Legal destinations highlighted; illegal targets ignored | `model/exercise.test.ts:170-180` (`squareClick`); `trainingMachine.test.ts:72-87`; `TrainingScreen.test.tsx:86-91`; `shared/ui/Board.test.tsx:88-89` ("…, destino possível") | ✅ |
+| TR-04 | Engine-evaluated; accepted when not a D3 mistake | `model/exercise.test.ts:49-81` (Te6 `accepted:false`; Bd4+ and Bb2 `accepted:true`); `trainingMachine.test.ts:96` (engine called with the FEN after Te6); `e2e/training.spec.ts:28-47` real engine | ✅ |
+| TR-05 | "Tentativa N", "{lance} ainda perde {peça}", reply on board, return, no solution | `model/exercise.test.ts:59-62` exact title/text; `trainingMachine.test.ts:99-113` (reply FEN, 1199 ms still `refuting`, +1 ms `playing`, back to `fenBefore`), `:122-130` (`attempt: 2`); `TrainingScreen.test.tsx:93-124` ("Tentativa 1", `a1, torre branca`, no `Bd4\|Bb2\|solução`, d4 not green, "Tentativa 2"); `e2e/training.spec.ts:30-37` | ✅ |
+| TR-06 | "Esse foi o lance jogado na partida." | `model/exercise.test.ts:83-90`; `TrainingScreen.test.tsx:118-123` | ✅ |
+| TR-07 | Confirm, ≤ 4-ply continuation, principle, "Próximo momento" | `model/exercise.test.ts:74` (4 of 5 plies); `TrainingScreen.test.tsx:126-138` ("22...Bd4+ resolve o problema.", `/^Continuação do motor: Rf1 Bb2 Bc3 Bxc3/`, principle, "Momento 2 de 5"); `e2e/training.spec.ts:44-49` | ✅ |
+| TR-08 | Hints pattern → piece, capped at 2; solution in green + "Próximo momento" | `model/exercise.test.ts:92-97`; `trainingMachine.test.ts` hint-cap test (`hintLevel` stays 2) and solution test (`saw-solution`); `TrainingScreen.test.tsx:140-151` (order, "Outra dica" disabled, "A solução é 22...Bd4+.", d4 `data-mark="green"`) | ✅ |
+| TR-09 | Undo to start, history kept | `trainingMachine.test.ts` "Desfazer volta na hora" (`attempts: 1`, `lastMove: null`); `TrainingScreen.test.tsx:112-114`; `e2e/training.spec.ts:39-40` | ✅ |
+| TR-10 | first-try / with-hint / saw-solution | `model/exercise.test.ts:137-141`; `trainingMachine.test.ts` `{44:"first-try"}`, `{44:"with-hint"}` (after a wrong attempt and after a hint), `saw-solution` | ✅ |
+| TR-11 | "N de M de primeira" with M = moments in this session, + "Voltar ao resultado" | `model/exercise.test.ts:142-144` `"3 de 5 de primeira"`; `TrainingScreen.test.tsx:163-177` (opened on the last moment: `"0 de 1 de primeira"`, back sends `TRAINING.BACK`) | ✅ |
+| TR-12 | Back to Result at any time | `TrainingScreen.test.tsx:179-183`; `trainingMachine.test.ts` `sendParent` test; `app/appMachine.test.ts:230-262` (input `{result, ply: 86, engine}`, `training` → `review`); `e2e/training.spec.ts` keyboard test ends on "Resumo da partida" | ✅ |
+| TR-13 | `role="status"` | `TrainingScreen.test.tsx:98`; `e2e/training.spec.ts:30-37` | ✅ |
+| TR-14 | Engine failure message, reset, not counted | `trainingMachine.test.ts` TR-14 test (`feedback {kind:"error"}`, `attempts: 0`, `fen` = `fenBefore`); `TrainingScreen.test.tsx:153-161` exact text | ✅ |
 
 ### step_04 §7 and §8
 
 | Criterion | Evidence | Result |
 | --------- | -------- | ------ |
-| Moment 1 before 22...Ta7, black at the bottom, black to move | `e2e/training.spec.ts:10-18` | ✅ |
-| 22...Te6 → 23.Txa1, "ainda perde o bispo", no solution | `e2e/training.spec.ts:28-37` (real engine, anchored regex, `not.toContainText("Bd4")`); board reply `TrainingScreen.test.tsx:99` | ✅ |
-| 22...Bd4+ accepted with continuation and principle | `e2e/training.spec.ts` keyboard test; `TrainingScreen.test.tsx` TR-07 test | ✅ |
-| 22...Bb2 also accepted | `e2e/training.spec.ts:40-45` | ✅ |
-| §8 keyboard play | `Board.test.tsx` keyboard test; `e2e/training.spec.ts` focus + Enter on a1 and d4 | ✅ |
-| §8 highlights come with text | `TrainingScreen.test.tsx:71`, `e2e/training.spec.ts:12`, `Board.test.tsx:88-89`. Weak: the sentence's removal once the mark is gone, and the feminine form, are untested (R2-1, R2-2). | ✅ (⚠️) |
+| Moment 1 before 22...Ta7, black at the bottom, black to move | `e2e/training.spec.ts:10-18`; `TrainingScreen.test.tsx:75-80` | ✅ |
+| 22...Te6 → 23.Txa1, "ainda perde o bispo", no solution | `e2e/training.spec.ts:28-37` (real engine, `$`-anchored regex, `not.toContainText("Bd4")`); `TrainingScreen.test.tsx:105-111` | ✅ |
+| 22...Bd4+ accepted, continuation and principle shown | `e2e/training.spec.ts` keyboard test; `TrainingScreen.test.tsx:126-138` | ✅ |
+| 22...Bb2 also accepted (T-03) | `e2e/training.spec.ts:42-47`; `model/exercise.test.ts:77-81` | ✅ |
+| §8 keyboard: Tab to the square, Enter, Enter | `shared/ui/Board.test.tsx` keyboard test (focus + `{Enter}`); `e2e/training.spec.ts` focus a1 + Enter, focus d4 + Enter → accepted | ✅ |
+| §8 feedback with `role="status"` | TR-13 | ✅ |
+| §8 highlights come with text | danger mark: `TrainingScreen.test.tsx:71`, `:107`, `model/exercise.test.ts:237-243`, `e2e/training.spec.ts:12`; destinations: `Board.test.tsx:88-89`; solution: "A solução é 22...Bd4+." | ✅ |
 
-**Status**: ✅ All ACs covered · ⚠️ 2 weak assertions on the §8 label (sensor survivors)
+**Status**: ✅ All ACs covered. One wording note: the TR-07 confirmation text is not fixed by the spec; the implementation uses "{lance} resolve o problema.", and the tests pin it.
 
 ---
 
-## Discrimination Sensor (round 2)
+## Discrimination Sensor (round 3)
 
-A fresh detached `git worktree` at `964139e` in the session scratchpad, `node_modules` symlinked. Each mutant was applied alone against the Vitest suites for `training`, `game`, `app` and `shared/ui/Board` (17 files, 223 tests green on the clean scratch), then restored. The scratch was removed; the real worktree's `git status --porcelain` was empty before and after.
+A fresh detached `git worktree` at `039ce3a` in the session scratchpad, with `node_modules` symlinked. Each mutant was applied alone against the Vitest suites for `training`, `game`, `app` and `shared/ui/Board` (17 files, 224 tests green on the clean scratch), then restored. The scratch was removed; the real worktree's `git status --porcelain` was empty before and after.
 
-| # | Fault | Round 1 | Round 2 |
-| - | ----- | ------- | ------- |
-| M01–M05, M07–M14, M16–M19, M22, M23 | accept rule inverted / accept everything / repeated move / refutation not shown / no return / hint order / hint cap / outcome / summary / error counted / error no reset / opponent selection / disabled ignored / NEXT skips / BACK not sent / app engine / app ply / continuation cap / Undo during refutation | ✅ Killed | ✅ Killed (all 18) |
-| M06 | `REFUTATION_MS` 1200 → 12000 | ❌ Survived | ✅ Killed |
-| M15 | orientation fixed to white | ✅ Killed by e2e only | Vitest survives; `e2e/training.spec.ts:16-17` unchanged and still kills it (shown in round 1) |
-| M20 | "Tentativa N" frozen at 1 | ❌ Survived | ✅ Killed |
-| M21 | wrong feedback prints the solution | ❌ Survived | ✅ Killed |
-| N01 | `TrainingScreen.tsx:144` board label drops the highlight sentence | - | ✅ Killed |
-| N02 | `TrainingScreen.tsx:144` highlight sentence kept after leaving the start position (`!atStart` dropped) | - | ❌ **Survived** (R2-1) |
-| N03 | `Board.tsx:148` ", destino possível" removed | - | ✅ Killed |
-| N04 | `Board.tsx:148` suffix on every square | - | ✅ Killed |
-| N05 | `TrainingScreen.tsx:146` always "destacado" (wrong for "a torre", "a dama") | - | ❌ **Survived** (R2-2) |
+| # | File | Fault | Result |
+| - | ---- | ----- | ------ |
+| M01 | `training/model/exercise.ts` `checkAttempt` | accept rule inverted | ✅ Killed |
+| M02 | `exercise.ts` `checkAttempt` | accept everything (D3 threshold ignored) | ✅ Killed |
+| M03 | `exercise.ts` `checkAttempt` | `repeatedGameMove` always false | ✅ Killed |
+| M04 | `training/machines/trainingMachine.ts` `checking.onDone` | refutation not shown on the board | ✅ Killed |
+| M05 | `trainingMachine.ts` `refuting.after` | never returns to the start | ✅ Killed |
+| M06 | `trainingMachine.ts:17` | `REFUTATION_MS` 1200 → 12000 | ✅ Killed |
+| M07 | `components/TrainingScreen.tsx` hint box | hint order swapped | ✅ Killed |
+| M08 | `trainingMachine.ts` `hintsLeft` | hints not capped at 2 | ✅ Killed |
+| M09 | `exercise.ts` `outcomeOf` | a wrong attempt still first-try | ✅ Killed |
+| M10 | `exercise.ts` `summaryText` | with-hint counted as first-try | ✅ Killed |
+| M11 | `trainingMachine.ts` `onError` | engine error counted as an attempt | ✅ Killed |
+| M12 | `trainingMachine.ts` `onError` | engine error does not reset the board | ✅ Killed |
+| M13 | `exercise.ts` `squareClick` | squares without legal moves (opponent pieces) selected | ✅ Killed |
+| M14 | `shared/ui/Board.tsx` | `disabled` ignored | ✅ Killed |
+| M15 | `TrainingScreen.tsx` | orientation fixed to white | ✅ Killed (now in Vitest too) |
+| M16 | `trainingMachine.ts` `solved` | `MOMENT.NEXT` skips a moment | ✅ Killed |
+| M17 | `TrainingScreen.tsx` | `TRAINING.BACK` not sent | ✅ Killed |
+| M18 | `app/appMachine.ts:141` | app passes no engine | ✅ Killed |
+| M19 | `appMachine.ts:140` | app passes the wrong ply | ✅ Killed |
+| M20 | `trainingMachine.ts` `checking.onDone` | "Tentativa N" frozen at 1 | ✅ Killed |
+| M21 | `TrainingScreen.tsx` wrong card | wrong feedback prints the solution | ✅ Killed |
+| M22 | `exercise.ts:24` | continuation capped at 6 instead of 4 | ✅ Killed |
+| M23 | `trainingMachine.ts` `refuting` | `UNDO` ignored during the refutation | ✅ Killed |
+| N01 | `TrainingScreen.tsx:145` | board label drops the highlight sentence | ✅ Killed |
+| N02 | `TrainingScreen.tsx:144` | sentence kept after leaving the start (`atStart` dropped) | ✅ Killed |
+| N03 | `Board.tsx:148` | ", destino possível" removed | ✅ Killed |
+| N04 | `Board.tsx:148` | suffix on every square | ✅ Killed |
+| N05 | `exercise.ts:260` | always "destacado" | ✅ Killed |
+| N06 | `exercise.ts:258` | a sentence even without a lost piece | ✅ Killed |
 
-**Result**: 26/28 killed (M15 by e2e) - ❌ FAIL
+**Sensor depth**: P0-style manual run (29 behavior mutants).
+**Result**: 29/29 killed - ✅ PASS
 
 ---
 
@@ -109,46 +132,54 @@ A fresh detached `git worktree` at `964139e` in the session scratchpad, `node_mo
 
 | Principle | Status |
 | --------- | ------ |
-| Minimum code / surgical changes / no scope creep | ✅ |
-| Matches patterns (XState `setup`, actor side effects, rules in `model/`, `index.ts` boundaries) | ✅ |
-| Spec-anchored outcome check | ✅ (2 weak label assertions) |
+| Minimum code | ✅ |
+| Surgical changes | ✅ (Board gains an interactive mode; the read-only mode is unchanged and tested) |
+| No scope creep | ✅ (T-11, drag and AI training texts left out as `spec.md` says) |
+| Matches patterns | ✅ `setup({types, actors, guards, actions})`, side effect in the `evaluateAttempt` actor, rules and texts in `training/model` (the highlight sentence now included), cross-domain imports only through `index.ts` |
+| Spec-anchored outcome check | ✅ |
+| Per-layer coverage (domain 1:1 ACs; UI happy + edge + error) | ✅ |
+| Every test maps to a requirement | ✅ |
 | Documented guidelines: `docs/engineering/quality.md`, `docs/architecture/code-structure.md` | ✅ |
-
-Note: `boardLabel` (`TrainingScreen.tsx:140-147`) builds a text from a piece and an article inside a component. `hintText` already does the same in `training/model/exercise.ts:159`. Moving the gender rule into `model/` would make it unit-testable next to its twin. This is optional.
 
 ---
 
-## Fix Plans
+## Edge Cases
 
-### R2-1 (Minor): the highlight sentence is not shown to leave with the mark (N02)
+- [x] Engine failure (TR-14): message, reset, not counted.
+- [x] Engine without a PV: accepted, no reply and no refutation (`model/exercise.test.ts:184-194`).
+- [x] Illegal PV reply: board unchanged (`model/exercise.test.ts:196-203`).
+- [x] No or illegal best move: no solution label (`model/exercise.test.ts:205-212`).
+- [x] Promotion promotes to a queen (`model/exercise.test.ts:214-227`).
+- [x] Board locked while checking (`TrainingScreen.tsx` `disabled={!playing}`; `Board.test.tsx` disabled test; M14 killed).
+- [x] Training opened on a later moment: the summary counts the moments of this session (TR-11 as amended; `TrainingScreen.test.tsx:172`).
 
-- **Fix task**: in `apps/web/src/domains/training/components/TrainingScreen.test.tsx` (refutation test, after the wrong attempt and before "Desfazer"), assert `screen.getByRole("group", {name: "Posição antes de 22...Ta7, vista pelas pretas."})`, the label without the sentence, while the refutation is on the board.
-- **Done when**: N02 is killed.
+---
 
-### R2-2 (Minor): feminine form untested (N05)
+## Visual check
 
-- **Fix task**: render the training on ply 86 (the rook moment) and assert the group name ends with "A torre em … está destacada." (exact square from the fixture). Alternatively, move the sentence into `training/model` and unit-test both genders.
-- **Done when**: N05 is killed.
+The Verifier did not do a screenshot comparison (optional in this run). The e2e runs against `vite preview` with the isolation headers on. Copy differences from `docs/design/step_04/Treino.dc.html` are deliberate: the instruction reads "Clique na peça e depois na casa de destino" because there is no drag in the MVP.
 
 ---
 
 ## Requirement Traceability Update
 
-| Requirement | Round 1 | Round 2 |
-| ----------- | ------- | ------- |
-| TR-01..TR-04, TR-06..TR-14 | ✅ Verified | ✅ Verified |
-| TR-05 | ❌ Needs Fix | ✅ Verified |
-| TR-11 | ⚠️ spec-precision | ✅ Verified (spec now defines M) |
-| step_04 §8 highlights with text | ❌ Needs Fix | ⚠️ Implemented; R2-1/R2-2 test gaps |
+| Requirement | Round 1 | Round 2 | Round 3 |
+| ----------- | ------- | ------- | ------- |
+| TR-01..TR-04, TR-06..TR-10, TR-12..TR-14 | ✅ | ✅ | ✅ Verified |
+| TR-05 | ❌ | ✅ | ✅ Verified |
+| TR-11 | ⚠️ | ✅ | ✅ Verified |
+| step_04 §8 text for highlights | ❌ | ⚠️ | ✅ Verified |
 
 ---
 
 ## Summary
 
-**Overall**: ❌ Not Ready (two test-only fixes left)
+**Overall**: ✅ Ready
 
-**Spec-anchored check**: 14/14 TR and 4/4 §7 criteria matched; §8 covered with 2 weak assertions.
-**Sensor**: 26/28 killed (M15 by e2e); N02 and N05 survived.
-**Gate**: `make check` 417 Vitest + 75 pytest passed; `make test-e2e` 16 passed.
+**Spec-anchored check**: 14/14 TR, 4/4 step_04 §7 and the §8 criteria matched.
+**Sensor**: 29/29 mutations killed in Vitest.
+**Gate**: `make check` 418 Vitest + 75 pytest passed; `make test-e2e` 16 passed.
 
-**Next steps**: add the two assertions in R2-1 and R2-2, then a round-3 re-verify (the last of the 3 allowed iterations).
+**What works**: the T-03 accept rule with the real engine (Te6 refuted by 23.Txa1, Bd4+ and Bb2 accepted), the refutation and its 1.2 s return, the attempt numbering, the repeated-move notice, the hidden solution, ordered and capped hints, the solution in green, undo, the outcomes and session summary, back navigation, engine failure, keyboard play, and text for every board highlight.
+
+**Next steps**: none for F8. Follow-ups already logged in `spec.md` Out of Scope: AI-written training texts, drag and drop, and the T-11 extra exercise.
