@@ -145,7 +145,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Route returns verified text; 502 after two rejections; 422 on bad body
+- [x] Route returns verified text; 502 after two rejections; 422 on bad body
 
 **Tests**: unit
 **Gate**: quick

@@ -109,3 +109,40 @@ class QuestionRequest(ContractModel):
 class QuestionAnswer(ContractModel):
     answer: str
     in_scope: bool
+
+
+MoveQuality = Literal["best", "excellent", "good", "inaccuracy", "mistake", "blunder", "miss"]
+
+
+class BestMoveReasonsFact(ContractModel):
+    check: bool = Field(description="O melhor lance dá xeque")
+    mate_in: int | None = Field(ge=1, description="Mate em N lances com o melhor lance")
+    wins: int = Field(ge=0, description="Pontos de material que a linha do melhor lance ganha")
+    saves: list[PieceOnSquare] = Field(description="Peças en prise que o melhor lance salva")
+
+
+class MoveContract(ContractModel):
+    """Tudo o que a IA pode afirmar sobre UM lance (revisão lance a lance, F9)."""
+
+    level: Level
+    player_color: PlayerColor
+    mover: Literal["player", "opponent"]
+    move_label: str = Field(description='Lance com número, em notação portuguesa: "22...Ta7"')
+    move_san: str = Field(description='O mesmo lance sem número: "Ta7"')
+    quality: MoveQuality
+    best_move_label: str | None = Field(description='Melhor lance do motor com número: "22...Bd4+"')
+    best_line: list[str] = Field(
+        max_length=6, description="Linha do motor a partir do melhor lance"
+    )
+    undefended: list[PieceOnSquare] = Field(description="Peças que o lance deixou descobertas")
+    still_en_prise: list[PieceOnSquare] = Field(
+        description="Peças que já estavam atacadas sem defesa e continuaram"
+    )
+    missed_material: int = Field(ge=0, description="Material que o melhor lance ganharia a mais")
+    best_reasons: BestMoveReasonsFact | None
+
+
+class MoveExplanation(ContractModel):
+    """Resposta da IA para o painel do treinador, sempre neste formato."""
+
+    text: str = Field(description="De 2 a 4 frases sobre o lance")

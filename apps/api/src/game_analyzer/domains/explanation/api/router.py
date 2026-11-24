@@ -10,10 +10,13 @@ from game_analyzer.domains.explanation.application.explain_game import (
     ExplainGame,
     ExplanationUnverifiedError,
 )
+from game_analyzer.domains.explanation.application.explain_move import ExplainMove
 from game_analyzer.domains.explanation.application.ports import LLMProvider, ProviderError
 from game_analyzer.domains.explanation.domain.contract import (
     GameContract,
     GameExplanation,
+    MoveContract,
+    MoveExplanation,
     QuestionAnswer,
     QuestionRequest,
 )
@@ -70,6 +73,23 @@ def answer_question(request: QuestionRequest, provider: Provider) -> QuestionAns
     except ExplanationUnverifiedError as error:
         logger.warning(
             "resposta reprovada na verificação (%d problemas): %s",
+            len(error.violations),
+            "; ".join(error.violations),
+        )
+        raise HTTPException(status_code=502, detail="explanation_unverified") from error
+
+
+@router.post("/move-explanations", responses=_ERRORS)  # type: ignore[arg-type]  # dict de respostas
+def explain_move(contract: MoveContract, provider: Provider) -> MoveExplanation:
+    """Revisão lance a lance (F9): explica um lance quando o jogador o abre."""
+    try:
+        return ExplainMove(provider)(contract)
+    except ProviderError as error:
+        logger.warning("provedor de IA indisponível: %s", error)
+        raise HTTPException(status_code=503, detail="ai_unavailable") from error
+    except ExplanationUnverifiedError as error:
+        logger.warning(
+            "explicação do lance reprovada na verificação (%d problemas): %s",
             len(error.violations),
             "; ".join(error.violations),
         )

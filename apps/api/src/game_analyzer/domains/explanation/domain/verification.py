@@ -3,7 +3,12 @@
 import re
 from dataclasses import dataclass
 
-from game_analyzer.domains.explanation.domain.contract import GameContract, GameExplanation
+from game_analyzer.domains.explanation.domain.contract import (
+    GameContract,
+    GameExplanation,
+    MoveContract,
+    MoveExplanation,
+)
 
 MAX_VERDICT_WORDS = 30
 
@@ -121,3 +126,49 @@ def verify_explanation(explanation: GameExplanation, contract: GameContract) -> 
     for text in texts:
         violations.extend(verify_text(text, facts))
     return violations
+
+
+def _line_labels(move_label: str, best_line: list[str]) -> set[str]:
+    """Rótulos numerados da linha do motor: "22...Bd4+", "23.Re3", "23...Bxe3"…"""
+    number = _MOVE_NUMBER.match(move_label)
+    if number is None:
+        return set()
+    move_number = int(re.sub(r"\D", "", number.group(0)))
+    black = "..." in number.group(0) or "…" in number.group(0)
+    labels: set[str] = set()
+    for san in best_line:
+        labels.add(_normalize_move(f"{move_number}{'...' if black else '.'}{san}"))
+        if black:
+            move_number += 1
+        black = not black
+    return labels
+
+
+def allowed_move_facts(contract: MoveContract) -> AllowedFacts:
+    """Lances, casas e números que o texto de um lance pode citar (F9)."""
+    labels = {_normalize_move(contract.move_label)}
+    moves = {_normalize_move(contract.move_san)}
+    moves.update(_normalize_move(san) for san in contract.best_line)
+    labels.update(_line_labels(contract.move_label, contract.best_line))
+    if contract.best_move_label:
+        labels.add(_normalize_move(contract.best_move_label))
+        moves.add(_normalize_move(re.sub(r"^\d+\s?(?:\.\.\.|…|\.)", "", contract.best_move_label)))
+    pieces = [*contract.undefended, *contract.still_en_prise]
+    numbers: set[int] = {1, 2, contract.missed_material, len(contract.best_line)}
+    number = _MOVE_NUMBER.match(contract.move_label)
+    if number:
+        move_number = int(re.sub(r"\D", "", number.group(0)))
+        numbers.update({move_number, move_number + 1})
+    reasons = contract.best_reasons
+    if reasons is not None:
+        numbers.add(reasons.wins)
+        if reasons.mate_in is not None:
+            numbers.add(reasons.mate_in)
+        pieces.extend(reasons.saves)
+    squares = {square for move in moves | labels for square in _SQUARE.findall(move)}
+    squares.update(piece.square for piece in pieces)
+    return AllowedFacts(frozenset(labels), frozenset(moves), frozenset(squares), frozenset(numbers))
+
+
+def verify_move_explanation(explanation: MoveExplanation, contract: MoveContract) -> list[str]:
+    return verify_text(explanation.text, allowed_move_facts(contract))

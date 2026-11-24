@@ -12,6 +12,8 @@ from game_analyzer.domains.explanation.domain.contract import (
     GameContract,
     GameExplanation,
     KeyMomentText,
+    MoveContract,
+    MoveExplanation,
     PieceOnSquare,
     QuestionAnswer,
     StrengthText,
@@ -55,12 +57,49 @@ def _piece(piece: PieceOnSquare | None) -> tuple[str, str]:
     return f"{article} {name} em {piece.square}", ending
 
 
-def _read_contract(user: str) -> GameContract:
+def _read_json(user: str) -> object:
     start = user.find("{", user.find(_CONTRACT_MARKER))
     if start == -1:
         raise ProviderError("prompt sem o JSON do contrato")
     data, _ = json.JSONDecoder().raw_decode(user[start:])
-    return GameContract.model_validate(data)
+    return data
+
+
+def _read_contract(user: str) -> GameContract:
+    return GameContract.model_validate(_read_json(user))
+
+
+_QUALITY = {
+    "best": "foi o lance do motor",
+    "excellent": "foi excelente",
+    "good": "foi um bom lance",
+    "inaccuracy": "foi uma imprecisão",
+    "mistake": "foi um erro",
+    "blunder": "foi uma capivarada",
+    "miss": "perdeu a chance de aproveitar o erro do adversário",
+}
+
+
+def _move_explanation(contract: MoveContract) -> MoveExplanation:
+    """Texto de exemplo para um lance, só com os fatos do contrato."""
+    sentences = [f"{contract.move_label} {_QUALITY[contract.quality]}."]
+    left = contract.undefended or contract.still_en_prise
+    if left:
+        piece, ending = _piece(left[0])
+        sentences.append(f"Depois dele, {piece} ficou atacad{ending} e sem defesa.")
+    if contract.quality != "best" and contract.best_move_label:
+        reasons = contract.best_reasons
+        why = ""
+        if reasons is not None and reasons.mate_in is not None:
+            why = f", com mate em {reasons.mate_in}"
+        elif reasons is not None and reasons.saves:
+            why = f", salvando {_piece(reasons.saves[0])[0]}"
+        elif reasons is not None and reasons.wins:
+            why = f", ganhando {reasons.wins} pontos de material"
+        elif reasons is not None and reasons.check:
+            why = ", com xeque"
+        sentences.append(f"O melhor era {contract.best_move_label}{why}.")
+    return MoveExplanation(text=" ".join(sentences))
 
 
 def _verdict(contract: GameContract) -> str:
@@ -128,6 +167,8 @@ def _answer(contract: GameContract) -> QuestionAnswer:
 
 class FakeProvider:
     def generate(self, system: str, user: str, schema: type[ResponseT]) -> ResponseT:
+        if schema is MoveExplanation:
+            return cast(ResponseT, _move_explanation(MoveContract.model_validate(_read_json(user))))
         contract = _read_contract(user)
         if schema is GameExplanation:
             return cast(ResponseT, _explanation(contract))

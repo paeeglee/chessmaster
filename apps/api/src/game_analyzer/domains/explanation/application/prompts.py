@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from importlib.resources import files
 
-from game_analyzer.domains.explanation.domain.contract import GameContract, Level
+from game_analyzer.domains.explanation.domain.contract import GameContract, Level, MoveContract
 
 LEVEL_RULES: dict[Level, str] = {
     "beginner": "Nível Iniciante: sem jargão; quando usar um termo técnico, explique-o.",
@@ -32,7 +32,7 @@ def load_prompt(name: str, version: int = 1) -> tuple[str, str]:
 
 
 def render_prompt(
-    name: str, contract: GameContract, *, feedback: str = "", question: str = ""
+    name: str, contract: GameContract | MoveContract, *, feedback: str = "", question: str = ""
 ) -> Prompt:
     system, user = load_prompt(name)
     values = {
