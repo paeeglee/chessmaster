@@ -59,7 +59,7 @@ def test_explanations_reports_an_unavailable_provider() -> None:
     assert response.json() == {"detail": "ai_unavailable"}
 
 
-def test_explanations_reports_unverified_texts() -> None:
+def test_explanations_reports_unverified_texts(caplog: pytest.LogCaptureFixture) -> None:
     bad = GameExplanation(
         verdict="Cf3.",
         patterns_sentence="",
@@ -67,11 +67,14 @@ def test_explanations_reports_unverified_texts() -> None:
         strengths=[],
         next_game_habit="",
     )
-    response = client_with(ScriptedProvider([bad, bad])).post(
-        "/api/explanations", json=reference_contract_data()
-    )
+    with caplog.at_level("WARNING"):
+        response = client_with(ScriptedProvider([bad, bad])).post(
+            "/api/explanations", json=reference_contract_data()
+        )
     assert response.status_code == 502
     assert response.json() == {"detail": "explanation_unverified"}
+    # O log diz o que foi recusado, para depurar sem reproduzir a chamada.
+    assert "lance Cf3 não está no contrato" in caplog.text
 
 
 def test_questions_answers_about_the_game() -> None:
@@ -98,11 +101,13 @@ def test_questions_reports_an_unavailable_provider() -> None:
     assert response.json() == {"detail": "ai_unavailable"}
 
 
-def test_questions_reports_unverified_answers() -> None:
+def test_questions_reports_unverified_answers(caplog: pytest.LogCaptureFixture) -> None:
     bad = QuestionAnswer(answer="Cf3 era melhor.", in_scope=True)
-    response = client_with(ScriptedProvider([bad, bad])).post(
-        "/api/questions", json={"game": reference_contract_data(), "question": "Oi?"}
-    )
+    with caplog.at_level("WARNING"):
+        response = client_with(ScriptedProvider([bad, bad])).post(
+            "/api/questions", json={"game": reference_contract_data(), "question": "Oi?"}
+        )
+    assert "lance Cf3 não está no contrato" in caplog.text
     assert response.status_code == 502
     assert response.json() == {"detail": "explanation_unverified"}
 

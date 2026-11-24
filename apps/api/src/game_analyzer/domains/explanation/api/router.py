@@ -52,7 +52,11 @@ def explain_game(contract: GameContract, provider: Provider) -> GameExplanation:
         logger.warning("provedor de IA indisponível: %s", error)
         raise HTTPException(status_code=503, detail="ai_unavailable") from error
     except ExplanationUnverifiedError as error:
-        logger.warning("explicação reprovada na verificação (%d problemas)", len(error.violations))
+        logger.warning(
+            "explicação reprovada na verificação (%d problemas): %s",
+            len(error.violations),
+            "; ".join(error.violations),
+        )
         raise HTTPException(status_code=502, detail="explanation_unverified") from error
 
 
@@ -64,5 +68,9 @@ def answer_question(request: QuestionRequest, provider: Provider) -> QuestionAns
         logger.warning("provedor de IA indisponível: %s", error)
         raise HTTPException(status_code=503, detail="ai_unavailable") from error
     except ExplanationUnverifiedError as error:
-        logger.warning("resposta reprovada na verificação (%d problemas)", len(error.violations))
+        logger.warning(
+            "resposta reprovada na verificação (%d problemas): %s",
+            len(error.violations),
+            "; ".join(error.violations),
+        )
         raise HTTPException(status_code=502, detail="explanation_unverified") from error
