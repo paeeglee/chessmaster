@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 40,
+  "next_id": 43,
   "lessons": [
     {
       "id": "L-001",
@@ -708,6 +708,60 @@
       ],
       "created": "2026-11-23T22:42:19Z",
       "last_seen": "2026-11-23T22:42:19Z"
+    },
+    {
+      "id": "L-040",
+      "key": "surviving_mutant::when a test name promises something does not wait assert it with fake timers so a hidden delay fails the test",
+      "text": "When a test name promises something does not wait, assert it with fake timers so a hidden delay fails the test",
+      "signal": "surviving_mutant",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "S16 apps/web/src/domains/evaluation/engine/EngineClient.test.ts:323 (web-tests)"
+      ],
+      "created": "2026-11-24T02:51:03Z",
+      "last_seen": "2026-11-24T02:51:03Z"
+    },
+    {
+      "id": "L-041",
+      "key": "surviving_mutant::assert a spec named timeout with a literal value not by advancing timers by the imported constant",
+      "text": "Assert a spec-named timeout with a literal value, not by advancing timers by the imported constant",
+      "signal": "surviving_mutant",
+      "scope": "web-tests",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "S09 apps/web/src/domains/evaluation/engine/EngineClient.test.ts:316 (web-tests)"
+      ],
+      "created": "2026-11-24T02:51:03Z",
+      "last_seen": "2026-11-24T02:51:03Z"
+    },
+    {
+      "id": "L-042",
+      "key": "spec_precision_gap::when an e2e accepts a variable count also assert that every listed item belongs to the allowed set",
+      "text": "When an e2e accepts a variable count, also assert that every listed item belongs to the allowed set",
+      "signal": "spec_precision_gap",
+      "scope": "e2e",
+      "status": "candidate",
+      "features": [
+        "analysis-screen"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R4-3 apps/web/e2e/analysis.spec.ts:24 (e2e)"
+      ],
+      "created": "2026-11-24T02:51:03Z",
+      "last_seen": "2026-11-24T02:51:03Z"
     }
   ]
 }

@@ -1,18 +1,13 @@
 # F4b · Analysis pipeline and screen Validation
 
-**Date**: 2026-11-23 (round 3)
+**Date**: 2026-11-23 (round 4, re-verification on `main`)
 **Spec**: `.specs/features/analysis-screen/spec.md`
-**Diff range**: `9de6292..bb4d357` (round 3 re-verified `bb4d357`)
+**Diff range**: `9de6292..9d8486c` (round 4 re-verified `main` at `9d8486c`, which contains F4b as `91cc8cc`)
 **Verifier**: independent sub-agent (author ≠ verifier)
 
 **Verdict**: FAIL
 
-All round-2 gaps (N1–N3) are fixed and confirmed. Two problems remain:
-
-- **One surviving mutant (T05):** the finding for the last ply on EVALUATION.DONE is untested.
-- **The `make test-e2e` gate is not reliable:** 1 of 4 full runs failed (4 key moments instead of 5).
-
-This was the **3rd fix→re-verify iteration** (the cap in validate.md). The remaining items go to the user instead of another loop.
+Round 4 confirms the post-round-3 fixes E1 and E2 and the E3 behavior, and every gate is green (`make check`, `make test-e2e` 3/3). Two sensor mutants survive in the E3 tests of `EngineClient.cancel`: the "no wait without a search" promise and the 2 s cap are not asserted. See "Round 4" at the end of this file. Rounds 1–3 are kept below.
 
 ---
 
@@ -305,3 +300,96 @@ The round limit in validate.md was reached, so these fixes were applied by the a
 | E2 last-ply finding | Machine test with the game cut at 22...Ta7 expects the finding after EVALUATION.DONE; mutant (no classification on DONE) killed | `apps/web/src/domains/analysis/machines/analysisMachine.test.ts` (last test) |
 | E3 readyok before bestmove | `cancel()` waits for the stopped search's `bestmove` (2 s cap) before `isready`; tests for readyok-first order, timeout and no-search cancel; mutant (skip the wait) killed | `apps/web/src/domains/evaluation/engine/EngineClient.ts` (`cancel`), `EngineClient.test.ts` |
 | E4 product confirmation | Open: the played-line rule (actual reply + engine PV after it) refines how D3 is measured; flagged to the user | `.specs/features/analysis-screen/spec.md` (assumptions) |
+
+---
+
+## Round 4 (re-verification on main)
+
+**HEAD**: `9d8486c` (`main`: F4b `91cc8cc` + F7 `9d8486c`). Worktree `.worktrees/docs/f4b-reverification`.
+**Verdict**: ❌ FAIL. 14/16 sensor mutants killed. Both survivors are in the E3 tests. Every AC has spec-anchored evidence, and every gate is green.
+
+### Round 4 · Gate Check
+
+- **`make check`**: exit 0. Biome clean, tsc + mypy clean, Vitest **33 files / 365 passed** (98.23% stmts, 90.54% branches, 98.02% funcs, 98.51% lines), pytest **75 passed**.
+- **`make test-e2e`**: **3 full runs, 3/3 exit 0, 14 passed each** (1.1–1.2 min). The log confirms the order: all 11 `[chromium]` tests finish first, then `[full-analysis]` runs `analysis.spec.ts:7`, `analysis.spec.ts:34` and `review.spec.ts:7` one at a time.
+- Ports 4173/8000 were checked before each run, with a wait loop because another verifier shares them. They were free each time.
+
+### Round 4 · Post-round-3 fixes (E1–E4)
+
+| Fix | Evidence | Result |
+| --- | -------- | ------ |
+| E1 full-analysis project | `apps/web/playwright.config.ts:4` (`FULL_ANALYSIS_SPECS`), `:23` (`testIgnore` in `chromium`), `:31-33` (`testMatch`, `workers: 1`, `dependencies: ["chromium"]`). `apps/web/e2e/analysis.spec.ts:22` first moment `toContainText("22...Ta7?")`; `:24` count 4 or 5; `:25-27` every `STABLE_MOMENTS` label (`apps/web/e2e/reference.ts`: 22...Ta7, 41...Ta1, 43...Te6, 56...Ta8) is present. 3/3 green | ✅ (weakness R4-3) |
+| E2 last-ply finding | `apps/web/src/domains/analysis/machines/analysisMachine.test.ts:185-199`: the game is cut at 22...Ta7, the test expects 45 calls and `labels.at(-1)` toBe `"22...Ta7?"`. Mutant S04 (no classification on DONE) is killed only by this test | ✅ |
+| E3 stale `bestmove` | `apps/web/src/domains/evaluation/engine/EngineClient.ts:101-124`. `EngineClient.test.ts:266-295` covers `readyok` before `bestmove`: the next search resolves `e2e4`, not the stale `h2h3`, and `isready` is sent twice. `:297-321` covers the cap with fake timers. `:323-340` covers cancel without a search: the command tail is `stop, isready, position, go`. Mutants S06, S07 and S08 are killed. **S09 and S16 survive (R4-1, R4-2)** | ⚠️ behavior correct, tests not discriminating |
+| E4 played-line rule | Still `Confirmed? n` in `spec.md` (assumption "Played line robustness"). This is a product decision, so it was not verified. **It is still waiting for the user** | ⏸ user decision |
+
+### Round 4 · Spec-anchored AC check (current line numbers)
+
+| ID | Evidence (`file:line` - assertion) | Result |
+| -- | ---------------------------------- | ------ |
+| AS-01 | `apps/web/src/domains/analysis/components/AnalyzingScreen.test.tsx:78-82`: stages 1–2 "— concluída", stage 3 "— em andamento", stages 4–5 "— aguardando"; `analysisMachine.test.ts:81` `value` toBe `"evaluating"` | ✅ |
+| AS-02 | `analysisMachine.test.ts:83-84`: `calls` toEqual `positionsOf(...)`, length 145; `AnalyzingScreen.test.tsx:103`: `aria-valuenow` = `floor(88/145*100)` | ✅ |
+| AS-03 | `analysisMachine.test.ts:87-97`: engine hangs at 46, findings ⊇ "Adversário 12.Ce2?" and "Erro 22...Ta7?", all `ply <= 44`; `:185-199`: last ply on DONE; `:159-183`: actual-reply continuation | ✅ |
+| AS-04 | `AnalyzingScreen.test.tsx:139-140`: "Tabela de finais — não necessária", "Explicação da IA — em andamento"; `analysisMachine.test.ts:103-109`: the explain input has the 5 key moments | ✅ |
+| AS-05 | `analysisMachine.test.ts:110-114`; `apps/web/src/app/appMachine.test.ts:166` (review with result); `e2e/analysis.spec.ts:14,29` | ✅ |
+| AS-06 | `analysisMachine.test.ts:122` `toMatchObject({ explanation: null, aiFailed: true })`; UI warning `apps/web/src/app/App.test.tsx:141` "A explicação não pôde ser gerada." (the round-1 Gap 4 is closed) | ✅ |
+| AS-07 | `analysisMachine.test.ts:129-135`: `evaluationFailed`, RETRY → `evaluations` `[]`, 145 calls; `AnalyzingScreen.test.tsx:151-153`: "— falhou" → "— em andamento" | ✅ |
+| AS-08 | `EngineClient.test.ts:206-228`: running and queued searches reject "Análise cancelada", the commands go `stop` → `isready`, and the next search resolves; `analysisMachine.test.ts:143` `cancels` toBe 1; `appMachine.test.ts:148`; `e2e/analysis.spec.ts:34-43` | ✅ |
+| AS-09 | `AnalyzingScreen.test.tsx:70-95`: heading, `aria-current`, the five stages in order | ✅ |
+| AS-10 | `apps/web/src/domains/analysis/components/components.test.tsx:39` "lance 44 de 72 · ~12 s restantes"; `AnalyzingScreen.test.tsx:103-104` | ✅ |
+| AS-11 | `AnalyzingScreen.test.tsx:105-112`: "Lance 44 de 72", "44.Cd4", Black's side (`h1` first), `data-mark="last"` on f5/d4 and exactly 2 marks; `:115-121`: odd count shows "44...Texe3+" with "Lance 44 de 72" | ✅ (round-1 Gaps 1 and 3 closed) |
+| AS-12 | `components.test.tsx:63-72` tag + text, max 6; `AnalyzingScreen.test.tsx:124-131` | ✅ |
+| AS-13 | `AnalyzingScreen.test.tsx:141` "Etapa 5 de 5: explicação da IA." has `aria-live="polite"` | ✅ |
+| AS-14 | `apps/web/src/domains/analysis/model/contract.test.ts` (all fields; key-moment `loss` is checked, S12 killed). The contract has no positions or scores, which narrows general.md 7.2 and is logged in the spec with `Confirmed? n` | ⚠️ spec decision still unconfirmed |
+| AS-15 | `contract.test.ts:67` `advantage_started_at` `{ ply: 24, label: "12...Bxa1" }`; `:113-115` boundary exactly 2 → ply 2; 5 key moments in the same file | ✅ |
+| AS-16 | `analysisMachine.test.ts:146-157`: the 4-ply game reaches `done`, `keyMoments` `[]` | ✅ (round-1 Gap 5 closed) |
+
+| step_02 §6 AC | Evidence | Result |
+| ------------- | -------- | ------ |
+| Stages 1–2 done in < 1 s, stage 3 shows real progress | `AnalyzingScreen.test.tsx:78-80` (synchronous at mount); `e2e/analysis.spec.ts:11` progressbar | ✅ |
+| "22...Ta7?" before the end | `analysisMachine.test.ts:87-97`; `AnalyzingScreen.test.tsx:130`. `e2e/analysis.spec.ts:13` still does not discriminate this (R4-4) | ✅ |
+| Cancel keeps the text and choices | `appMachine.test.ts:148`; `e2e/analysis.spec.ts:37-43` | ✅ |
+| AI failure → Result with data and warning | `App.test.tsx:112-143`: the warning plus "Nenhuma perda de material importante." | ✅ |
+
+### Round 4 · Discrimination Sensor (fresh scratch `f4b-sensor4` at `9d8486c`)
+
+The scratch is a detached `git worktree` in the session scratchpad, set up with `pnpm install --frozen-lockfile` and `copy-engine.mjs`. The baseline Vitest run was 365/365. Each mutant was applied alone, the full `vitest run` was executed, and the file was restored.
+
+| # | Target | Mutation | Killed? | Killed by |
+| - | ------ | -------- | ------- | --------- |
+| S01 | `analysis/model/classify.ts` `classifyPly` | continuation drops the actual reply | ✅ | `classify.test.ts`, `analysisMachine.test.ts:159` |
+| S02 | `classifyPly` | `previousFen` not passed (strength rule) | ✅ | review tests (F7) via the reference fixture |
+| S03 | `analysisMachine.ts:106-108` | no findings on POSITION.EVALUATED | ✅ | `analysisMachine.test.ts:87`, `AnalyzingScreen.test.tsx:124` |
+| S04 | `analysisMachine.ts:122` | last ply not added on DONE (E2) | ✅ | `analysisMachine.test.ts:185` |
+| S05 | `analysis/model/progress.ts:24` | caption follows position n, not n−1 | ✅ | `summary.test.ts`, `AnalyzingScreen.test.tsx:115` |
+| S06 | `EngineClient.ts:107` | cancel does not send `stop` | ✅ | `EngineClient.test.ts:206,323` |
+| S07 | `EngineClient.ts:106` | never wait for the stale `bestmove` (E3) | ✅ | `EngineClient.test.ts:266` |
+| S08 | `EngineClient.ts:121` | no `isready` after cancel | ✅ | `EngineClient.test.ts:206,266,323` |
+| S09 | `EngineClient.ts:28` | `STALE_BESTMOVE_TIMEOUT_MS` 2000 → 60000 | ❌ **Survived** | the test advances by the imported constant |
+| S10 | `analysisMachine.ts:135` | RETRY has no target | ✅ | `analysisMachine.test.ts:126`, `AnalyzingScreen.test.tsx:147` |
+| S11 | `analysisMachine.ts:150` | AI error leaves `aiFailed: false` | ✅ | `analysisMachine.test.ts:117` |
+| S12 | `analysis/model/contract.ts:52` | key-moment `loss` → 0 | ✅ | `contract.test.ts` |
+| S13 | `AnalyzingScreen.tsx:61` | stage 4 "done" instead of "não necessária" | ✅ | `AnalyzingScreen.test.tsx:134` |
+| S14 | `AnalyzingScreen.tsx:66` | stage 5 "waiting" while explaining | ✅ | `AnalyzingScreen.test.tsx:134` |
+| S15 | `AnalyzingScreen.tsx:45` | stage 3 "running" when evaluation failed | ✅ | `AnalyzingScreen.test.tsx:147` |
+| S16 | `EngineClient.ts:165-167` | `searching` never reset, so every later cancel waits for a `bestmove` that never comes | ❌ **Survived** | `EngineClient.test.ts:323` still passes but takes **2004 ms** (measured), which contradicts its title "não espera bestmove" |
+
+**Result**: 14/16 killed - ❌ FAIL. Scratch removed with `git worktree remove --force`; `git worktree list` no longer shows it; the real tree's `git status --porcelain` matches the pre-sensor baseline (empty).
+
+S16 matters in the app. `analysisMachine` calls `engine.cancel()` every time it leaves `evaluating` (`analysisMachine.ts:64-67`), including after a normal EVALUATION.DONE. With S16, each later engine use would wait 2 s. The current code is correct; the tests do not protect it.
+
+### Round 4 · Ranked gaps
+
+1. **R4-1 - "cancel without a search does not wait" is not asserted (S16 survived, Minor).** `apps/web/src/domains/evaluation/engine/EngineClient.test.ts:323-340`. Fix: run the test with `vi.useFakeTimers()`, call `client.cancel()` and `client.evaluate(START_FEN)`, then `await vi.advanceTimersByTimeAsync(0)` and assert the next evaluation already resolved (or that `worker.commands` already contains `isready` and `go movetime 200`) **without** advancing `STALE_BESTMOVE_TIMEOUT_MS`.
+2. **R4-2 - the 2 s cap is constant-coupled (S09 survived, Minor).** `EngineClient.test.ts:316` advances by the imported `STALE_BESTMOVE_TIMEOUT_MS`, so any value passes. Fix: assert `STALE_BESTMOVE_TIMEOUT_MS` toBe `2000`, or advance by a literal `1999` (expect still pending) and then `1` (expect resolved). The second also proves the next search does not start before the cap.
+3. **R4-3 - e2e accepts any 5th key moment (Minor).** `apps/web/e2e/analysis.spec.ts:24-27` checks that the count is 4 or 5 and the 4 stable labels, but an unexpected 5th moment would pass. Fix: also assert that every listed moment is one of `[...STABLE_MOMENTS, "27...Tb7"]`.
+4. **R4-4 - e2e "22...Ta7? before the end" is still not discriminating (Cosmetic, carried from round 1).** `e2e/analysis.spec.ts:13` can match the Result screen. Fix: assert it while `heading "Analisando sua partida…"` is still visible (scope the lookup to the "Já encontrado" region).
+5. **R4-5 - spec drift (Cosmetic).** `.specs/features/analysis-screen/spec.md:9` (Goal) still says "with the five key moments found" in the real browser, while `docs/architecture/overview.md` ("Lances limítrofes") and the e2e accept 4 or 5. Fix: reword the goal to "the four stable key moments (27...Tb7 is borderline; the exact five are asserted in Vitest)".
+6. **R4-6 - real-engine cancel → re-analyze path is not exercised end to end (Risk).** `e2e/analysis.spec.ts:34-43` stops at "Analisar partida →" enabled. Fix: cancel mid-run, start again, and assert the first finding "22...Ta7?". This checks E3 against real Stockfish, which the fakes only model.
+7. **E4 - product confirmation pending (user decision).** The played-line rule (actual reply + PV after it) is still `Confirmed? n` in `spec.md`.
+
+### Round 4 · Traceability
+
+AS-01..AS-13, AS-15, AS-16: ✅ Verified. AS-14: ⚠️ verified, but the no-positions/scores narrowing is still unconfirmed. AS-08 (E3 hardening): behavior verified, tests need R4-1 and R4-2.
+
+**Next steps**: fix R4-1 and R4-2 (test-only, about 15 lines in `EngineClient.test.ts`), optionally R4-3..R4-6, then re-run the sensor on S09 and S16. This round runs after the 3-iteration cap at the user's explicit request; the result goes back to the user.
