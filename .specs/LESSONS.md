@@ -246,6 +246,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: RV-02 / apps/web/src/domains/review/model/review.test.ts:45 (web-tests)
 - last seen: 2026-11-23T22:42:19Z
 
+### L-040 - When a test name promises something does not wait, assert it with fake timers so a hidden delay fails the test
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: analysis-screen
+- evidence: S16 apps/web/src/domains/evaluation/engine/EngineClient.test.ts:323 (web-tests)
+- last seen: 2026-11-24T02:51:03Z
+
+### L-041 - Assert a spec-named timeout with a literal value, not by advancing timers by the imported constant
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `web-tests` · harmful: 0
+- features: analysis-screen
+- evidence: S09 apps/web/src/domains/evaluation/engine/EngineClient.test.ts:316 (web-tests)
+- last seen: 2026-11-24T02:51:03Z
+
+### L-042 - When an e2e accepts a variable count, also assert that every listed item belongs to the allowed set
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `e2e` · harmful: 0
+- features: analysis-screen
+- evidence: R4-3 apps/web/e2e/analysis.spec.ts:24 (e2e)
+- last seen: 2026-11-24T02:51:03Z
+
+### L-043 - In a multi-round validation report keep a single Result line for the latest round and relabel older rounds' results
+- signal: `gate_fail` · recurrence: 1 feature(s) · scope: `specs` · harmful: 0
+- features: analysis-screen
+- evidence: .specs/features/analysis-screen/validation.md:434 validate_state unfilled verdict (specs)
+- last seen: 2026-11-24T03:11:11Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

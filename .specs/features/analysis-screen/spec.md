@@ -6,7 +6,7 @@ After "Analisar partida", the app must evaluate every position with the loaded e
 
 ## Goals
 
-- [ ] The reference game goes from "Analisar partida" to the Result step in the real browser, with the five key moments found and the AI texts (fake provider in e2e).
+- [ ] The reference game goes from "Analisar partida" to the Result step in the real browser, with the four stable key moments found (27...Tb7 is borderline for the engine at 200 ms; the exact five are checked in Vitest with fixed evaluations) and the AI texts (fake provider in e2e).
 - [ ] Cancelling at any time stops the engine search and returns to Colar with text and choices intact.
 
 ## Out of Scope
