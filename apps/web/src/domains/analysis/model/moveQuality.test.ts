@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { classifyQuality, MOVE_QUALITY_LABEL, winChance, winChanceLoss } from "./moveQuality";
+import {
+  classifyQuality,
+  MOVE_QUALITY_LABEL,
+  sideToMoveOf,
+  winChance,
+  winChanceLoss,
+} from "./moveQuality";
 
 describe("winChance (MR-03)", () => {
   it("vale 50 com avaliação zero e é simétrica entre as cores", () => {
@@ -16,6 +22,18 @@ describe("winChance (MR-03)", () => {
     expect(winChance({ kind: "mate", value: -2 }, "b")).toBe(100);
   });
 
+  it("mate 0: quem está na vez levou o mate", () => {
+    expect(winChance({ kind: "mate", value: 0 }, "w", "b")).toBe(100);
+    expect(winChance({ kind: "mate", value: 0 }, "b", "b")).toBe(0);
+    expect(winChance({ kind: "mate", value: 0 }, "w", "w")).toBe(0);
+    expect(winChance({ kind: "mate", value: 0 }, "b", "w")).toBe(100);
+  });
+
+  it("lê o lado a jogar do FEN", () => {
+    expect(sideToMoveOf("8/8/8/8/8/8/8/K6k b - - 0 1")).toBe("b");
+    expect(sideToMoveOf("8/8/8/8/8/8/8/K6k w - - 0 1")).toBe("w");
+  });
+
   it("a perda nunca é negativa", () => {
     expect(winChanceLoss(40, 55)).toBe(0);
     expect(winChanceLoss(70, 52)).toBe(18);
@@ -28,7 +46,10 @@ describe("classifyQuality (MR-01, MR-02, MR-04)", () => {
 
   it("o melhor lance do motor é Melhor, mesmo com ruído na avaliação", () => {
     expect(quality(3, true)).toBe("best");
-    expect(quality(0)).toBe("best");
+  });
+
+  it("outro lance sem perda é Excelente, nunca Melhor (MR-02)", () => {
+    expect(quality(0)).toBe("excellent");
   });
 
   it("usa as faixas 2 / 5 / 10 / 20 nos limites exatos", () => {

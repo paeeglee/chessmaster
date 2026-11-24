@@ -77,20 +77,36 @@ describe("textos do painel do treinador (MR-06..MR-10)", () => {
   });
 });
 
+const at = (score: { kind: "cp" | "mate"; value: number }, side: "w" | "b" = "w") => ({
+  fen: `4k3/8/8/8/8/8/8/4K3 ${side} - - 0 1`,
+  depth: 18,
+  score,
+  bestMove: null,
+  pv: [],
+});
+
 describe("barra de avaliação (MR-11)", () => {
   it("mostra a avaliação das brancas com vírgula, sinal e limite de 10", () => {
-    expect(evaluationLabel({ kind: "cp", value: 120 })).toBe("+1,2");
-    expect(evaluationLabel({ kind: "cp", value: -40 })).toBe("−0,4");
-    expect(evaluationLabel({ kind: "cp", value: 3 })).toBe("0,0");
-    expect(evaluationLabel({ kind: "cp", value: 2500 })).toBe("+10,0");
-    expect(evaluationLabel({ kind: "mate", value: 3 })).toBe("M3");
-    expect(evaluationLabel({ kind: "mate", value: -2 })).toBe("−M2");
+    expect(evaluationLabel(at({ kind: "cp", value: 120 }))).toBe("+1,2");
+    expect(evaluationLabel(at({ kind: "cp", value: -40 }))).toBe("−0,4");
+    expect(evaluationLabel(at({ kind: "cp", value: 3 }))).toBe("0,0");
+    expect(evaluationLabel(at({ kind: "cp", value: 2500 }))).toBe("+10,0");
+    expect(evaluationLabel(at({ kind: "mate", value: 3 }))).toBe("M3");
+    expect(evaluationLabel(at({ kind: "mate", value: -2 }))).toBe("−M2");
+  });
+
+  it("na posição já em mate, quem está na vez perdeu: barra cheia e 1-0 ou 0-1", () => {
+    // Stockfish manda "mate 0" sem dizer quem levou o mate.
+    expect(whiteShare(at({ kind: "mate", value: 0 }, "b"))).toBe(100);
+    expect(evaluationLabel(at({ kind: "mate", value: 0 }, "b"))).toBe("1-0");
+    expect(whiteShare(at({ kind: "mate", value: 0 }, "w"))).toBe(0);
+    expect(evaluationLabel(at({ kind: "mate", value: 0 }, "w"))).toBe("0-1");
   });
 
   it("a fatia das brancas segue a chance de vitória", () => {
-    expect(whiteShare({ kind: "cp", value: 0 })).toBe(50);
-    expect(whiteShare({ kind: "mate", value: 1 })).toBe(100);
-    expect(whiteShare({ kind: "mate", value: -1 })).toBe(0);
+    expect(whiteShare(at({ kind: "cp", value: 0 }))).toBe(50);
+    expect(whiteShare(at({ kind: "mate", value: 1 }))).toBe(100);
+    expect(whiteShare(at({ kind: "mate", value: -1 }))).toBe(0);
   });
 
   it("tem um símbolo para cada classificação", () => {

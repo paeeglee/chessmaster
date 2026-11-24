@@ -88,3 +88,35 @@ describe("applyMaterialFloor (MR-20)", () => {
     expect(applyMaterialFloor("good", { kind: "none", ply: 1, color: "w" })).toBe("good");
   });
 });
+
+describe("mate das brancas (MR-03, MR-18)", () => {
+  // 1.e4 e5 2.Bc4 Nc6 3.Qh5 Nf6 4.Qxf7#: o Stockfish manda "mate 0" na posição final.
+  function scholarsMate(): Game {
+    const parsed = parseGameText("1.e4 e5 2.Bc4 Nc6 3.Qh5 Nf6 4.Qxf7#");
+    if (parsed.kind !== "parsed") throw new Error("partida inválida");
+    const replayed = replayGame(parsed.game);
+    if (replayed.kind !== "legal") throw new Error("lance ilegal");
+    return replayed.game;
+  }
+
+  it("o lance que dá mate vale 100 para as brancas mesmo sem a regra de fim de partida", () => {
+    const game = scholarsMate();
+    const fens = [game.initialFen, ...game.plies.map((ply) => ply.fenAfter)];
+    const evals: PositionEvaluation[] = fens.map((fen, index) => ({
+      fen,
+      depth: 18,
+      score:
+        index === fens.length - 1
+          ? { kind: "mate", value: 0 }
+          : index === fens.length - 2
+            ? { kind: "mate", value: 1 }
+            : { kind: "cp", value: 30 },
+      bestMove: index === fens.length - 2 ? "h5f7" : null,
+      pv: index === fens.length - 2 ? ["h5f7"] : [],
+    }));
+    // Sem o fim de partida: só a avaliação "mate 0" decide.
+    const unfinished = { ...game, termination: null };
+    const last = reviewMoves(unfinished, evals).at(-1);
+    expect(last).toMatchObject({ moveLabel: "4.Dxf7#", winAfter: 100, quality: "best" });
+  });
+});

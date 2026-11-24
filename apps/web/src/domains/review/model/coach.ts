@@ -5,9 +5,10 @@ import {
   type MoveQuality,
   type MoveReview,
   pieceWithArticle,
+  sideToMoveOf,
   winChance,
 } from "../../analysis";
-import type { EngineScore } from "../../evaluation";
+import type { PositionEvaluation } from "../../evaluation";
 
 /** Símbolo curto de cada classificação, dentro do ícone colorido (MR-09). */
 export const QUALITY_SYMBOL: Record<MoveQuality, string> = {
@@ -91,8 +92,15 @@ export function coachTitle(review: MoveReview, playerColor: "w" | "b") {
   };
 }
 
-/** MR-11: rótulo da avaliação do ponto de vista das brancas ("+1,2", "−0,4", "M3"). */
-export function evaluationLabel(score: EngineScore): string {
+/**
+ * MR-11: rótulo da avaliação do ponto de vista das brancas ("+1,2", "−0,4", "M3"). Na
+ * posição já em mate ("mate 0"), mostra o resultado: "1-0" ou "0-1".
+ */
+export function evaluationLabel(evaluation: PositionEvaluation): string {
+  const { score } = evaluation;
+  if (score.kind === "mate" && score.value === 0) {
+    return sideToMoveOf(evaluation.fen) === "w" ? "0-1" : "1-0";
+  }
   if (score.kind === "mate") {
     return score.value >= 0 ? `M${score.value}` : `−M${Math.abs(score.value)}`;
   }
@@ -103,6 +111,6 @@ export function evaluationLabel(score: EngineScore): string {
 }
 
 /** MR-11: fatia da barra que fica com as brancas (0 a 100), pela chance de vitória. */
-export function whiteShare(score: EngineScore): number {
-  return winChance(score, "w");
+export function whiteShare(evaluation: PositionEvaluation): number {
+  return winChance(evaluation.score, "w", sideToMoveOf(evaluation.fen));
 }

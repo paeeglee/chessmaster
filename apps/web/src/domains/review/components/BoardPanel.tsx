@@ -54,7 +54,7 @@ export function BoardPanel({ context, send }: BoardPanelProps) {
         <span className="text-ink-muted text-sm">{sideToMoveLabel(game, position)}</span>
       </div>
       <div className="flex gap-2">
-        <EvalBar score={result.evaluations[position]?.score ?? null} orientation={orientation} />
+        <EvalBar evaluation={result.evaluations[position] ?? null} orientation={orientation} />
         <Board
           fen={fen}
           orientation={orientation}

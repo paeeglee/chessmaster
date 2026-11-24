@@ -120,7 +120,7 @@ export function enPrisePieces(fen: string, color: "w" | "b"): EnPrisePiece[] {
       const attackerValues = attackers
         .map((from) => chess.get(from as Square)?.type)
         .filter((type): type is PieceSymbol => type !== undefined)
-        .filter((type) => !defended || type !== "k")
+        // O rei vale 100 aqui: contra peça defendida ele nunca é o atacante mais barato.
         .map((type) => EXCHANGE_VALUES[type] ?? 0);
       if (attackerValues.length === 0) continue;
       const cheapest = Math.min(...attackerValues);

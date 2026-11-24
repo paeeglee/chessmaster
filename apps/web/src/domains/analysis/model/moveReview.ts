@@ -1,7 +1,13 @@
 import type { PositionEvaluation } from "../../evaluation";
 import { formatMoveLabel, type Game, type Ply } from "../../game";
 import { type MoveFacts, moveFacts } from "./moveFacts";
-import { classifyQuality, type MoveQuality, winChance, winChanceLoss } from "./moveQuality";
+import {
+  classifyQuality,
+  type MoveQuality,
+  sideToMoveOf,
+  winChance,
+  winChanceLoss,
+} from "./moveQuality";
 import type { MoveVerdict } from "./types";
 
 /** Piso de material (D3): perder 5 pontos ou mais é Capivarada. */
@@ -54,7 +60,7 @@ function winAfterMove(game: Game, ply: Ply, after: PositionEvaluation): number {
   const isLast = ply.index === game.plies.length;
   if (isLast && game.termination === "checkmate") return 100;
   if (isLast && game.termination === "stalemate") return 50;
-  return winChance(after.score, ply.color);
+  return winChance(after.score, ply.color, sideToMoveOf(after.fen));
 }
 
 /** MR-01..MR-08: revisa todos os meio-lances que têm as duas avaliações em volta. */
@@ -71,7 +77,7 @@ export function reviewMoves(
     const after = evaluations[ply.index];
     if (!before || !after) break;
     const facts = moveFacts(ply, before, after);
-    const winBefore = winChance(before.score, ply.color);
+    const winBefore = winChance(before.score, ply.color, sideToMoveOf(before.fen));
     const winAfter = winAfterMove(game, ply, after);
     const loss = winChanceLoss(winBefore, winAfter);
     reviews.push({

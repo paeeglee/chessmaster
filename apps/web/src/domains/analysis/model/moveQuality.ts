@@ -33,16 +33,28 @@ export const MISS_THRESHOLD = 10;
 /**
  * Chance de vitória (0 a 100) de `color` com a avaliação do motor, que vem do ponto de
  * vista das brancas. Fórmula do Lichess: 50 + 50 × (2 / (1 + e^(−0,00368208 × cp)) − 1).
- * Mate a favor vale 100; mate contra vale 0.
+ * Mate a favor vale 100; mate contra vale 0. "Mate 0" (posição já em mate) não diz quem
+ * levou o mate: é quem está na vez (`sideToMove`).
  */
-export function winChance(score: EngineScore, color: PlayerColor): number {
-  const white =
-    score.kind === "mate"
-      ? score.value > 0
-        ? 100
-        : 0
-      : 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * score.value)) - 1);
+export function winChance(
+  score: EngineScore,
+  color: PlayerColor,
+  sideToMove?: PlayerColor,
+): number {
+  let white: number;
+  if (score.kind === "mate" && score.value === 0 && sideToMove) {
+    white = sideToMove === "w" ? 0 : 100;
+  } else if (score.kind === "mate") {
+    white = score.value > 0 ? 100 : 0;
+  } else {
+    white = 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * score.value)) - 1);
+  }
   return color === "w" ? white : 100 - white;
+}
+
+/** Lado a jogar numa posição FEN. */
+export function sideToMoveOf(fen: string): PlayerColor {
+  return fen.split(" ")[1] === "b" ? "b" : "w";
 }
 
 /** Perda de chance de vitória de quem jogou: antes menos depois, nunca negativa. */
@@ -58,7 +70,9 @@ export function classifyQuality(input: {
   previousLoss: number | null;
 }): MoveQuality {
   const { loss, isBest, previousLoss } = input;
-  if (isBest || loss <= 0) return "best";
+  // "Melhor" é só o lance do motor; outro lance sem perda é Excelente (o painel não
+  // pode dizer "Melhor" e "Melhor era X" ao mesmo tempo).
+  if (isBest) return "best";
   if (previousLoss !== null && previousLoss >= MISS_THRESHOLD && loss >= MISS_THRESHOLD) {
     return "miss";
   }

@@ -34,6 +34,7 @@ export type { BestMoveReasons, MoveFacts } from "./model/moveFacts";
 export {
   MOVE_QUALITY_LABEL,
   type MoveQuality,
+  sideToMoveOf,
   winChance,
 } from "./model/moveQuality";
 export { type MoveReview, reviewMoves } from "./model/moveReview";

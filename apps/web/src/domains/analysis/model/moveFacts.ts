@@ -112,10 +112,9 @@ export function moveFacts(
   // Posição logo depois do melhor lance, para ver quais peças ficam seguras.
   const afterBest = playCaptureLine(ply.fenBefore, best, [], 0).fen;
   const enPriseAfterBest = toPieces(enPrisePieces(afterBest, mover));
-  const movedByBest = best.slice(0, 2);
+  // Uma peça en prise que o melhor lance move sai da casa e conta como salva.
   const saves = enPriseBefore.filter(
-    (piece) =>
-      piece.square === movedByBest || !enPriseAfterBest.some((still) => sameSquare(still, piece)),
+    (piece) => !enPriseAfterBest.some((still) => sameSquare(still, piece)),
   );
   const mateIn =
     before.score.kind === "mate" && before.score.value > 0 === (mover === "w")

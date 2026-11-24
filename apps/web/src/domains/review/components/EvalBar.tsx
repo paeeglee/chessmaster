@@ -1,17 +1,17 @@
-import type { EngineScore } from "../../evaluation";
+import type { PositionEvaluation } from "../../evaluation";
 import { evaluationLabel, whiteShare } from "../model/coach";
 
 type EvalBarProps = {
-  score: EngineScore | null;
+  evaluation: PositionEvaluation | null;
   /** Lado que fica embaixo no tabuleiro. */
   orientation: "w" | "b";
 };
 
 /** MR-11: barra de avaliação da posição mostrada, do ponto de vista das brancas. */
-export function EvalBar({ score, orientation }: EvalBarProps) {
-  if (!score) return null;
-  const white = whiteShare(score);
-  const label = evaluationLabel(score);
+export function EvalBar({ evaluation, orientation }: EvalBarProps) {
+  if (!evaluation) return null;
+  const white = whiteShare(evaluation);
+  const label = evaluationLabel(evaluation);
   const whiteBottom = orientation === "w";
   return (
     <div

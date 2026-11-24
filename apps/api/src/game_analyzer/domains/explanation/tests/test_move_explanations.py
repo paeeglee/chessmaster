@@ -70,6 +70,12 @@ def test_rejects_moves_squares_and_numbers_outside_the_contract() -> None:
     ]
 
 
+def test_rejects_an_unlabeled_move_outside_the_contract() -> None:
+    assert verify_move_explanation(text("Tb7 era melhor."), contract()) == [
+        "lance Tb7 não está no contrato"
+    ]
+
+
 def test_line_numbers_must_follow_the_move_order() -> None:
     # 23...Re3 não existe: Re3 é lance das brancas no lance 23.
     assert verify_move_explanation(text("Depois vem 23...Re3."), contract()) == [
