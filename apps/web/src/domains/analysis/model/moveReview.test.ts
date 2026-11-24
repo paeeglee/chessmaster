@@ -119,4 +119,19 @@ describe("mate das brancas (MR-03, MR-18)", () => {
     const last = reviewMoves(unfinished, evals).at(-1);
     expect(last).toMatchObject({ moveLabel: "4.Dxf7#", winAfter: 100, quality: "best" });
   });
+
+  it("o fim da partida decide mesmo se a avaliação final não indicar mate (MR-18)", () => {
+    const game = scholarsMate();
+    const fens = [game.initialFen, ...game.plies.map((ply) => ply.fenAfter)];
+    const evals: PositionEvaluation[] = fens.map((fen) => ({
+      fen,
+      depth: 18,
+      score: { kind: "cp", value: 0 },
+      bestMove: null,
+      pv: [],
+    }));
+    expect(reviewMoves(game, evals).at(-1)).toMatchObject({ winAfter: 100 });
+    const stalemate = { ...game, termination: "stalemate" as const };
+    expect(reviewMoves(stalemate, evals).at(-1)).toMatchObject({ winAfter: 50 });
+  });
 });

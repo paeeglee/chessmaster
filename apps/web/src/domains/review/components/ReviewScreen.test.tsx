@@ -10,6 +10,7 @@ import {
   type MoveExplainInput,
   reviewMachine,
 } from "../machines/reviewMachine";
+import { evaluationLabel } from "../model/coach";
 import { ReviewScreen } from "./ReviewScreen";
 
 const explanation: GameExplanation = {
@@ -425,6 +426,25 @@ describe("revisão lance a lance (F9)", () => {
     expect(within(moves).getAllByRole("img", { name: "Melhor" }).length).toBeGreaterThan(0);
     expect(
       screen.getByRole("img", { name: /^Avaliação do motor: [+−]?(M?\d|\d+,\d) para as brancas$/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("a barra de avaliação segue a posição mostrada (MR-11)", async () => {
+    renderReview();
+    await userEvent.click(screen.getByRole("button", { name: "Início" }));
+    const first = referenceResult().evaluations[0];
+    if (!first) throw new Error("sem avaliação");
+    const expected = evaluationLabel(first);
+    expect(
+      screen.getByRole("img", { name: `Avaliação do motor: ${expected} para as brancas` }),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Próximo lance" }));
+    const second = referenceResult().evaluations[1];
+    if (!second) throw new Error("sem avaliação");
+    expect(
+      screen.getByRole("img", {
+        name: `Avaliação do motor: ${evaluationLabel(second)} para as brancas`,
+      }),
     ).toBeInTheDocument();
   });
 });
