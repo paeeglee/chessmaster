@@ -56,12 +56,6 @@ export function AnalyzingScreen({ analysisRef, onCancel }: AnalyzingScreenProps)
       onRetry: () => analysisRef.send({ type: "RETRY" }),
     },
     {
-      title: "Tabela de finais",
-      description: "Resultado exato quando sobram poucas peças, como rei e torre contra rei",
-      // TB-04..TB-06: roda só quando a partida chega a KQK ou KRK.
-      status: snapshot.context.endgameStatus,
-    },
-    {
       title: "Explicação da IA",
       description: "Transforma os números em momentos-chave e dicas para o seu nível",
       status: phase === "explaining" ? "running" : phase === "done" ? "done" : "waiting",
@@ -71,10 +65,9 @@ export function AnalyzingScreen({ analysisRef, onCancel }: AnalyzingScreenProps)
     phase === "evaluationFailed"
       ? "O motor de avaliação falhou."
       : phase === "explaining"
-        ? "Etapa 5 de 5: explicação da IA."
-        : phase === "endgame"
-          ? "Etapa 4 de 5: tabela de finais."
-          : "Etapa 3 de 5: motor de avaliação.";
+        ? "Etapa 4 de 4: explicação da IA."
+        : // A tabela de finais roda sem etapa própria na tela (decisão de 2026-11-24).
+          "Etapa 3 de 4: motor de avaliação.";
 
   return (
     <>

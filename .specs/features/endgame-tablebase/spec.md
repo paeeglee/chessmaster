@@ -43,7 +43,7 @@ general.md lists engine 4, "Tabela de finais": the exact result and distance to 
 
 ### P1: Analysis stage 4 ⭐ MVP
 
-1. WHEN the analysed game never reaches KQK or KRK THEN stage 4 SHALL show "não necessária" and no table SHALL be generated. <!-- TB-04 -->
+1. WHEN the analysed game never reaches KQK or KRK THEN no table SHALL be generated. (Until 2026-11-24 stage 4 also showed "não necessária"; since then the tablebase has no stage on the Analisando screen, by product decision.) <!-- TB-04 -->
 2. WHEN it does THEN stage 4 SHALL run after the evaluation, probe the first such position and store `endgame` in the result (kind, ply, strong side, optimal moves, moves actually played until mate or null). <!-- TB-05 -->
 3. IF the tablebase fails THEN the analysis SHALL continue without `endgame` and stage 4 SHALL show "falhou". <!-- TB-06 -->
 

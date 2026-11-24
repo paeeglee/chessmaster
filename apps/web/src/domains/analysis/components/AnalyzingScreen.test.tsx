@@ -68,7 +68,7 @@ function stage(name: string): HTMLElement {
 }
 
 describe("AnalyzingScreen", () => {
-  it("mostra o passo 2, o título e as cinco etapas (AS-09)", () => {
+  it("mostra o passo 2, o título e as quatro etapas, sem a tabela de finais (AS-09)", () => {
     const { actor } = startAnalysis();
     render(<AnalyzingScreen analysisRef={actor} onCancel={() => {}} />);
     expect(screen.getByRole("heading", { name: "Analisando sua partida…" })).toBeInTheDocument();
@@ -79,7 +79,6 @@ describe("AnalyzingScreen", () => {
     expect(stage("Leitura dos lances")).toHaveTextContent("Leitura dos lances — concluída");
     expect(stage("Motor de regras")).toHaveTextContent("Motor de regras — concluída");
     expect(stage("Motor de avaliação")).toHaveTextContent("Motor de avaliação — em andamento");
-    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — aguardando");
     expect(stage("Explicação da IA")).toHaveTextContent("Explicação da IA — aguardando");
     const order = screen
       .getAllByRole("listitem")
@@ -90,9 +89,10 @@ describe("AnalyzingScreen", () => {
       "Leitura dos lances",
       "Motor de regras",
       "Motor de avaliação",
-      "Tabela de finais",
       "Explicação da IA",
     ]);
+    // A tabela de finais roda por trás, sem etapa própria na tela (decisão de 2026-11-24).
+    expect(screen.queryByText(/Tabela de finais/)).toBeNull();
     expect(screen.getByText("Extrai os 144 lances do texto colado")).toBeInTheDocument();
   });
 
@@ -132,14 +132,13 @@ describe("AnalyzingScreen", () => {
     expect(screen.getByText("deixou o bispo em a1 ser capturado")).toBeInTheDocument();
   });
 
-  it("depois de avaliar, a tabela de finais fica não necessária e a IA em andamento", async () => {
+  it("depois de avaliar, a IA fica em andamento (etapa 4 de 4)", async () => {
     const { actor, control, evaluateUpTo } = startAnalysis();
     render(<AnalyzingScreen analysisRef={actor} onCancel={() => {}} />);
     await evaluateUpTo(145);
     act(() => control.send({ type: "EVALUATION.DONE" }));
-    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — não necessária");
     expect(stage("Explicação da IA")).toHaveTextContent("Explicação da IA — em andamento");
-    expect(screen.getByText("Etapa 5 de 5: explicação da IA.")).toHaveAttribute(
+    expect(screen.getByText("Etapa 4 de 4: explicação da IA.")).toHaveAttribute(
       "aria-live",
       "polite",
     );
@@ -168,7 +167,7 @@ describe("AnalyzingScreen: etapa 4, tabela de finais (TB-04..TB-06)", () => {
     return { fen, depth: 18, score: { kind: "cp", value: 0 }, bestMove: null, pv: [] };
   }
 
-  it("mostra a etapa em andamento e depois a falha, sem travar a análise", async () => {
+  it("a tabela roda sem etapa própria e a falha não trava a análise", async () => {
     let reject: (error: Error) => void = () => {};
     const game = krkGame();
     const machine = analysisMachine.provide({
@@ -198,19 +197,12 @@ describe("AnalyzingScreen: etapa 4, tabela de finais (TB-04..TB-06)", () => {
       },
     }).start();
     render(<AnalyzingScreen analysisRef={actor} onCancel={() => {}} />);
-    expect(screen.getByText("Etapa 4 de 5: tabela de finais.")).toBeInTheDocument();
-    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — em andamento");
+    // Com a tabela consultando, a tela continua na etapa 3 e não mostra a tabela.
+    expect(actor.getSnapshot().value).toBe("endgame");
+    expect(screen.getByText("Etapa 3 de 4: motor de avaliação.")).toBeInTheDocument();
+    expect(screen.queryByText(/Tabela de finais/)).toBeNull();
     await act(async () => reject(new Error("worker caiu")));
-    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — falhou");
+    expect(actor.getSnapshot().context.endgameStatus).toBe("failed");
     expect(stage("Explicação da IA")).toHaveTextContent("Explicação da IA — em andamento");
-  });
-
-  it("sem final com tabela, a etapa fica não necessária", async () => {
-    const { actor, control, evaluateUpTo } = startAnalysis();
-    render(<AnalyzingScreen analysisRef={actor} onCancel={() => {}} />);
-    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — aguardando");
-    await evaluateUpTo(evaluations.length);
-    await act(async () => control.send({ type: "EVALUATION.DONE" }));
-    expect(stage("Tabela de finais")).toHaveTextContent("Tabela de finais — não necessária");
   });
 });
