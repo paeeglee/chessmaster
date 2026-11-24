@@ -103,7 +103,11 @@ describe("trainingMachine", () => {
       });
       expect(snapshot.context.lastMove).toEqual({ from: "h1", to: "a1" });
       expect(snapshot.context.fen).toMatch(/^r7\/5kpp\/p1p1rn2\/8\/1Pp1pPbP\/P5N1\/3B1KP1\/R7 b/);
-      await vi.advanceTimersByTimeAsync(REFUTATION_MS);
+      // T-04: a resposta fica 1,2 s no tabuleiro.
+      expect(REFUTATION_MS).toBe(1200);
+      await vi.advanceTimersByTimeAsync(1199);
+      expect(actor.getSnapshot().value).toBe("refuting");
+      await vi.advanceTimersByTimeAsync(1);
       expect(actor.getSnapshot().value).toBe("playing");
       expect(actor.getSnapshot().context.fen).toBe(
         actor.getSnapshot().context.exercise.ply.fenBefore,
@@ -113,6 +117,16 @@ describe("trainingMachine", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("numera as tentativas erradas (TR-05)", async () => {
+    const { actor } = start(LINES);
+    play(actor, "e8", "e6");
+    await flush();
+    actor.send({ type: "UNDO" });
+    play(actor, "a8", "a7");
+    await flush();
+    expect(actor.getSnapshot().context.feedback).toMatchObject({ kind: "wrong", attempt: 2 });
   });
 
   it("Desfazer volta na hora durante a refutação (TR-09)", async () => {

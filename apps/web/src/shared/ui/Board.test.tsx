@@ -84,7 +84,9 @@ describe("Board interativo", () => {
       "aria-pressed",
       "true",
     );
-    await userEvent.click(screen.getByRole("button", { name: "f3, vazia" }));
+    // §8: destaque com texto — os destinos possíveis são anunciados.
+    expect(screen.getByRole("button", { name: "h3, vazia, destino possível" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "f3, vazia, destino possível" }));
     expect(onSquareClick).toHaveBeenCalledWith("f3");
   });
 

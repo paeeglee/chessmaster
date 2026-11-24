@@ -145,7 +145,7 @@ export function Board({
           type="button"
           data-square={name}
           data-mark={marks[name]}
-          aria-label={squareLabel(name, piece)}
+          aria-label={`${squareLabel(name, piece)}${isDestination ? ", destino possível" : ""}`}
           aria-pressed={marks[name] === "selected" ? true : undefined}
           disabled={disabled}
           onClick={() => onSquareClick(name)}

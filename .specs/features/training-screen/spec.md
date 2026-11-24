@@ -58,7 +58,7 @@ Each key moment must become a "find the move" exercise on the real position, whe
 ### P1: Progress ⭐ MVP
 
 1. Each moment SHALL be recorded as first-try, with-hint or saw-solution. <!-- TR-10 -->
-2. WHEN the last moment is done THEN the screen SHALL show "N de M de primeira" and "Voltar ao resultado". <!-- TR-11 -->
+2. WHEN the last moment is done THEN the screen SHALL show "N de M de primeira" and "Voltar ao resultado", where M is the number of moments trained in this session (from the moment the training opened on to the last one) and N how many of them were solved on the first attempt without hints. <!-- TR-11 -->
 3. "← Voltar ao resultado" SHALL return to the Result screen at any time. <!-- TR-12 -->
 4. Feedback SHALL be announced with `role="status"`. <!-- TR-13 -->
 
@@ -88,22 +88,22 @@ Each key moment must become a "find the move" exercise on the real position, whe
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| TR-01 | Load | Design | Pending |
-| TR-02 | Load | Design | Pending |
-| TR-03 | Attempt | Design | Pending |
-| TR-04 | Attempt | Design | Pending |
-| TR-05 | Attempt | Design | Pending |
-| TR-06 | Attempt | Design | Pending |
-| TR-07 | Attempt | Design | Pending |
-| TR-08 | Hints | Design | Pending |
-| TR-09 | Hints | Design | Pending |
-| TR-10 | Progress | Design | Pending |
-| TR-11 | Progress | Design | Pending |
-| TR-12 | Progress | Design | Pending |
-| TR-13 | Progress | Design | Pending |
-| TR-14 | Edge | Design | Pending |
+| TR-01 | Load | Tasks | Done |
+| TR-02 | Load | Tasks | Done |
+| TR-03 | Attempt | Tasks | Done |
+| TR-04 | Attempt | Tasks | Done |
+| TR-05 | Attempt | Tasks | Done |
+| TR-06 | Attempt | Tasks | Done |
+| TR-07 | Attempt | Tasks | Done |
+| TR-08 | Hints | Tasks | Done |
+| TR-09 | Hints | Tasks | Done |
+| TR-10 | Progress | Tasks | Done |
+| TR-11 | Progress | Tasks | Done |
+| TR-12 | Progress | Tasks | Done |
+| TR-13 | Progress | Tasks | Done |
+| TR-14 | Edge | Tasks | Done |
 
-**Coverage:** 14 total, 0 mapped to tasks, 14 unmapped ⚠️ (mapped in Tasks)
+**Coverage:** 14 total, 14 mapped to tasks (T1–T4), 0 unmapped
 
 ---
 

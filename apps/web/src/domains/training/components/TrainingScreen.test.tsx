@@ -13,6 +13,7 @@ const result = referenceResult();
 const LINES: Record<string, string[]> = {
   "r7/5kpp/p1p1rn2/8/1Pp1pPbP/P5N1/3B1KP1/b6R w": ["h1a1", "e6e2"],
   "r3r3/5kpp/p1p2n2/8/1PpbpPbP/P5N1/3B1KP1/7R w": ["f2f1", "d4b2", "d2c3", "b2c3"],
+  "4r3/r4kpp/p1p2n2/8/1Pp1pPbP/P5N1/3B1KP1/b6R w": ["h1a1", "a7d7"],
 };
 
 function renderTraining(options: { ply?: number; fail?: boolean } = {}) {
@@ -66,7 +67,9 @@ describe("TrainingScreen", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("group", { name: "Posição antes de 22...Ta7, vista pelas pretas." }),
+      screen.getByRole("group", {
+        name: "Posição antes de 22...Ta7, vista pelas pretas. O bispo em a1 está destacado.",
+      }),
     ).toBeInTheDocument();
     expect(screen.getByText("Pretas jogam (você)")).toBeInTheDocument();
     expect(screen.queryByText(/Bd4/)).not.toBeInTheDocument();
@@ -94,9 +97,21 @@ describe("TrainingScreen", () => {
     ).toBeInTheDocument();
     // A resposta aparece no tabuleiro.
     expect(square("a1")).toHaveAccessibleName("a1, torre branca");
+    // Sem revelar a solução (step_04 §7).
+    expect(within(status).queryByText(/Bd4|Bb2|solução/)).toBeNull();
+    expect(square("d4")).not.toHaveAttribute("data-mark", "green");
     await u.click(screen.getByRole("button", { name: "Desfazer" }));
     expect(square("a1")).toHaveAccessibleName("a1, bispo preto");
     expect(within(status).getByText("Tentativa 1")).toBeInTheDocument();
+    // Segunda tentativa errada (o lance da partida) vira "Tentativa 2".
+    await u.click(square("a8"));
+    await u.click(square("a7"));
+    expect(await within(status).findByText("Tentativa 2")).toBeInTheDocument();
+    expect(
+      within(status).getByText(
+        "Depois de 23.Txa1, o bispo some do tabuleiro. Esse foi o lance jogado na partida.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("aceita 22...Bd4+ e mostra continuação, princípio e próximo (TR-07)", async () => {

@@ -1,7 +1,7 @@
 import { useSelector } from "@xstate/react";
 import type { ActorRefFrom } from "xstate";
 import { Board } from "../../../shared/ui/Board";
-import { MISTAKE_TYPE_LABEL } from "../../analysis";
+import { MISTAKE_TYPE_LABEL, pieceWithArticle } from "../../analysis";
 import type { TrainingContext, trainingMachine } from "../machines/trainingMachine";
 import {
   exerciseMarks,
@@ -136,6 +136,16 @@ function Summary({ context, onBack }: { context: TrainingContext; onBack: () => 
   );
 }
 
+/** §8: o destaque da peça em perigo também vai no texto do tabuleiro. */
+function boardLabel(context: TrainingContext, atStart: boolean): string {
+  const { exercise } = context;
+  const base = `Posição antes de ${exercise.moment.moveLabel}, vista pelas ${colorName(exercise.playerColor).toLowerCase()}.`;
+  const lost = exercise.moment.lostPiece;
+  if (!atStart || !lost) return base;
+  const name = pieceWithArticle(lost);
+  return `${base} ${name.charAt(0).toUpperCase()}${name.slice(1)} está destacad${name.startsWith("a ") ? "a" : "o"}.`;
+}
+
 /** Tela 4, "Treinar momento-chave" (step_04). */
 export function TrainingScreen({ trainingRef }: { trainingRef: TrainingRef }) {
   const snapshot = useSelector(trainingRef, (state) => state);
@@ -175,7 +185,7 @@ export function TrainingScreen({ trainingRef }: { trainingRef: TrainingRef }) {
               fen={context.fen}
               orientation={color}
               coordinates
-              label={`Posição antes de ${exercise.moment.moveLabel}, vista pelas ${colorName(color).toLowerCase()}.`}
+              label={boardLabel(context, atStart)}
               marks={exerciseMarks({
                 exercise,
                 atStart,

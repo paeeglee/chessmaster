@@ -9,7 +9,7 @@ async function openTraining(page: Page) {
   await page.getByRole("button", { name: /^Treinar os \d momentos/ }).click();
   await expect(page.getByText(/^Momento 1 de \d$/)).toBeVisible();
   const board = page.getByRole("group", {
-    name: "Posição antes de 22...Ta7, vista pelas pretas.",
+    name: "Posição antes de 22...Ta7, vista pelas pretas. O bispo em a1 está destacado.",
   });
   await expect(board).toBeVisible();
   // Pretas embaixo: a primeira casa desenhada é h1 e a última é a8; vez das pretas.
@@ -31,8 +31,10 @@ test.describe("treino do momento-chave (step_04)", () => {
     await expect(status.getByText("Tentativa 1")).toBeVisible({ timeout: 30_000 });
     await expect(status.getByText("22...Te6 ainda perde o bispo")).toBeVisible();
     await expect(
-      status.getByText(/^Depois de 23\.Txa1, o bispo some do tabuleiro\./),
+      status.getByText(/^Depois de 23\.Txa1, o bispo some do tabuleiro\.$/),
     ).toBeVisible();
+    // Sem revelar a solução (step_04 §7).
+    await expect(status).not.toContainText("Bd4");
 
     await page.getByRole("button", { name: "Desfazer" }).click();
     await expect(square(page, "a1")).toHaveAccessibleName("a1, bispo preto");
