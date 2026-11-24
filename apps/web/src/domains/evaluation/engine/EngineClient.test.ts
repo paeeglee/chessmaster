@@ -312,8 +312,15 @@ describe("EngineClient.evaluate", () => {
       await vi.advanceTimersByTimeAsync(0);
       client.cancel();
       expect(await cancelled).toBe("Análise cancelada");
-      const next = client.evaluate(START_FEN);
-      await vi.advanceTimersByTimeAsync(STALE_BESTMOVE_TIMEOUT_MS);
+      expect(STALE_BESTMOVE_TIMEOUT_MS).toBe(2000);
+      let settled = false;
+      const next = client.evaluate(START_FEN).finally(() => {
+        settled = true;
+      });
+      // Até o limite de 2 s, a próxima busca espera o bestmove atrasado.
+      await vi.advanceTimersByTimeAsync(1999);
+      expect(settled).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
       await expect(next).resolves.toMatchObject({ bestMove: "e2e4" });
     } finally {
       vi.useRealTimers();
@@ -321,21 +328,32 @@ describe("EngineClient.evaluate", () => {
   });
 
   it("cancelar sem busca em andamento não espera bestmove", async () => {
-    const { client, worker } = engineWith((command, reply) => {
-      if (command === "go movetime 200") {
-        reply("info depth 20 score cp 5 pv e2e4");
-        reply("bestmove e2e4");
-      }
-    });
-    await client.start({ threads: 1 });
-    await client.evaluate(START_FEN);
-    client.cancel();
-    await expect(client.evaluate(START_FEN)).resolves.toMatchObject({ bestMove: "e2e4" });
-    expect(worker.commands.slice(-4)).toEqual([
-      "stop",
-      "isready",
-      `position fen ${START_FEN}`,
-      "go movetime 200",
-    ]);
+    // Com relógio falso: a próxima busca tem de sair sem avançar o limite de 2 s.
+    vi.useFakeTimers();
+    try {
+      const { client, worker } = engineWith((command, reply) => {
+        if (command === "go movetime 200") {
+          reply("info depth 20 score cp 5 pv e2e4");
+          reply("bestmove e2e4");
+        }
+      });
+      await client.start({ threads: 1 });
+      await client.evaluate(START_FEN);
+      client.cancel();
+      let result: unknown = null;
+      void client.evaluate(START_FEN).then((evaluation) => {
+        result = evaluation;
+      });
+      await vi.advanceTimersByTimeAsync(0);
+      expect(result).toMatchObject({ bestMove: "e2e4" });
+      expect(worker.commands.slice(-4)).toEqual([
+        "stop",
+        "isready",
+        `position fen ${START_FEN}`,
+        "go movetime 200",
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -9,8 +9,10 @@ test.describe("análise da partida (step_02)", () => {
   }) => {
     await startReferenceAnalysis(page);
     await expect(page.getByRole("progressbar", { name: "Motor de avaliação" })).toBeVisible();
-    // O primeiro achado aparece antes do fim da análise (A-05).
-    await expect(page.getByText("22...Ta7?")).toBeVisible({ timeout: 60_000 });
+    // O primeiro achado aparece em "Já encontrado" antes do fim da análise (A-05).
+    const findings = page.getByRole("region", { name: "Já encontrado" });
+    await expect(findings.getByText("22...Ta7?")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole("heading", { name: "Analisando sua partida…" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Resumo da partida" })).toBeVisible({
       timeout: 120_000,
     });
@@ -24,6 +26,10 @@ test.describe("análise da partida (step_02)", () => {
     expect(texts.length === 4 || texts.length === 5).toBe(true);
     for (const label of STABLE_MOMENTS) {
       expect(texts.some((text) => text.includes(label))).toBe(true);
+    }
+    // Nenhum momento fora dos quatro estáveis e do limítrofe 27...Tb7.
+    for (const text of texts) {
+      expect([...STABLE_MOMENTS, "27...Tb7"].some((label) => text.includes(label))).toBe(true);
     }
     // Texto da IA (provedor falso, só com fatos do contrato).
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
@@ -41,5 +47,20 @@ test.describe("análise da partida (step_02)", () => {
     );
     // O motor continua pronto para a próxima análise.
     await expect(page.getByRole("button", { name: "Analisar partida →" })).toBeEnabled();
+  });
+
+  test("cancelar no meio e analisar de novo usa o motor sem resultado velho", async ({ page }) => {
+    await startReferenceAnalysis(page);
+    // Cancela com a avaliação em andamento (o Stockfish está buscando).
+    await expect(page.getByRole("progressbar", { name: "Motor de avaliação" })).toBeVisible();
+    await page.waitForTimeout(1500);
+    await page.getByRole("button", { name: "Cancelar análise" }).click();
+    await page.getByRole("button", { name: "Analisar partida →" }).click();
+    await expect(page.getByRole("heading", { name: "Analisando sua partida…" })).toBeVisible();
+    const findings = page.getByRole("region", { name: "Já encontrado" });
+    await expect(findings.getByText("22...Ta7?")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole("region", { name: "Resumo da partida" })).toBeVisible({
+      timeout: 120_000,
+    });
   });
 });
