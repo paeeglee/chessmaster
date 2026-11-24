@@ -1,6 +1,7 @@
-from typing import Any
+from typing import Any, cast
 
 import pytest
+from langchain_openai import ChatOpenAI
 
 from game_analyzer.domains.explanation.application.answer_question import AnswerQuestion
 from game_analyzer.domains.explanation.application.explain_game import ExplainGame
@@ -14,7 +15,11 @@ from game_analyzer.domains.explanation.domain.contract import (
     QuestionRequest,
 )
 from game_analyzer.domains.explanation.infrastructure.fake_provider import FakeProvider
-from game_analyzer.domains.explanation.infrastructure.openai_provider import OpenAIProvider
+from game_analyzer.domains.explanation.infrastructure.openai_provider import (
+    ChatConfig,
+    OpenAIProvider,
+    _default_chat,
+)
 from game_analyzer.domains.explanation.infrastructure.provider_factory import (
     UnknownProviderError,
     build_provider,
@@ -47,30 +52,34 @@ class FakeChat:
 def test_openai_provider_asks_for_strict_json_schema_output() -> None:
     answer = QuestionAnswer(answer="ok", in_scope=True)
     chat = FakeChat(answer)
-    created: list[tuple[str, str]] = []
+    created: list[ChatConfig] = []
 
-    def factory(model: str, key: str) -> FakeChat:
-        created.append((model, key))
+    def factory(config: ChatConfig) -> FakeChat:
+        created.append(config)
         return chat
 
-    provider = OpenAIProvider("gpt-5.1", "sk-test", chat_factory=factory)
+    config = ChatConfig(model="gpt-5.1", api_key="sk-test")
+    provider = OpenAIProvider(config, chat_factory=factory)
     assert provider.generate("sistema", "usuário", QuestionAnswer) == answer
-    assert created == [("gpt-5.1", "sk-test")]
+    assert created == [config]
     assert chat.kwargs == {"schema": QuestionAnswer, "method": "json_schema", "strict": True}
     assert [message.content for message in chat.structured.messages] == ["sistema", "usuário"]
 
 
 def test_openai_provider_without_key_is_unavailable() -> None:
-    provider = OpenAIProvider("gpt-5.1", "", chat_factory=lambda model, key: FakeChat(None))
+    provider = OpenAIProvider(
+        ChatConfig(model="gpt-5.1", api_key=""), chat_factory=lambda config: FakeChat(None)
+    )
     with pytest.raises(ProviderError, match="OPENAI_API_KEY"):
         provider.generate("s", "u", QuestionAnswer)
 
 
 def test_openai_provider_wraps_errors_and_bad_formats() -> None:
-    failing = OpenAIProvider("m", "k", chat_factory=lambda m, k: FakeChat(RuntimeError("429")))
+    config = ChatConfig(model="m", api_key="k")
+    failing = OpenAIProvider(config, chat_factory=lambda c: FakeChat(RuntimeError("429")))
     with pytest.raises(ProviderError, match="429"):
         failing.generate("s", "u", QuestionAnswer)
-    wrong = OpenAIProvider("m", "k", chat_factory=lambda m, k: FakeChat({"answer": "x"}))
+    wrong = OpenAIProvider(config, chat_factory=lambda c: FakeChat({"answer": "x"}))
     with pytest.raises(ProviderError, match="formato"):
         wrong.generate("s", "u", QuestionAnswer)
 
@@ -126,20 +135,60 @@ def test_factory_builds_the_configured_provider(provider: str, expected: type) -
     assert isinstance(build_provider(Settings(ai_provider=provider)), expected)
 
 
-def test_factory_passes_model_and_key_to_the_openai_adapter() -> None:
-    settings = Settings(ai_provider="openai", ai_model="gpt-x", openai_api_key="sk-abc")
+def _configured_chat(settings: Settings) -> ChatConfig:
     provider = build_provider(settings)
     assert isinstance(provider, OpenAIProvider)
     chat = FakeChat(QuestionAnswer(answer="ok", in_scope=True))
-    created: list[tuple[str, str]] = []
+    created: list[ChatConfig] = []
 
-    def factory(model: str, key: str) -> FakeChat:
-        created.append((model, key))
+    def factory(config: ChatConfig) -> FakeChat:
+        created.append(config)
         return chat
 
     provider._chat_factory = factory  # noqa: SLF001 - troca a fábrica só neste teste
     provider.generate("s", "u", QuestionAnswer)
-    assert created == [("gpt-x", "sk-abc")]
+    return created[0]
+
+
+def test_factory_passes_model_and_key_to_the_openai_adapter() -> None:
+    settings = Settings(ai_provider="openai", ai_model="gpt-x", openai_api_key="sk-abc")
+    assert _configured_chat(settings) == ChatConfig(
+        model="gpt-x", api_key="sk-abc", base_url=None, timeout_seconds=60
+    )
+
+
+def test_factory_passes_base_url_and_timeout_for_local_servers() -> None:
+    # LM Studio, vLLM ou Ollama: servidor compatível com a API da OpenAI.
+    settings = Settings(
+        ai_provider="openai",
+        ai_model="qwen2.5-7b-instruct",
+        openai_api_key="lm-studio",
+        openai_base_url="http://localhost:1234/v1",
+        ai_timeout_seconds=180,
+    )
+    assert _configured_chat(settings) == ChatConfig(
+        model="qwen2.5-7b-instruct",
+        api_key="lm-studio",
+        base_url="http://localhost:1234/v1",
+        timeout_seconds=180,
+    )
+
+
+def test_default_chat_sends_base_url_and_timeout_to_chat_openai() -> None:
+    chat = cast(
+        ChatOpenAI,
+        _default_chat(
+            ChatConfig(
+                model="local-model",
+                api_key="lm-studio",
+                base_url="http://localhost:1234/v1",
+                timeout_seconds=180,
+            )
+        ),
+    )
+    assert chat.openai_api_base == "http://localhost:1234/v1"
+    assert chat.request_timeout == 180
+    assert chat.model_name == "local-model"
 
 
 def test_fake_verdict_for_a_clean_game(contract: GameContract) -> None:
