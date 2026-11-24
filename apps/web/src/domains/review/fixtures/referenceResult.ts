@@ -21,6 +21,14 @@ export function referenceResult(overrides: Partial<AnalysisResult> = {}): Analys
     referenceEvaluations as PositionEvaluation[],
     "b",
   );
-  return { ...summary, request, explanation: null, aiFailed: false, ...overrides };
+  return {
+    ...summary,
+    request,
+    explanation: null,
+    aiFailed: false,
+    endgame: null,
+    endgameStatus: "skipped",
+    ...overrides,
+  };
 }
 

@@ -77,7 +77,7 @@ T1 → T2 → T3
 
 **Done when**:
 
-- [ ] Machine transitions tested with a fake probe
+- [x] Machine transitions tested with a fake probe
 
 **Tests**: unit
 **Gate**: quick
